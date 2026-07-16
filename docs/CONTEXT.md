@@ -160,6 +160,22 @@ Vercel environment variables.
     error. All 7 stores (`journalStore`, `dailyLogStore`, `learningStore`,
     `socialStore`, `habitStore`, `goalStore`, `themeStore`) follow this
     pattern now — keep it when adding new store actions.
+13. **Production-only Prisma error P1011 ("self-signed certificate in
+    certificate chain") when connecting to Supabase from Vercel.** Node's
+    default trust store doesn't include "Supabase Root 2021 CA", and pg's
+    connection-string parsing now treats `sslmode=require` as full
+    verification (not "encrypt but don't verify" like older libpq
+    defaults) — so registration/login/every Prisma call 500s in
+    production while working fine locally, since local dev's connection
+    string uses `sslmode=disable` and never hits this path at all. Fixed
+    in `src/lib/prisma.ts` by pinning the actual CA (`public/prod-ca-
+    2021.crt`, downloaded from Supabase's dashboard under Project
+    Settings > Database > SSL Configuration — it's a public root cert,
+    safe to commit) via `ssl: { ca, rejectUnauthorized: true }`, gated on
+    the connection string not being the local `sslmode=disable` one. Do
+    **not** "fix" this by setting `rejectUnauthorized: false` instead —
+    that silently drops certificate verification on the production
+    database connection rather than actually solving the trust-store gap.
 
 ## Where things live
 
