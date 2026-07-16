@@ -651,3 +651,19 @@ and a pet (persist) → reload (all three still present) → visit
 `/dashboard/settings` directly (redirects to `/dashboard/account`) →
 hover a top-row heatmap cell (tooltip now visible, opacity 1, positioned
 below the cell) → Sign Out (lands on `/login`).
+
+**Follow-up — the build-step plan above had a real bug, caught on the
+actual deploy**: the first production deploy hung in Vercel's
+"Building" state for 14+ minutes with no further log output, because
+`DATABASE_URL` in production routes through Supabase's transaction-mode
+connection pooler (port 6543), which silently can't run the DDL `prisma
+db push` needs — instead of failing fast, it just hangs. Cancelled the
+stuck deployment (`vercel remove <url> --yes`), fixed it by flipping
+`prisma.config.ts` to prefer `DIRECT_DATABASE_URL` (the actual
+non-pooled connection, same one `src/lib/prisma.ts`'s runtime client
+already used successfully) for CLI operations, confirmed locally, then
+redeployed — build completed in 25s. Verified the fix live against
+production itself with Playwright (`life-dashboard-eosin-one.vercel.app`):
+register → account page → set favorite color and a hobby → reload
+(both persisted, confirming the new columns exist in the real prod
+database) → sign out. See CONTEXT.md convention #17's addendum.

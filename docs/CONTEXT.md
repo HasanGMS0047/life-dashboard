@@ -385,6 +385,13 @@ Vercel project so auth and per-user Prisma writes work in the deployed
 environment. Local development still uses the local Prisma dev database
 via `.env`.
 
+**Deploys are manual, not automatic on `git push`.** This project isn't
+wired to auto-deploy from the GitHub push (confirmed: pushing to `main`
+did not trigger a new Vercel deployment). Shipping a change to
+production requires an explicit `npx vercel --prod --yes` from a
+machine with the Vercel CLI logged in — pushing to GitHub alone only
+updates the repo, not the live site.
+
 ## Known decisions (don't relitigate these without cause)
 
 - **Stays a plain web app for now.** No Tauri/Electron/Capacitor. If a
