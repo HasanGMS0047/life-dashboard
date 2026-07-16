@@ -59,22 +59,31 @@ export function HeatmapQuilt() {
       <div className="flex gap-2 p-4 bg-surface rounded-3xl border-2 border-border/80 shadow-inner overflow-hidden">
         {/* The quilt container */}
         <div className="grid grid-flow-col grid-rows-7 gap-1.5 overflow-x-auto scrollbar-hide py-2 px-1">
-          {data.map((day, i) => (
-            <motion.div
-              key={day.id}
-              whileHover={{ scale: 1.5, zIndex: 10, rotate: (i % 2 === 0 ? 2 : -2) }}
-              className={cn(
-                "w-4 h-4 rounded-sm border cursor-pointer relative group transition-all duration-200",
-                getFabricPattern(day.level)
-              )}
-            >
-              {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-foreground text-background text-[10px] rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
-                {format(day.date, "MMM d")}:{" "}
-                {day.count === 0 ? "No entries" : `${day.count} ${day.count === 1 ? "entry" : "entries"}`}
-              </div>
-            </motion.div>
-          ))}
+          {data.map((day, i) => {
+            const isTopRow = i % 7 < 2;
+            return (
+              <motion.div
+                key={day.id}
+                whileHover={{ scale: 1.5, zIndex: 10, rotate: (i % 2 === 0 ? 2 : -2) }}
+                className={cn(
+                  "w-4 h-4 rounded-sm border cursor-pointer relative group transition-all duration-200",
+                  getFabricPattern(day.level)
+                )}
+              >
+                {/* Tooltip — flipped below the cell for the top two rows, since an
+                    above-cell tooltip there gets clipped by the grid's overflow-hidden wrapper. */}
+                <div
+                  className={cn(
+                    "absolute z-20 left-1/2 -translate-x-1/2 px-2 py-1 bg-foreground text-background text-[10px] rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity",
+                    isTopRow ? "top-full mt-2" : "bottom-full mb-2"
+                  )}
+                >
+                  {format(day.date, "MMM d")}:{" "}
+                  {day.count === 0 ? "No entries" : `${day.count} ${day.count === 1 ? "entry" : "entries"}`}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
       

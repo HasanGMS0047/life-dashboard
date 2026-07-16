@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Home, BookOpen, Heart, Grid, Settings, Clapperboard, Clock, Images, X } from "lucide-react";
+import { Home, BookOpen, Heart, Grid, User, Clapperboard, Clock, Images, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -15,7 +15,7 @@ const navItems = [
   { icon: Images, label: "Gallery", href: "/dashboard/gallery" },
   { icon: Heart, label: "Heart Patterns", href: "/dashboard/patterns" },
   { icon: Grid, label: "Heatmap", href: "/dashboard/heatmap" },
-  { icon: Settings, label: "Settings", href: "/dashboard/settings" },
+  { icon: User, label: "Account", href: "/dashboard/account" },
 ];
 
 interface SidebarProps {
