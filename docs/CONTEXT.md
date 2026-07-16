@@ -171,11 +171,21 @@ Vercel environment variables.
     in `src/lib/prisma.ts` by pinning the actual CA (`public/prod-ca-
     2021.crt`, downloaded from Supabase's dashboard under Project
     Settings > Database > SSL Configuration — it's a public root cert,
-    safe to commit) via `ssl: { ca, rejectUnauthorized: true }`, gated on
-    the connection string not being the local `sslmode=disable` one. Do
+    safe to commit) via `ssl: { ca, rejectUnauthorized: true }`. Do
     **not** "fix" this by setting `rejectUnauthorized: false` instead —
     that silently drops certificate verification on the production
     database connection rather than actually solving the trust-store gap.
+    **Gotcha that cost a whole extra round-trip**: passing `ssl` *and*
+    `connectionString` in the same `PrismaPg`/`pg.Pool` config object does
+    **not** work — `pg`'s `ConnectionParameters` re-parses
+    `connectionString` internally and merges those parsed values **over**
+    the explicit `ssl` you passed (`node_modules/pg/lib/connection-
+    parameters.js`: `config = Object.assign({}, config,
+    parse(config.connectionString))`), silently discarding the pinned CA
+    and reproducing the identical P1011 error with zero indication why.
+    The fix has to decompose the URL into discrete `host`/`port`/
+    `database`/`user`/`password` fields (no `connectionString` key at all)
+    so there's nothing left for `pg` to re-parse over your `ssl` config.
 
 ## Where things live
 
