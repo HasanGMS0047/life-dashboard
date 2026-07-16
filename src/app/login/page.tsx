@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
 
 function LoginForm() {
   const router = useRouter();
@@ -47,7 +48,7 @@ function LoginForm() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-8 relative"
+      className="h-screen overflow-y-auto flex items-center justify-center p-4 sm:p-8 relative"
       style={{
         backgroundImage: "url(/calm_scenery_bg.png)",
         backgroundSize: "cover",
@@ -79,13 +80,11 @@ function LoginForm() {
             placeholder="Email"
             className="w-full bg-background/50 border border-border rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-terracotta/50 placeholder:text-muted/70"
           />
-          <input
-            type="password"
+          <PasswordInput
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="w-full bg-background/50 border border-border rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-terracotta/50 placeholder:text-muted/70"
           />
 
           {error && <p className="text-sm text-terracotta text-center">{error}</p>}

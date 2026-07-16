@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push("/dashboard");
+      router.push("/dashboard?new=1");
       router.refresh();
     } catch (err) {
       console.error("Registration failed", err);
@@ -103,14 +104,12 @@ export default function RegisterPage() {
             placeholder="Email"
             className="w-full bg-background/50 border border-border rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-terracotta/50 placeholder:text-muted/70"
           />
-          <input
-            type="password"
+          <PasswordInput
             required
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password (min. 8 characters)"
-            className="w-full bg-background/50 border border-border rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-terracotta/50 placeholder:text-muted/70"
           />
 
           {error && <p className="text-sm text-terracotta text-center">{error}</p>}
