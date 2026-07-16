@@ -20,27 +20,42 @@ export default function RegisterPage() {
     setError(null);
     setLoading(true);
 
-    const res = await fetch("/api/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    if (!res.ok) {
-      setError(data.error || "Something went wrong.");
+      let data: { error?: string; ok?: boolean } | null = null;
+      const text = await res.text();
+      if (text) {
+        try {
+          data = JSON.parse(text) as { error?: string; ok?: boolean };
+        } catch {
+          data = null;
+        }
+      }
+
+      if (!res.ok) {
+        setError(data?.error || "Something went wrong. Please try again.");
+        return;
+      }
+
+      const signInRes = await signIn("credentials", { email, password, redirect: false });
+      if (signInRes?.error) {
+        setError("Your account was created, but we could not sign you in automatically. Please log in manually.");
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      console.error("Registration failed", err);
+      setError("We couldn't create your account right now. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const signInRes = await signIn("credentials", { email, password, redirect: false });
-    setLoading(false);
-    if (signInRes?.error) {
-      router.push("/login");
-      return;
-    }
-    router.push("/dashboard");
-    router.refresh();
   };
 
   return (

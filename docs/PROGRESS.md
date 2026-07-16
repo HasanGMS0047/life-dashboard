@@ -249,6 +249,14 @@ on one domain (Journal) rather than migrating all 7 stores at once:
 now only **goals** and **theme**. See CONTEXT.md's "Known decisions" for
 that remaining migration recipe.
 
+## 20. Registration flow resilience
+
+Hardened the account-creation flow so a failed database request or an
+unexpected server error no longer leaves the register button stuck in a
+permanent loading state. The API route now catches and returns JSON errors,
+and the client handles both network and parsing failures with a visible
+error message while always clearing the loading state.
+
 ---
 
 ## 20. Expanded per-user migration (Daily logs, Learning, Social, Habits)
@@ -272,6 +280,18 @@ applied to the rest of the core tracker domains:
 Verified with `npx prisma generate`, `npx tsc --noEmit`, and `npx prisma db push`.
 
 ---
+
+## 21. Vercel deployment + hosted Postgres
+
+The app was pushed to GitHub, linked to a Vercel project, and brought
+live in production. The missing production database step was completed by
+connecting the deployment to a hosted Supabase Postgres instance and
+setting the Vercel production environment variables for
+`DATABASE_URL`, `DIRECT_DATABASE_URL`, `NEXTAUTH_URL`, and
+`NEXTAUTH_SECRET`. Prisma was verified against the hosted database with
+`npx prisma db push`, and a fresh `npx vercel --prod` deployment completed
+successfully. This closes the last major gap for real multi-user auth and
+persistent data in the deployed app.
 
 **Verification habit throughout**: every feature above was type-checked
 (`npx tsc --noEmit`) and exercised in an actual headless browser via

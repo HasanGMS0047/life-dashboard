@@ -47,9 +47,10 @@ practice during this build.
 - **NextAuth v4** (credentials provider, JWT session strategy, bcrypt
   password hashing) for real user accounts.
 - **Prisma 7** + **Postgres** for the user-scoped Journal, Daily Metrics,
-Learning, Social, Habits, Goals, and Theme domains. Runs against a
-*local* Prisma Postgres dev server (`prisma dev`) — see "Running
-locally" below, this is not a production database.
+Learning, Social, Habits, Goals, and Theme domains. Locally it runs
+against a *local* Prisma Postgres dev server (`prisma dev`), while
+production is now backed by a hosted **Supabase Postgres** instance via
+Vercel environment variables.
 
 ## Design system
 
@@ -132,6 +133,11 @@ locally" below, this is not a production database.
    previous user's already-fetched Journal entries still sitting in
    memory until a fetch overwrote them. Don't "fix" sign-out into a
    softer transition without re-solving this.
+10. **Auth flows must always clear loading state on any outcome.**
+    Registration/login pages should wrap fetch/sign-in calls in
+    `try/catch/finally`, safely parse server responses, and surface an
+    error message instead of leaving buttons stuck in a permanent loading
+    state when the backend fails.
 
 ## Where things live
 
@@ -204,6 +210,16 @@ convention #8. **Neither works in production as-is** — deploying for
 real means provisioning a real hosted Postgres and pointing both env
 vars at it appropriately (or better, refactoring to a single URL once
 off the local dev proxy).
+
+## Deployment status
+
+The app has been deployed to Vercel and is now configured for production
+multi-user persistence. The production environment variables
+`DATABASE_URL` and `DIRECT_DATABASE_URL` point at a hosted Supabase
+Postgres database, and `NEXTAUTH_URL` / `NEXTAUTH_SECRET` are set in the
+Vercel project so auth and per-user Prisma writes work in the deployed
+environment. Local development still uses the local Prisma dev database
+via `.env`.
 
 ## Known decisions (don't relitigate these without cause)
 
