@@ -219,6 +219,27 @@ Vercel environment variables.
     same directory and `fs.renameSync` it over the target instead — the
     rename succeeds even when a direct write doesn't. Used when
     recompressing images in place (see convention #14).
+16. **A full-height/full-width absolutely-positioned wrapper div with no
+    `pointer-events-none` silently blocks clicks to anything behind it in
+    its "empty" space, even where nothing is visibly rendered.** Real bug:
+    `ReplayShell`'s desktop chevron buttons are wrapped in `<div
+    className="absolute inset-y-0 right-4 ... z-20">` to vertically
+    center a button that's much shorter than the div — but the div's
+    hit-testable box is the *full height*, and being later in the DOM at
+    the same `z-20` as the close (X) button in the top-right corner, its
+    transparent area silently ate every click meant for the close button.
+    The close button was fully visible and looked completely normal; the
+    only way this surfaced was Playwright reporting "element intercepts
+    pointer events" on click — a manual click in a real browser shows no
+    error, it just silently does nothing. Fixed by adding
+    `pointer-events-none` to the outer wrapper and `pointer-events-auto`
+    to the inner button (the same pattern already used for the "Scene
+    content" wrapper a few lines below it — should have been applied
+    consistently the first time). **When wrapping a small element in a
+    larger positioned container for centering, default to
+    `pointer-events-none` on the wrapper + `pointer-events-auto` on the
+    actual interactive child**, especially if anything else shares its
+    z-index tier nearby.
 
 ## Where things live
 
@@ -321,11 +342,14 @@ via `.env`.
   Tauri desktop build would make this closest to seamless (Rust HTTP
   calls sidestep the CORS problems a plain deployed website would hit
   trying to reach a friend's `localhost` Ollama).
-- **`public/moonlit_scenery_bg.png` does not exist yet.** The night theme
-  was deliberately built to degrade gracefully without it (CSS gradient +
-  SVG starfield). A matching AI-image prompt for it was given to the
-  user; if/when they generate it and drop it into `public/`, it'll be
-  picked up automatically with no code changes.
+- **`public/moonlit_scenery_bg.png` now exists** (the user generated and
+  added it after the night theme shipped) — this note previously said it
+  didn't; the CSS-gradient-+-starfield fallback described when it was
+  written is now moot in practice, though the code still degrades
+  gracefully if the file were ever removed. See convention #14 — it was
+  a 2.7MB lossless PNG-of-a-photo before the item #25 performance pass
+  recompressed it to a ~226KB JPEG (kept the `.png` extension to match
+  existing precedent).
 - Mobile responsiveness: hamburger + slide-in drawer nav (with the
   search bar embedded in the drawer, since it's hidden on the desktop
   TopBar below the `md` breakpoint), full-bleed shell below `md`, boxed
@@ -346,3 +370,23 @@ via `.env`.
   and theme. If future work adds more domains, the same pattern should be
   followed: Prisma model + per-user API route + store rewrite with an
   in-memory cache and an initial fetch guard.
+- **A remaining, unresolved performance characteristic: every API route
+  on production takes ~350–500ms, and it's not asset size or database
+  query cost.** Measured directly against the live Vercel URL: even
+  routes that touch zero Prisma/Postgres (`/api/auth/csrf`,
+  `/api/auth/providers`) are exactly as slow as ones that do
+  (`/api/theme`, `/api/journal`, etc.) — ruling out the database as the
+  cause. `X-Vercel-Id` response header shows the function executes in
+  `iad1` (US East, Virginia); Vercel's Hobby/free tier pins all
+  serverless functions to a single fixed region with no way to change it
+  (region selection requires a paid plan). If the people actually using
+  this app are geographically far from `iad1`, that round-trip distance
+  is very likely the whole ~350–500ms — a physical-network-distance
+  floor, not a code inefficiency, and **not fixable by further
+  optimizing app code**. Static pages/images are already served from
+  Vercel's global CDN edge and unaffected by this — it's specifically
+  API-route (serverless function) calls that pay this tax. Options if it
+  matters enough to address: upgrade to Vercel Pro for region control, or
+  move hosting to a provider with a free-tier region closer to the actual
+  users. Not acted on yet — flag to the user before spending more effort
+  chasing "slowness" that turns out to be this.

@@ -511,3 +511,54 @@ change password → sign out → sign back in with the *new* password
 (succeeds) → old password rejected (`Incorrect email or password.`).
 Zero new console errors beyond the already-known benign
 navigation-aborted-fetch pattern during sign-out.
+
+---
+
+## 26. Replay close button silently did nothing, Life Replay's nav icon looked like refresh, more perf digging
+
+Follow-up from a screenshot showing the Life Replay outro slide, plus "the
+site is still very slow."
+
+- **The Replay close (X) button visually worked but clicking it did
+  nothing — real bug, found by reproducing in Playwright rather than
+  guessing.** Root cause: `ReplayShell`'s desktop chevron buttons
+  (`ChevronLeft`/`ChevronRight`) are each wrapped in a `<div
+  className="absolute inset-y-0 ... z-20">` to vertically center a much
+  smaller button inside a full-height container. That wrapper's
+  *entire* height counts for hit-testing even where nothing is visibly
+  drawn, and being later in the DOM at the same `z-20` as the close
+  button in the top-right corner, its transparent area silently
+  swallowed every click meant for the X — Playwright's own error message
+  named it exactly ("`<div class=\"...z-20\">` intercepts pointer
+  events"), a manual click in a real browser just does nothing with no
+  console error at all. Fixed with `pointer-events-none` on the wrapper
+  + `pointer-events-auto` on the actual button, mirroring a pattern the
+  same file already used correctly for its scene-content wrapper a few
+  lines below. See CONTEXT.md convention #16.
+- **Life Replay's nav icon (`RotateCcw`) read as a refresh/undo button**,
+  not "cinematic replay." Swapped for `Clapperboard` (desktop rail +
+  mobile drawer, `src/components/dashboard/Sidebar.tsx`) — reads
+  immediately as film/playback. Left the unrelated `RotateCcw` on the
+  public landing page's top bar alone (decorative dead button, different
+  context, not part of this ask).
+- **"Still slow" — investigated further, found the image fix (item #25)
+  was real but incomplete: there's a second, structurally different
+  bottleneck.** Measured directly against the live production URL:
+  every API route sits at ~350–500ms *regardless of what it does* —
+  including `/api/auth/csrf` and `/api/auth/providers`, which touch zero
+  Prisma/Postgres. That rules out database cost entirely. `X-Vercel-Id`
+  shows the function runs in `iad1` (US East); Vercel's free/Hobby tier
+  fixes serverless functions to one region with no way to change it.
+  This looks like a physical-network-distance floor between wherever the
+  actual users are and `iad1`, not something further code changes can
+  fix. Documented as an open, unresolved item in CONTEXT.md's Known
+  Decisions rather than guessed at further — needs a hosting-tier
+  decision (Vercel Pro for region control, or a different host) that's
+  the user's call, not a code fix.
+- Also corrected two now-stale doc claims found while touching this
+  area: "Known decisions" still said `moonlit_scenery_bg.png` didn't
+  exist (it does, and was already re-optimized in item #25).
+
+**Verified**: re-ran the Playwright reproduction after the fix — clicking
+the X now lands on the icon's own SVG path (not the chevron wrapper) and
+correctly navigates to `/dashboard/replay`. `npx tsc --noEmit` clean.
