@@ -33,7 +33,7 @@ export function JournalWidget() {
           )}
         </div>
         <div className="relative w-20 h-20 shrink-0 drop-shadow-md">
-          <Image src="/journal_icon.png" alt="Daily Journal" fill className="object-contain" />
+          <Image src="/journal_icon.png" alt="Daily Journal" fill sizes="80px" className="object-contain" />
         </div>
       </div>
 

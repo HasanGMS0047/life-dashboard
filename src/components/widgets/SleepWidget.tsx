@@ -15,7 +15,7 @@ export function SleepWidget() {
   return (
     <Card className="flex flex-col items-center justify-center p-6 gap-2 bg-background border-2 hover:border-terracotta/30 transition-colors">
       <div className="relative w-20 h-20 drop-shadow-sm">
-        <Image src="/sleep_icon.png" alt="Sleep of the Day" fill className="object-contain" />
+        <Image src="/sleep_icon.png" alt="Sleep of the Day" fill sizes="80px" className="object-contain" />
       </div>
 
       <div className="text-center">

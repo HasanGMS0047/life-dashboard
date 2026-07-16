@@ -18,7 +18,7 @@ export function MoodWidget() {
   return (
     <Card className="flex flex-col items-center justify-center p-6 gap-3 bg-background relative overflow-hidden group border-2 hover:border-terracotta/30 transition-colors">
       <div className="relative w-28 h-28 drop-shadow-md group-hover:scale-105 transition-transform">
-        <Image src={iconSrc} alt="Today's Mood" fill unoptimized className="object-contain" />
+        <Image src={iconSrc} alt="Today's Mood" fill unoptimized sizes="112px" className="object-contain" />
       </div>
 
       <div className="text-center">
