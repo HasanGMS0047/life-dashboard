@@ -240,6 +240,38 @@ Vercel environment variables.
     `pointer-events-none` on the wrapper + `pointer-events-auto` on the
     actual interactive child**, especially if anything else shares its
     z-index tier nearby.
+17. **A Prisma schema change that adds columns must reach production
+    *before* the deploy that ships the regenerated client** — otherwise
+    every query against that model 500s in production (not just the
+    feature that needed the new column), since Prisma selects/returns
+    all scalar fields by default. There's no migration pipeline in this
+    repo (see "Running locally" below — it's `db push`, not `migrate`),
+    so there was no existing mechanism for this. Extracting production
+    DB credentials into the local session to run `db push` directly
+    (e.g. via `vercel env pull`) gets blocked by the harness's safety
+    classifier as an unauthorized action against a live production
+    database — don't try to work around that block; ask the user how
+    they want it handled. The chosen fix here: `package.json`'s `build`
+    script now runs `prisma db push && next build`, so schema sync
+    happens automatically at Vercel deploy time using Vercel's own real
+    `DATABASE_URL` — the local shell never needs prod credentials at
+    all. `db push` is idempotent (a no-op if the DB already matches)
+    and refuses to run if it would cause data loss, and a failed build
+    doesn't cut over traffic (the previous deployment keeps serving),
+    so this is safe to leave permanently in the pipeline rather than
+    reverting after one use — future schema changes now deploy
+    automatically too.
+18. **Tailwind's class scanner only sees literal strings written in
+    source files — it cannot see classes built at runtime.** A first
+    draft of the Account page's avatar ring derived its border/text
+    color from a stored swatch class via `accent.className.replace(
+    "bg-", "border-")`; since that string only exists at runtime, no
+    `border-*`/`text-*` CSS for it is ever generated and the ring would
+    silently render with no visible color, in production only (dev's
+    occasionally-broader debug output can mask this). Give every
+    variant its own explicit literal class string (e.g. a `{ swatch,
+    border, text }` object per accent color) instead of transforming
+    one class name into another with string methods.
 
 ## Where things live
 
@@ -275,18 +307,25 @@ src/components/AuthProvider.tsx  Thin "use client" wrapper around next-auth/reac
 src/app/login/, src/app/register/  Auth pages, matching the app's aesthetic.
 src/app/api/auth/[...nextauth]/  NextAuth route handler.
 src/app/api/register/  Account creation (bcrypt hash + Prisma user create).
-src/app/api/account/   PATCH — update the signed-in user's name and/or
-                       password (current-password check required for a
-                       password change). Settings page's Account card.
+src/app/api/account/   GET — current user's name/email/preferences. PATCH —
+                       update name, password (current-password check
+                       required), and/or preferences (favoriteColor,
+                       hobbies, pets). Backs the Account page.
+src/app/dashboard/account/  The Account page: profile header + sign-out,
+                       name/password, Preferences (favorite accent color,
+                       hobbies, pets as tag chips), Appearance, Your Data.
+                       Reached from the TopBar account icon and the
+                       Sidebar's Account nav item. `/dashboard/settings`
+                       now just redirects here.
 src/components/ui/password-input.tsx  Shared password `<input>` with a
                        show/hide eye toggle (`useState` + `type` swap, own
                        `visible` state per instance) — used by login,
-                       register, and the Settings password-change form.
+                       register, and the Account page's password form.
 src/app/api/journal/   GET/POST (list/create), [id]/ DELETE — all check
                        getServerSession server-side before touching Prisma.
 src/app/api/daily-log/, src/app/api/learning/, src/app/api/social/, src/app/api/habits/, src/app/api/goals/, src/app/api/theme/  User-scoped CRUD-like routes for the migrated domains.
 src/app/dashboard/*/    Page routes: home, journal, gallery, timeline,
-                       heatmap, patterns (Heart Patterns), settings, replay
+                       heatmap, patterns (Heart Patterns), account, replay
                        (chooser). Protected by proxy.ts.
 src/app/replay/{monthly,yearly}/  Full-screen Replay routes — deliberately
                        outside the dashboard shell (no sidebar/topbar chrome).
@@ -356,10 +395,16 @@ via `.env`.
   floating-card shell at `md`+. See `src/app/dashboard/layout.tsx`,
   `Sidebar.tsx`, `TopBar.tsx`.
 - Data backup: the app still keeps a browser-based export/import backup
-  flow in Settings (`src/lib/backup.ts`) for convenience, but the primary
-  user data now lives in Postgres. The backup is no longer the main storage
-  mechanism for the migrated domains and should be treated as a recovery
-  tool rather than the system of record.
+  flow on the Account page (`src/lib/backup.ts`) for convenience, but the
+  primary user data now lives in Postgres. The backup is no longer the
+  main storage mechanism for the migrated domains and should be treated
+  as a recovery tool rather than the system of record.
+- **`/dashboard/settings` no longer exists as a real page** — it merged
+  into `/dashboard/account` (profile, name/password, preferences,
+  appearance, data, sign-out all in one place) and now just redirects
+  there. See convention #17 for why the schema change behind the new
+  Preferences fields had to land in production via the build step
+  rather than a direct local `db push`.
 - **Multi-user accounts now cover the full tracker surface, not just
   Journal.** The original scaffold shipped with `next-auth` + `prisma` +
   a `User` model already defined but completely unused; the migration was
