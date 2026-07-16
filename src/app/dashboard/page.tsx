@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { MoodWidget } from "@/components/widgets/MoodWidget";
 import { SleepWidget } from "@/components/widgets/SleepWidget";
 import { EnergyWidget } from "@/components/widgets/EnergyWidget";
@@ -12,17 +13,20 @@ import { GoalsWidget } from "@/components/widgets/GoalsWidget";
 import { motion } from "framer-motion";
 
 export default function DashboardHome() {
+  const { data: session } = useSession();
+  const firstName = session?.user?.name?.trim().split(" ")[0];
+
   return (
     <div className="max-w-4xl mx-auto py-8">
       {/* Welcome Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="mb-10"
       >
         <h1 className="font-serif text-4xl text-foreground font-semibold leading-snug">
-          Welcome back, Eleanor. <br />
+          {firstName ? `Welcome back, ${firstName}.` : "Welcome back."} <br />
           <span className="text-muted">The home fire is warm.</span>
         </h1>
       </motion.div>

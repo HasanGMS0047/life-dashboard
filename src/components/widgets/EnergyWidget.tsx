@@ -21,7 +21,7 @@ export function EnergyWidget() {
   return (
     <Card className="flex flex-col items-center justify-center p-6 gap-2 bg-background border-2 hover:border-terracotta/30 transition-colors">
       <div className="relative w-20 h-20 drop-shadow-sm">
-        <Image src="/energy_icon.png" alt="Energy of the sun" fill className="object-contain" />
+        <Image src="/energy_icon.png" alt="Energy of the sun" fill sizes="80px" className="object-contain" />
       </div>
 
       <div className="text-center">

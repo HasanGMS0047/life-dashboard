@@ -106,8 +106,8 @@ export default function SettingsPage() {
       <Card className="p-6 bg-background border-2 mt-6">
         <h3 className="font-serif text-lg font-semibold text-foreground mb-1">Your Data</h3>
         <p className="text-sm text-muted mb-5">
-          Everything lives only in this browser. Export a backup now and then so a cleared
-          cache or a new device never costs you your story.
+          Your story is safely stored in your account, so it follows you to any device.
+          Exporting a backup now and then is still a good habit for extra peace of mind.
         </p>
 
         <div className="flex flex-wrap gap-3">

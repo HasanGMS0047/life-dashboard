@@ -351,3 +351,44 @@ plus concurrent `curl` requests rather than guessing:
 signed back in, via a real Playwright browser run, with zero application
 console errors (only the already-known, already-handled pre-login
 `/api/theme` 401). `npx tsc --noEmit` clean throughout.
+
+---
+
+## 23. Visual/UX polish pass (screenshot-driven, not guesswork)
+
+Took real Playwright screenshots (desktop 1440×900 and mobile 390×844)
+across every page — landing, register, login, dashboard home, journal,
+gallery, timeline, patterns, settings, replay, night theme, mobile
+drawer — and fixed what the screenshots actually showed instead of
+guessing at cosmetic changes:
+
+- **Dashboard greeted every user as "Welcome back, Eleanor."** — a
+  hardcoded name in `src/app/dashboard/page.tsx` that was never wired to
+  the real signed-in session. Now pulls the first name from
+  `useSession().data.user.name` (falls back to "Welcome back." with no
+  name for the many users who leave the optional name field blank at
+  registration).
+- **Settings page told users "Everything lives only in this browser...
+  a cleared cache or a new device never costs you your story"** — false
+  since the per-user Postgres migration (item #20/#22); this could make
+  users needlessly worried their data wasn't safely stored, or think
+  manual export was their only real backup. Reworded to reflect that the
+  account is the system of record and backup is for extra peace of mind.
+- **Landing page CTA buttons overflowed horizontally on mobile** (390px
+  viewport) — "Begin Your Tale" and "Explore the World" side-by-side
+  didn't fit, clipping both labels at the screen edge. Fixed with
+  `flex-col sm:flex-row` + full-width buttons below the `sm` breakpoint,
+  and hid the "Life Simulator Dashboard" top-bar title below `sm` (it was
+  crowding "Log in"/"Start Setup" into a cramped, wrapping layout).
+- **Six `next/image` `fill` usages were missing the `sizes` prop**
+  (`EnergyWidget`, `SleepWidget`, `MoodWidget`, `JournalWidget`,
+  `TeacupChart`, landing page hero) — a real Next.js dev-console warning
+  about suboptimal image loading, not just cosmetic noise. Added
+  appropriately-sized `sizes` values matching each icon's fixed container
+  size (or a responsive value for the hero image).
+
+**Verified**: re-ran the same Playwright screenshot pass after each fix
+to visually confirm (mobile landing buttons no longer clip, dashboard
+greets the actual registered name), plus a full register → browse-every-
+page → sign-out → sign-in smoke run with zero new console errors.
+`npx tsc --noEmit` clean.

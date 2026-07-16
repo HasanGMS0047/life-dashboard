@@ -7,8 +7,8 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-8 relative"
+    <div
+      className="min-h-screen flex items-center justify-center p-4 sm:p-8 relative"
       style={{
         backgroundImage: 'url(/calm_scenery_bg.png)',
         backgroundSize: 'cover',
@@ -28,7 +28,7 @@ export default function Home() {
             <RotateCcw className="w-5 h-5" />
           </button>
           
-          <span className="font-semibold text-sm tracking-wide">
+          <span className="hidden sm:block font-semibold text-sm tracking-wide">
             Life Simulator Dashboard
           </span>
           
@@ -52,10 +52,11 @@ export default function Home() {
           </h1>
 
           <div className="relative w-full max-w-2xl aspect-[16/9] mb-8 rounded-2xl overflow-hidden border-4 border-surface shadow-md">
-            <Image 
-              src="/cozy_desk_hero.png" 
-              alt="Cozy desk by the window" 
+            <Image
+              src="/cozy_desk_hero.png"
+              alt="Cozy desk by the window"
               fill
+              sizes="(max-width: 768px) 100vw, 672px"
               className="object-cover"
               priority
             />
@@ -65,13 +66,13 @@ export default function Home() {
             Collect memories, build relationships, and discover your heart. Then weave your journey together.
           </p>
 
-          <div className="flex gap-4">
-            <Link href="/register">
-              <Button size="lg" className="rounded-full bg-terracotta text-white hover:bg-terracotta/90">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4 sm:px-0">
+            <Link href="/register" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto rounded-full bg-terracotta text-white hover:bg-terracotta/90">
                 Begin Your Tale
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="rounded-full border-2 border-terracotta text-terracotta hover:bg-terracotta/5">
+            <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-full border-2 border-terracotta text-terracotta hover:bg-terracotta/5">
               Explore the World
             </Button>
           </div>

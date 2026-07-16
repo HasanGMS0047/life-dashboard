@@ -63,6 +63,7 @@ export function TeacupChart() {
                     alt="Teacup"
                     fill
                     unoptimized
+                    sizes="48px"
                     className="object-contain"
                   />
                 </motion.div>
