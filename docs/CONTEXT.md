@@ -260,7 +260,23 @@ Vercel environment variables.
     doesn't cut over traffic (the previous deployment keeps serving),
     so this is safe to leave permanently in the pipeline rather than
     reverting after one use — future schema changes now deploy
-    automatically too.
+    automatically too. **Caught in practice on the very next deploy**:
+    `prisma db push` hung forever (not a fast failure — the Vercel build
+    sat in "Building" for 14+ minutes with zero further log output)
+    because `DATABASE_URL` in production is Supabase's *transaction-mode
+    connection pooler* (`...pooler.supabase.com:6543`), which doesn't
+    support the DDL/prepared-statement behavior the schema engine needs.
+    `DIRECT_DATABASE_URL` (the actual non-pooled connection, already
+    used by `src/lib/prisma.ts`'s runtime client) works fine for this —
+    fixed by flipping `prisma.config.ts`'s fallback order to prefer it:
+    `DIRECT_DATABASE_URL ?? DATABASE_URL`. This is also what the CLI now
+    uses locally (via the plain `postgres://localhost:51214` URL rather
+    than the `prisma+postgres://` proxy one) — confirmed working
+    identically. If a future `db push` ever hangs in "Building" with no
+    further log lines after "Datasource ... at ...", cancel it
+    (`vercel remove <deployment-url> --yes`, since a stuck build won't
+    self-cancel and just burns the build-minutes budget) and check
+    whether it's connecting through a pooler again.
 18. **Tailwind's class scanner only sees literal strings written in
     source files — it cannot see classes built at runtime.** A first
     draft of the Account page's avatar ring derived its border/text

@@ -3,7 +3,14 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-const databaseUrl = process.env["DATABASE_URL"] ?? process.env["DIRECT_DATABASE_URL"];
+// Prefer DIRECT_DATABASE_URL: in production DATABASE_URL goes through
+// Supabase's transaction-mode connection pooler (port 6543), which does
+// not support the DDL Prisma's schema engine needs for `db push` — it
+// just hangs indefinitely instead of failing. DIRECT_DATABASE_URL is the
+// actual non-pooled connection (already proven to work, since the
+// runtime PrismaClient in src/lib/prisma.ts uses it too) and works fine
+// for the CLI locally as well.
+const databaseUrl = process.env["DIRECT_DATABASE_URL"] ?? process.env["DATABASE_URL"];
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
