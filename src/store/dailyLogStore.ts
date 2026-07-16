@@ -81,15 +81,20 @@ export const useDailyLogStore = create<DailyLogState>((set, get) => ({
   fetchLogs: async () => {
     if (get().loaded) return;
 
-    const res = await fetch("/api/daily-log");
-    if (!res.ok) {
-      set({ loaded: true });
-      return;
-    }
+    try {
+      const res = await fetch("/api/daily-log");
+      if (!res.ok) {
+        set({ loaded: true });
+        return;
+      }
 
-    const metrics: DailyMetricResponse[] = await res.json();
-    const logs = Object.fromEntries(metrics.map((metric) => [metric.date, toLog(metric)]));
-    set({ logs, loaded: true });
+      const metrics: DailyMetricResponse[] = await res.json();
+      const logs = Object.fromEntries(metrics.map((metric) => [metric.date, toLog(metric)]));
+      set({ logs, loaded: true });
+    } catch (err) {
+      console.error("Failed to fetch daily logs", err);
+      set({ loaded: true });
+    }
   },
   setMood: async (date, mood) => {
     const currentLog = getOrCreateLog(get().logs, date);
@@ -101,23 +106,27 @@ export const useDailyLogStore = create<DailyLogState>((set, get) => ({
       deeds: currentLog.deeds,
     };
 
-    const res = await fetch("/api/daily-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) return;
+    try {
+      const res = await fetch("/api/daily-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) return;
 
-    const metric: DailyMetricResponse = await res.json();
-    set((state) => ({
-      logs: {
-        ...state.logs,
-        [date]: {
-          ...getOrCreateLog(state.logs, date),
-          ...toLog(metric),
+      const metric: DailyMetricResponse = await res.json();
+      set((state) => ({
+        logs: {
+          ...state.logs,
+          [date]: {
+            ...getOrCreateLog(state.logs, date),
+            ...toLog(metric),
+          },
         },
-      },
-    }));
+      }));
+    } catch (err) {
+      console.error("Failed to save mood", err);
+    }
   },
   setSleepHours: async (date, hours) => {
     const currentLog = getOrCreateLog(get().logs, date);
@@ -129,23 +138,27 @@ export const useDailyLogStore = create<DailyLogState>((set, get) => ({
       deeds: currentLog.deeds,
     };
 
-    const res = await fetch("/api/daily-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) return;
+    try {
+      const res = await fetch("/api/daily-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) return;
 
-    const metric: DailyMetricResponse = await res.json();
-    set((state) => ({
-      logs: {
-        ...state.logs,
-        [date]: {
-          ...getOrCreateLog(state.logs, date),
-          ...toLog(metric),
+      const metric: DailyMetricResponse = await res.json();
+      set((state) => ({
+        logs: {
+          ...state.logs,
+          [date]: {
+            ...getOrCreateLog(state.logs, date),
+            ...toLog(metric),
+          },
         },
-      },
-    }));
+      }));
+    } catch (err) {
+      console.error("Failed to save sleep hours", err);
+    }
   },
   setEnergy: async (date, energy) => {
     const currentLog = getOrCreateLog(get().logs, date);
@@ -157,23 +170,27 @@ export const useDailyLogStore = create<DailyLogState>((set, get) => ({
       deeds: currentLog.deeds,
     };
 
-    const res = await fetch("/api/daily-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) return;
+    try {
+      const res = await fetch("/api/daily-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) return;
 
-    const metric: DailyMetricResponse = await res.json();
-    set((state) => ({
-      logs: {
-        ...state.logs,
-        [date]: {
-          ...getOrCreateLog(state.logs, date),
-          ...toLog(metric),
+      const metric: DailyMetricResponse = await res.json();
+      set((state) => ({
+        logs: {
+          ...state.logs,
+          [date]: {
+            ...getOrCreateLog(state.logs, date),
+            ...toLog(metric),
+          },
         },
-      },
-    }));
+      }));
+    } catch (err) {
+      console.error("Failed to save energy", err);
+    }
   },
   toggleDeed: async (date, deedId) => {
     const currentLog = getOrCreateLog(get().logs, date);
@@ -186,22 +203,26 @@ export const useDailyLogStore = create<DailyLogState>((set, get) => ({
       deeds: nextDeeds,
     };
 
-    const res = await fetch("/api/daily-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) return;
+    try {
+      const res = await fetch("/api/daily-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) return;
 
-    const metric: DailyMetricResponse = await res.json();
-    set((state) => ({
-      logs: {
-        ...state.logs,
-        [date]: {
-          ...getOrCreateLog(state.logs, date),
-          ...toLog(metric),
+      const metric: DailyMetricResponse = await res.json();
+      set((state) => ({
+        logs: {
+          ...state.logs,
+          [date]: {
+            ...getOrCreateLog(state.logs, date),
+            ...toLog(metric),
+          },
         },
-      },
-    }));
+      }));
+    } catch (err) {
+      console.error("Failed to toggle kind deed", err);
+    }
   },
 }));

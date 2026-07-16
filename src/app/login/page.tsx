@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useRef, useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -14,25 +14,35 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const submittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setError(null);
     setLoading(true);
 
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    setLoading(false);
-    if (res?.error) {
-      setError("Incorrect email or password.");
-      return;
+      if (res?.error) {
+        setError("Incorrect email or password.");
+        return;
+      }
+      router.push(searchParams.get("callbackUrl") || "/dashboard");
+      router.refresh();
+    } catch (err) {
+      console.error("Login failed", err);
+      setError("We couldn't sign you in right now. Please try again.");
+    } finally {
+      submittingRef.current = false;
+      setLoading(false);
     }
-    router.push(searchParams.get("callbackUrl") || "/dashboard");
-    router.refresh();
   };
 
   return (

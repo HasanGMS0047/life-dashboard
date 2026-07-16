@@ -27,29 +27,45 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   fetchHabits: async () => {
     if (get().loaded) return;
 
-    const res = await fetch("/api/habits");
-    if (!res.ok) {
-      set({ loaded: true });
-      return;
-    }
+    try {
+      const res = await fetch("/api/habits");
+      if (!res.ok) {
+        set({ loaded: true });
+        return;
+      }
 
-    const habits: Habit[] = await res.json();
-    set({ habits, loaded: true });
+      const habits: Habit[] = await res.json();
+      set({ habits, loaded: true });
+    } catch (err) {
+      console.error("Failed to fetch habits", err);
+      set({ loaded: true });
+    }
   },
   addHabit: async (title) => {
-    const res = await fetch("/api/habits", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title }),
-    });
-    if (!res.ok) return;
+    try {
+      const res = await fetch("/api/habits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      if (!res.ok) return;
 
-    const habit: Habit = await res.json();
-    set((state) => ({ habits: [habit, ...state.habits] }));
+      const habit: Habit = await res.json();
+      set((state) => ({ habits: [habit, ...state.habits] }));
+    } catch (err) {
+      console.error("Failed to add habit", err);
+    }
   },
   removeHabit: async (id) => {
+    const previousHabits = get().habits;
     set((state) => ({ habits: state.habits.filter((habit) => habit.id !== id) }));
-    await fetch(`/api/habits/${id}`, { method: "DELETE" });
+    try {
+      const res = await fetch(`/api/habits/${id}`, { method: "DELETE" });
+      if (!res.ok) set({ habits: previousHabits });
+    } catch (err) {
+      console.error("Failed to remove habit", err);
+      set({ habits: previousHabits });
+    }
   },
   toggleToday: async (id) => {
     const today = getTodayKey();
@@ -66,12 +82,21 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       ),
     }));
 
-    const res = await fetch(`/api/habits/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ completions: nextCompletions }),
-    });
-    if (!res.ok) {
+    try {
+      const res = await fetch(`/api/habits/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completions: nextCompletions }),
+      });
+      if (!res.ok) {
+        set((state) => ({
+          habits: state.habits.map((item) =>
+            item.id === id ? { ...item, completions: habit.completions } : item
+          ),
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to toggle habit", err);
       set((state) => ({
         habits: state.habits.map((item) =>
           item.id === id ? { ...item, completions: habit.completions } : item

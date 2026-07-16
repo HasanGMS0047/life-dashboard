@@ -22,36 +22,49 @@ export const useLearningStore = create<LearningState>((set, get) => ({
   fetchEntries: async () => {
     if (get().loaded) return;
 
-    const res = await fetch("/api/learning");
-    if (!res.ok) {
-      set({ loaded: true });
-      return;
-    }
+    try {
+      const res = await fetch("/api/learning");
+      if (!res.ok) {
+        set({ loaded: true });
+        return;
+      }
 
-    const entries: LearningEntry[] = await res.json();
-    set({ entries, loaded: true });
+      const entries: LearningEntry[] = await res.json();
+      set({ entries, loaded: true });
+    } catch (err) {
+      console.error("Failed to fetch learning entries", err);
+      set({ loaded: true });
+    }
   },
   addBook: async (title) => {
-    const res = await fetch("/api/learning", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "book", title }),
-    });
-    if (!res.ok) return;
+    try {
+      const res = await fetch("/api/learning", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "book", title }),
+      });
+      if (!res.ok) return;
 
-    const entry: LearningEntry = await res.json();
-    set((state) => ({ entries: [entry, ...state.entries] }));
+      const entry: LearningEntry = await res.json();
+      set((state) => ({ entries: [entry, ...state.entries] }));
+    } catch (err) {
+      console.error("Failed to add book", err);
+    }
   },
   addStudySession: async (title, hours) => {
-    const res = await fetch("/api/learning", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "study", title, hours }),
-    });
-    if (!res.ok) return;
+    try {
+      const res = await fetch("/api/learning", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "study", title, hours }),
+      });
+      if (!res.ok) return;
 
-    const entry: LearningEntry = await res.json();
-    set((state) => ({ entries: [entry, ...state.entries] }));
+      const entry: LearningEntry = await res.json();
+      set((state) => ({ entries: [entry, ...state.entries] }));
+    } catch (err) {
+      console.error("Failed to add study session", err);
+    }
   },
 }));
 
