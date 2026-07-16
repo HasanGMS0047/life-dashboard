@@ -22,11 +22,13 @@ Set these in Vercel:
 ```bash
 NEXTAUTH_SECRET=replace-with-a-strong-random-string
 NEXTAUTH_URL=https://your-app-name.vercel.app
-DATABASE_URL=postgresql://user:password@host:5432/dbname
-DIRECT_DATABASE_URL=postgresql://user:password@host:5432/dbname
+DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
+DIRECT_DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2
 ```
+
+For Supabase, copy the connection string from Project Settings → Database and paste it into both database variables.
 
 ### Deploy steps
 
