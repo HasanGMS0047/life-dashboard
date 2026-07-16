@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String?  // Null for guest/OAuth
+  name      String?
+  theme     String   @default("day")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  journals  Journal[]
+  metrics   DailyMetric[]
+  learningEntries LearningEntry[]
+  socialEntries SocialEntry[]
+  habits Habit[]
+  goals Goal[]
+}
+
+model Journal {
+  id        String   @id @default(cuid())
+  userId    String
+  text      String
+  mood      String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DailyMetric {
+  id          String   @id @default(cuid())
+  userId      String
+  date        String
+  mood        String?
+  energy      Int?
+  sleepHours  Float?
+  deeds       Json?
+  focusTime   Int?     // In minutes
+  moodScore   Int?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model LearningEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  hours     Float?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SocialEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  photo     String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Habit {
+  id           String   @id @default(cuid())
+  userId       String
+  title        String
+  completions  String[]
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Goal {
+  id           String   @id @default(cuid())
+  userId       String
+  title        String
+  progress     Int      @default(0)
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,68 @@
+@import "tailwindcss";
+@import "tailwindcss/utilities";
+
+:root {
+  /* Warm, homely, scrapbook light mode */
+  --background: #f3e9d8;
+  --surface: #FCFBF7;
+  --card: #FCFBF7;
+  --border: #d4c8b8;
+  --foreground: #4a3b32;
+  --muted: #8b7a69;
+  
+  /* Cottagecore/Scrapbook accents */
+  --terracotta: #B8695C;
+  --olive: #7c8a66;
+  --mustard: #d4a373;
+  --blush: #e2b4bd;
+  --sky: #a8dadc;
+}
+
+:root[data-theme="night"] {
+  /* Moonlit night mode — deep indigo sky, soft lavender ink */
+  --background: #171b30;
+  --surface: #232847;
+  --card: #232847;
+  --border: #3a4270;
+  --foreground: #e9e7f2;
+  --muted: #9b9dc4;
+
+  /* Same cottagecore family, tuned to glow against a dark sky */
+  --terracotta: #d99184;
+  --olive: #9db084;
+  --mustard: #e6c58f;
+  --blush: #f0cdd6;
+  --sky: #93d9e8;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+
+  --color-terracotta: var(--terracotta);
+  --color-olive: var(--olive);
+  --color-mustard: var(--mustard);
+  --color-blush: var(--blush);
+  --color-sky: var(--sky);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-lora), ui-serif, Georgia, serif;
+}
+
+body {
+  background: var(--background);
+  /* Optional: subtle noise texture */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  border-color: var(--border);
+}
