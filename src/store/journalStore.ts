@@ -22,23 +22,42 @@ export const useJournalStore = create<JournalState>((set, get) => ({
   loaded: false,
   fetchEntries: async () => {
     if (get().loaded) return;
-    const res = await fetch("/api/journal");
-    if (!res.ok) return;
-    const entries: JournalEntry[] = await res.json();
-    set({ entries, loaded: true });
+    try {
+      const res = await fetch("/api/journal");
+      if (!res.ok) {
+        set({ loaded: true });
+        return;
+      }
+      const entries: JournalEntry[] = await res.json();
+      set({ entries, loaded: true });
+    } catch (err) {
+      console.error("Failed to fetch journal entries", err);
+      set({ loaded: true });
+    }
   },
   addEntry: async (text, mood) => {
-    const res = await fetch("/api/journal", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, mood }),
-    });
-    if (!res.ok) return;
-    const entry: JournalEntry = await res.json();
-    set((state) => ({ entries: [entry, ...state.entries] }));
+    try {
+      const res = await fetch("/api/journal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, mood }),
+      });
+      if (!res.ok) return;
+      const entry: JournalEntry = await res.json();
+      set((state) => ({ entries: [entry, ...state.entries] }));
+    } catch (err) {
+      console.error("Failed to add journal entry", err);
+    }
   },
   removeEntry: async (id) => {
+    const previousEntries = get().entries;
     set((state) => ({ entries: state.entries.filter((entry) => entry.id !== id) }));
-    await fetch(`/api/journal/${id}`, { method: "DELETE" });
+    try {
+      const res = await fetch(`/api/journal/${id}`, { method: "DELETE" });
+      if (!res.ok) set({ entries: previousEntries });
+    } catch (err) {
+      console.error("Failed to remove journal entry", err);
+      set({ entries: previousEntries });
+    }
   },
 }));

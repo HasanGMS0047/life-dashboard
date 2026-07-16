@@ -299,3 +299,55 @@ Playwright (screenshots + `console.error`/`pageerror` assertions) before
 being called done — not just compiled. See CONTEXT.md point 6 for the
 concrete setup (Playwright isn't a project dependency; it's installed ad
 hoc into the OS temp scratchpad directory per session).
+
+---
+
+## 22. Bug sweep: registration race, stuck-loading login, silent store failures, dead Prisma client
+
+Triggered by a real screenshot of registration failing with "We couldn't
+create your account right now." Root-caused with a live Playwright run
+plus concurrent `curl` requests rather than guessing:
+
+- **Register race condition (the actual reported bug)**: submitting the
+  same email twice in quick succession (double-click/double-Enter) let
+  both requests pass the "does this user exist" check before either
+  committed; the loser then hit an uncaught Postgres unique-constraint
+  violation (`P2002`), falling into the generic catch block and showing
+  the unhelpful 500 message instead of "account already exists."
+  Reproduced with 3 concurrent `curl` POSTs to `/api/register` using the
+  same email — 1×200, 2×500 before the fix, 1×200 + 2×409 after. Fixed by
+  catching `Prisma.PrismaClientKnownRequestError` with `code === "P2002"`
+  specifically in `src/app/api/register/route.ts` and returning 409.
+- **Client-side double-submit guard**: added a `useRef` boolean guard
+  (checked synchronously, unlike React state) to both
+  `src/app/register/page.tsx` and `src/app/login/page.tsx` so a fast
+  double-click/double-Enter can't fire two overlapping submits in the
+  first place.
+- **Login page had no error handling at all** (CONTEXT.md convention #10
+  was previously only applied to register): a thrown `signIn` call left
+  the button stuck in "Signing in..." forever with no message. Wrapped in
+  try/catch/finally to match the register page's resilience.
+- **All 7 Zustand stores lacked try/catch around `fetch`** — an
+  uncaught network failure (not just a non-2xx response) skipped the
+  revert logic in every store that does an optimistic update before the
+  request (`removeEntry`, `toggleToday`, `adjustProgress`, etc.), silently
+  leaving the UI out of sync with the server. Added try/catch (with
+  revert-on-failure where applicable) to `journalStore`, `dailyLogStore`,
+  `learningStore`, `socialStore`, `habitStore`, `goalStore`, and
+  `themeStore`. See CONTEXT.md convention #12.
+- **Bigger bug found via the Playwright smoke pass, unrelated to the
+  screenshot**: `/api/learning`, `/api/social`, `/api/habits`, and
+  `/api/goals` were all 500ing with `Cannot read properties of undefined
+  (reading 'findMany')` — the running dev server's Prisma client was
+  stale and missing those models entirely, even though `schema.prisma`
+  and the on-disk generated client were both correct. `npx prisma
+  generate` alone didn't fix it; the dev server needed a full restart to
+  pick up the regenerated client. This meant Learning, Social/Gallery,
+  Habits, and Goals were completely broken for every signed-in user
+  before this fix. See CONTEXT.md convention #11.
+
+**Verified**: fresh register → dashboard → visited every dashboard page
+(journal, gallery, timeline, patterns, settings, replay) → signed out →
+signed back in, via a real Playwright browser run, with zero application
+console errors (only the already-known, already-handled pre-login
+`/api/theme` 401). `npx tsc --noEmit` clean throughout.

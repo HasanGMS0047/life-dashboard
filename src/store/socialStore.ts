@@ -23,25 +23,34 @@ export const useSocialStore = create<SocialState>((set, get) => ({
   fetchEntries: async () => {
     if (get().loaded) return;
 
-    const res = await fetch("/api/social");
-    if (!res.ok) {
-      set({ loaded: true });
-      return;
-    }
+    try {
+      const res = await fetch("/api/social");
+      if (!res.ok) {
+        set({ loaded: true });
+        return;
+      }
 
-    const entries: SocialEntry[] = await res.json();
-    set({ entries, loaded: true });
+      const entries: SocialEntry[] = await res.json();
+      set({ entries, loaded: true });
+    } catch (err) {
+      console.error("Failed to fetch social entries", err);
+      set({ loaded: true });
+    }
   },
   addEntry: async (type, title, photo) => {
-    const res = await fetch("/api/social", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, title, photo }),
-    });
-    if (!res.ok) return;
+    try {
+      const res = await fetch("/api/social", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, title, photo }),
+      });
+      if (!res.ok) return;
 
-    const entry: SocialEntry = await res.json();
-    set((state) => ({ entries: [entry, ...state.entries] }));
+      const entry: SocialEntry = await res.json();
+      set((state) => ({ entries: [entry, ...state.entries] }));
+    } catch (err) {
+      console.error("Failed to add social entry", err);
+    }
   },
 }));
 

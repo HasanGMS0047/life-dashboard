@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
@@ -33,6 +34,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json(
+        { error: "An account with that email already exists." },
+        { status: 409 }
+      );
+    }
     console.error("Register route failed", error);
     return NextResponse.json(
       { error: "We couldn't create your account right now. Please try again." },

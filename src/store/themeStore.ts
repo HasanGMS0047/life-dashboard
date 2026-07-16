@@ -15,27 +15,37 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
   fetchTheme: async () => {
     if (get().loaded) return;
 
-    const res = await fetch("/api/theme");
-    if (!res.ok) {
-      set({ loaded: true });
-      return;
-    }
+    try {
+      const res = await fetch("/api/theme");
+      if (!res.ok) {
+        set({ loaded: true });
+        return;
+      }
 
-    const data = await res.json();
-    const nextTheme = data?.theme === "night" ? "night" : "day";
-    set({ theme: nextTheme, loaded: true });
+      const data = await res.json();
+      const nextTheme = data?.theme === "night" ? "night" : "day";
+      set({ theme: nextTheme, loaded: true });
+    } catch (err) {
+      console.error("Failed to fetch theme", err);
+      set({ loaded: true });
+    }
   },
   setTheme: async (theme) => {
     const previousTheme = get().theme;
     set({ theme });
 
-    const res = await fetch("/api/theme", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ theme }),
-    });
+    try {
+      const res = await fetch("/api/theme", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme }),
+      });
 
-    if (!res.ok) {
+      if (!res.ok) {
+        set({ theme: previousTheme });
+      }
+    } catch (err) {
+      console.error("Failed to save theme", err);
       set({ theme: previousTheme });
     }
   },

@@ -138,6 +138,28 @@ Vercel environment variables.
     `try/catch/finally`, safely parse server responses, and surface an
     error message instead of leaving buttons stuck in a permanent loading
     state when the backend fails.
+11. **`npx prisma generate` alone does not update an already-running dev
+    server.** The generated client is loaded into the Node process once at
+    startup; regenerating it on disk (e.g. after a schema change, or after
+    a `node_modules` reinstall) is invisible to Turbopack's HMR, which only
+    watches app source. Symptom hit in practice: `prisma.learningEntry`,
+    `prisma.socialEntry`, `prisma.habit`, and `prisma.goal` were all
+    `undefined` (`TypeError: Cannot read properties of undefined (reading
+    'findMany')`, 500 on `/api/learning`, `/api/social`, `/api/habits`,
+    `/api/goals`) even though the schema and generated client on disk were
+    both correct — only `npx prisma generate` **followed by a full dev
+    server restart** fixed it. If any per-user API route 500s with an
+    "undefined" Prisma model error, restart the dev server before
+    debugging further.
+12. **Every store action that calls `fetch` must be wrapped in
+    try/catch**, not just check `res.ok`. An uncaught network failure
+    (offline, connection reset) skips the `!res.ok` branch entirely,
+    which for stores that apply an optimistic update before the request
+    (`removeEntry`, `toggleToday`, `adjustProgress`, etc.) leaves the UI
+    silently out of sync with the server with no revert and no user-visible
+    error. All 7 stores (`journalStore`, `dailyLogStore`, `learningStore`,
+    `socialStore`, `habitStore`, `goalStore`, `themeStore`) follow this
+    pattern now — keep it when adding new store actions.
 
 ## Where things live
 
