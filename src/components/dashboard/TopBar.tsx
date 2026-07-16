@@ -1,8 +1,9 @@
 "use client";
 
 import { Sun, Moon, User, Menu } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useThemeStore } from "@/store/themeStore";
 import { SearchBar } from "@/components/dashboard/SearchBar";
 
@@ -13,7 +14,7 @@ const PAGE_TITLES: { href: string; label: string }[] = [
   { href: "/dashboard/journal", label: "Journal" },
   { href: "/dashboard/gallery", label: "Memory Gallery" },
   { href: "/dashboard/patterns", label: "Heart Patterns" },
-  { href: "/dashboard/settings", label: "Settings" },
+  { href: "/dashboard/account", label: "Your Account" },
   { href: "/dashboard", label: "Main Home" },
 ];
 
@@ -57,13 +58,13 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
         >
           {theme === "day" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          title={session?.user?.email ? `Sign out (${session.user.email})` : "Sign out"}
+        <Link
+          href="/dashboard/account"
+          title={session?.user?.email ? `Account (${session.user.email})` : "Account"}
           className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center overflow-hidden cursor-pointer hover:border-terracotta transition-colors"
         >
           <User className="w-4 h-4 text-muted" />
-        </button>
+        </Link>
       </div>
     </header>
   );
