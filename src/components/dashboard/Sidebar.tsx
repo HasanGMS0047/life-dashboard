@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Home, BookOpen, Heart, Grid, Settings, RotateCcw, Clock, Images, X } from "lucide-react";
+import { Home, BookOpen, Heart, Grid, Settings, Clapperboard, Clock, Images, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -46,7 +46,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
               : "text-muted hover:bg-black/5 hover:text-foreground"
           )}
         >
-          <RotateCcw className="w-5 h-5" />
+          <Clapperboard className="w-5 h-5" />
         </Link>
 
         <nav className="flex-1 flex flex-col gap-4 w-full px-2">
@@ -112,7 +112,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                     : "text-foreground hover:bg-black/5"
                 )}
               >
-                <RotateCcw className="w-5 h-5" />
+                <Clapperboard className="w-5 h-5" />
                 <span className="text-sm font-medium">Life Replay</span>
               </Link>
 
