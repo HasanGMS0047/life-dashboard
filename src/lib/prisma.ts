@@ -24,14 +24,35 @@ if (!connectionString) {
 // sets `sslmode=disable`. Pinning Supabase's actual root CA (downloaded
 // from Project Settings > Database > SSL Configuration) restores full
 // verification instead of disabling it.
+//
+// Passing both `connectionString` and `ssl` in the same config object does
+// NOT work: pg's ConnectionParameters re-parses connectionString internally
+// and merges it OVER whatever `ssl` was explicitly passed (see
+// node_modules/pg/lib/connection-parameters.js), silently discarding our CA.
+// Decomposing the URL into discrete fields (no `connectionString` key at
+// all) avoids that re-parse so the explicit `ssl` config actually sticks.
 const requiresTls = !connectionString.includes("sslmode=disable");
-const supabaseCa = requiresTls
-  ? fs.readFileSync(path.join(process.cwd(), "public", "prod-ca-2021.crt"), "utf8")
-  : undefined;
-const adapter = new PrismaPg({
-  connectionString,
-  ...(requiresTls ? { ssl: { ca: supabaseCa, rejectUnauthorized: true } } : {}),
-});
+
+function buildPgConfig(rawConnectionString: string, ca: string) {
+  const url = new URL(rawConnectionString);
+  return {
+    host: url.hostname,
+    port: url.port ? Number(url.port) : 5432,
+    database: url.pathname.slice(1),
+    user: decodeURIComponent(url.username),
+    password: decodeURIComponent(url.password),
+    ssl: { ca, rejectUnauthorized: true },
+  };
+}
+
+const adapter = requiresTls
+  ? new PrismaPg(
+      buildPgConfig(
+        connectionString,
+        fs.readFileSync(path.join(process.cwd(), "public", "prod-ca-2021.crt"), "utf8")
+      )
+    )
+  : new PrismaPg({ connectionString });
 
 // Avoids exhausting DB connections from a new PrismaClient on every
 // hot-reload in dev — reuse the same instance across module reloads.
