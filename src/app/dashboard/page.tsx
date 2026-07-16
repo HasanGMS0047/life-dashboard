@@ -1,6 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { MoodWidget } from "@/components/widgets/MoodWidget";
 import { SleepWidget } from "@/components/widgets/SleepWidget";
 import { EnergyWidget } from "@/components/widgets/EnergyWidget";
@@ -12,10 +14,31 @@ import { HabitsWidget } from "@/components/widgets/HabitsWidget";
 import { GoalsWidget } from "@/components/widgets/GoalsWidget";
 import { motion } from "framer-motion";
 
-export default function DashboardHome() {
+function DashboardWelcome() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const isFirstVisit = searchParams.get("new") === "1";
   const firstName = session?.user?.name?.trim().split(" ")[0];
 
+  const greeting = isFirstVisit
+    ? firstName
+      ? `Welcome, ${firstName}.`
+      : "Welcome."
+    : firstName
+      ? `Welcome back, ${firstName}.`
+      : "Welcome back.";
+
+  return (
+    <h1 className="font-serif text-4xl text-foreground font-semibold leading-snug">
+      {greeting} <br />
+      <span className="text-muted">
+        {isFirstVisit ? "Your story starts here." : "The home fire is warm."}
+      </span>
+    </h1>
+  );
+}
+
+export default function DashboardHome() {
   return (
     <div className="max-w-4xl mx-auto py-8">
       {/* Welcome Header */}
@@ -25,10 +48,9 @@ export default function DashboardHome() {
         transition={{ duration: 0.5 }}
         className="mb-10"
       >
-        <h1 className="font-serif text-4xl text-foreground font-semibold leading-snug">
-          {firstName ? `Welcome back, ${firstName}.` : "Welcome back."} <br />
-          <span className="text-muted">The home fire is warm.</span>
-        </h1>
+        <Suspense fallback={null}>
+          <DashboardWelcome />
+        </Suspense>
       </motion.div>
 
       {/* Grid Layout */}

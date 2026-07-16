@@ -186,6 +186,39 @@ Vercel environment variables.
     The fix has to decompose the URL into discrete `host`/`port`/
     `database`/`user`/`password` fields (no `connectionString` key at all)
     so there's nothing left for `pg` to re-parse over your `ssl` config.
+14. **Keep `public/*` image sources sized for how they're actually
+    displayed, not the raw AI-generation output.** The original asset
+    pipeline dropped every image in at its generated resolution (mostly
+    1024×1024, one at 1254×1254) with no compression pass — several tiny
+    icons rendered at 48–112px (`teacup_*.png`, `mood_icon.png`,
+    `sleep_icon.png`, `energy_icon.png`, `journal_icon.png`) were shipping
+    700KB–1.6MB *each*, and the always-on dashboard background
+    (`calm_scenery_bg.png` / `moonlit_scenery_bg.png`) added another
+    0.8–2.7MB on every page. This was almost certainly the main cause of
+    the app "feeling slow." Fixed by resizing icons to 256px (still crisp
+    at 2–3x the display size) and recompressing everything with `sharp`
+    (PNG w/ palette+adaptive filtering for the alpha teacups, mozjpeg
+    quality ~80 for the rest); `public/` went from 13.4MB to ~750KB with
+    no visible quality loss (verified via Playwright screenshots
+    before/after). `moonlit_scenery_bg.png` is genuinely a JPEG now
+    (converted from a lossless PNG-of-a-photo, which is pure waste) —
+    it keeps the `.png` extension to match existing precedent in this
+    repo (several other assets, e.g. `mood_icon.png`, were already
+    JPEG-content-under-`.png`-name from the original pipeline; browsers
+    sniff actual image bytes so this doesn't break anything, only the
+    file extension is cosmetically wrong). **When adding new AI-generated
+    art**, resize/compress it for its actual display size before
+    committing — don't assume Next's optimizer will save you, since
+    several of these use the `unoptimized` prop (see convention #4) and
+    bypass it entirely.
+15. **On Windows, a running dev server (or some other process — not
+    conclusively identified) can hold an exclusive lock on files under
+    `public/` that blocks a direct overwrite** (`fs.writeFileSync` fails
+    with `UNKNOWN: unknown error, open ...`) even after the obvious
+    culprit (the Next dev server) is killed. Write to a temp file in the
+    same directory and `fs.renameSync` it over the target instead — the
+    rename succeeds even when a direct write doesn't. Used when
+    recompressing images in place (see convention #14).
 
 ## Where things live
 
@@ -221,6 +254,13 @@ src/components/AuthProvider.tsx  Thin "use client" wrapper around next-auth/reac
 src/app/login/, src/app/register/  Auth pages, matching the app's aesthetic.
 src/app/api/auth/[...nextauth]/  NextAuth route handler.
 src/app/api/register/  Account creation (bcrypt hash + Prisma user create).
+src/app/api/account/   PATCH — update the signed-in user's name and/or
+                       password (current-password check required for a
+                       password change). Settings page's Account card.
+src/components/ui/password-input.tsx  Shared password `<input>` with a
+                       show/hide eye toggle (`useState` + `type` swap, own
+                       `visible` state per instance) — used by login,
+                       register, and the Settings password-change form.
 src/app/api/journal/   GET/POST (list/create), [id]/ DELETE — all check
                        getServerSession server-side before touching Prisma.
 src/app/api/daily-log/, src/app/api/learning/, src/app/api/social/, src/app/api/habits/, src/app/api/goals/, src/app/api/theme/  User-scoped CRUD-like routes for the migrated domains.

@@ -445,3 +445,69 @@ against the production URL with `curl` and pulled real error detail with
 **Verified**: full register → login (via `/api/auth/callback/credentials`)
 → session → `/api/journal` round trip directly against the live
 production URL with `curl`, all 200s, after redeploying the corrected fix.
+
+---
+
+## 25. Performance pass, account settings (name/password), password visibility toggle, first-visit greeting
+
+Prompted by "the website is slow" plus a batch of smaller UX asks. Handled
+as one pass since several touched the same auth pages:
+
+- **Performance root cause: oversized image assets, not code.** Checked
+  the dashboard shell's data-fetching first (all 7 stores fire in
+  parallel in one `useEffect`, not a waterfall — not the problem) and
+  `next/font` (already using `next/font/google`, already optimal). The
+  real culprit was `public/*`: several tiny icons rendered at 48–112px
+  were shipping 700KB–1.6MB *unresized, unoptimized* source images
+  (`teacup_*.png` and `mood_icon.png` use the `unoptimized` prop from
+  item #1's dithering fix, so Next's optimizer never touches them), and
+  the always-on dashboard background added another 0.8–2.7MB per page.
+  Resized/recompressed everything with `sharp` (installed as a
+  transitive dep already, no new install needed) — `public/` went from
+  13.4MB to ~750KB. Verified with Playwright screenshots before/after at
+  both day and night theme: no visible quality loss. See CONTEXT.md
+  conventions #14 (the sizing/compression rule) and #15 (a Windows-only
+  file-lock quirk hit while overwriting images in place — `fs.renameSync`
+  over a temp file works around it, direct `writeFileSync` doesn't).
+- **Account settings (name + password) — new.** `PATCH /api/account`
+  (`src/app/api/account/route.ts`): updates `name` and/or `password`
+  independently; a password change requires `currentPassword` to verify
+  via bcrypt first. New "Account" card at the top of `/dashboard/settings`
+  with two independent forms (Save Name / Change Password), each with
+  its own loading/error/success state, matching the rest of the app's
+  per-action-not-per-page state pattern. Changing the name calls
+  `next-auth`'s `useSession().update({name})` so the new value shows up
+  immediately (TopBar, dashboard greeting) without a re-login — required
+  extending `src/lib/auth.ts`'s `jwt` callback to handle `trigger ===
+  "update"` and merge the passed `session.name` into the token, since
+  NextAuth doesn't do that by default.
+- **Show/hide password toggle — new.** `src/components/ui/password-input.tsx`,
+  a small shared component (eye/eye-off icon button, `type="password"` ↔
+  `type="text"`) used on login, register, and both new-password fields in
+  Settings — one component instead of duplicating the toggle logic 5+
+  times.
+- **"Welcome back" on a first-ever visit didn't make sense.** Register
+  now redirects to `/dashboard?new=1` instead of plain `/dashboard`
+  (login still goes to plain `/dashboard`); the dashboard header reads
+  that query param and shows "Welcome, {name}. Your story starts here."
+  on a first visit vs. "Welcome back, {name}. The home fire is warm."
+  otherwise. `useSearchParams` requires a Suspense boundary, so the
+  greeting was pulled into its own small `DashboardWelcome` component
+  wrapped in `<Suspense>` (same pattern already used in `login/page.tsx`).
+- **Login page desktop scroll.** Tested first rather than guessing:
+  Playwright at 1920×1080 down to 1366×550 all showed `scrollHeight ===
+  clientHeight` (no overflow) even before any change, so there wasn't an
+  active bug to fix. Tightened it anyway for a firmer guarantee — swapped
+  `min-h-screen` (a floor, content could in theory grow past it) for
+  `h-screen overflow-y-auto` (a hard cap that scrolls internally only if
+  it ever truly needs to) and matched the mobile-padding pattern used
+  elsewhere (`p-4 sm:p-8`).
+
+**Verified**: `npx tsc --noEmit` clean throughout. Full Playwright run:
+register (password hidden by default, toggle reveals it) → first-visit
+greeting text → navigate away/back (greeting flips to "Welcome back") →
+Settings: change name (dashboard greeting updates live, no re-login) →
+change password → sign out → sign back in with the *new* password
+(succeeds) → old password rejected (`Incorrect email or password.`).
+Zero new console errors beyond the already-known benign
+navigation-aborted-fetch pattern during sign-out.
