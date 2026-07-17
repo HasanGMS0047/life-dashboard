@@ -1,6 +1,8 @@
 # Life Dashboard
 
-A personal life-tracking app with journal, mood, learning, habits, goals, memory gallery, and replay views.
+A personal life-tracking app — journal, mood/sleep/energy, learning, habits, goals, a memory gallery, and a cinematic "Life Replay" view of it all.
+
+See `docs/ARCHITECTURE.md` for how it's put together and `docs/CHANGELOG.md` for what's shipped.
 
 ## Local development
 
