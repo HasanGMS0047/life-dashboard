@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Sun, Moon, Download, Upload, LogOut, X as XIcon, User as UserIcon } from "lucide-react";
+import { Sun, Moon, Download, Upload, LogOut, X as XIcon, User as UserIcon, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -104,6 +104,13 @@ export default function AccountPage() {
     null
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [resetConfirming, setResetConfirming] = useState(false);
+  const [resetPhrase, setResetPhrase] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetStatus, setResetStatus] = useState<{ type: "error" | "success"; message: string } | null>(
+    null
+  );
 
   useEffect(() => {
     if (session?.user?.name !== undefined) setName(session.user.name ?? "");
@@ -237,6 +244,27 @@ export default function AccountPage() {
         type: "error",
         message: err instanceof Error ? err.message : "Couldn't import that file.",
       });
+    }
+  };
+
+  const handleResetData = async () => {
+    if (resetPhrase !== "RESET") return;
+    setResetLoading(true);
+    setResetStatus(null);
+    try {
+      const res = await fetch("/api/account/reset", { method: "POST" });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setResetStatus({ type: "error", message: data?.error || "Couldn't reset your data." });
+        return;
+      }
+      setResetStatus({ type: "success", message: "All data cleared. Reloading..." });
+      setTimeout(() => window.location.reload(), 1200);
+    } catch (err) {
+      console.error("Data reset failed", err);
+      setResetStatus({ type: "error", message: "Couldn't reset your data. Please try again." });
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -479,6 +507,66 @@ export default function AccountPage() {
             )}
           >
             {importStatus.message}
+          </p>
+        )}
+      </Card>
+
+      <Card className="p-6 bg-background border-2 border-terracotta/30 mt-6">
+        <h3 className="font-serif text-lg font-semibold text-terracotta mb-1">Reset Data</h3>
+        <p className="text-sm text-muted mb-5">
+          Permanently deletes your journal, mood/sleep/energy/water logs, learning, memories,
+          habits, and goals. Your account (name, email, password) stays — this only clears what
+          you&apos;ve logged. Export a backup first if you might want it back.
+        </p>
+
+        {!resetConfirming ? (
+          <button
+            onClick={() => setResetConfirming(true)}
+            className="flex items-center gap-2 rounded-full border-2 border-terracotta/40 text-terracotta px-4 py-2 text-sm font-medium hover:bg-terracotta/10 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            Reset All Data
+          </button>
+        ) : (
+          <div className="flex flex-col gap-3 rounded-2xl border-2 border-terracotta/30 bg-terracotta/5 p-4">
+            <p className="text-sm text-foreground">
+              This can&apos;t be undone. Type <span className="font-semibold">RESET</span> to
+              confirm.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <input
+                type="text"
+                value={resetPhrase}
+                onChange={(e) => setResetPhrase(e.target.value)}
+                placeholder="Type RESET"
+                className="flex-1 min-w-[10rem] bg-background border border-border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-terracotta/50"
+              />
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={resetPhrase !== "RESET" || resetLoading}
+                onClick={handleResetData}
+              >
+                {resetLoading ? "Resetting..." : "Confirm Reset"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setResetConfirming(false);
+                  setResetPhrase("");
+                  setResetStatus(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {resetStatus && (
+          <p className={cn("text-sm mt-3", resetStatus.type === "success" ? "text-olive" : "text-terracotta")}>
+            {resetStatus.message}
           </p>
         )}
       </Card>

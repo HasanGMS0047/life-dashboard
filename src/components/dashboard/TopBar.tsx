@@ -1,11 +1,13 @@
 "use client";
 
-import { Sun, Moon, User, Menu } from "lucide-react";
+import { useState } from "react";
+import { Sun, Moon, User, Menu, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useThemeStore } from "@/store/themeStore";
 import { SearchBar } from "@/components/dashboard/SearchBar";
+import { HelpModal } from "@/components/dashboard/HelpModal";
 
 const PAGE_TITLES: { href: string; label: string }[] = [
   { href: "/dashboard/replay", label: "Life Replay" },
@@ -31,6 +33,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const theme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
   const { data: session } = useSession();
+  const [helpOpen, setHelpOpen] = useState(false);
 
   return (
     <header className="h-14 border-b border-border flex items-center justify-between px-4 md:px-6 shrink-0 bg-surface/50">
@@ -52,6 +55,13 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
 
       <div className="flex items-center gap-4 text-muted">
         <button
+          onClick={() => setHelpOpen(true)}
+          title="What does what?"
+          className="hover:text-foreground transition-colors"
+        >
+          <HelpCircle className="w-5 h-5" />
+        </button>
+        <button
           onClick={() => setTheme(theme === "day" ? "night" : "day")}
           title={theme === "day" ? "Switch to night" : "Switch to day"}
           className="hover:text-foreground transition-colors"
@@ -66,6 +76,8 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           <User className="w-4 h-4 text-muted" />
         </Link>
       </div>
+
+      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
     </header>
   );
 }
