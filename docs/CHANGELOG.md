@@ -263,3 +263,17 @@ seconds. Scrapped it for a single flat, one-tap list.
 - Verified: mood selection, the reload-persistence fix, journal entry
   save/display, and Heart Patterns all still work correctly with the
   new flat list; no horizontal overflow on mobile.
+
+## Mood art, simplified further: illustrated cups → colored mug icons
+
+The 5 illustrated teacup images (one per accent color) all shared the
+exact same closed-eye smiling face under different paint jobs, so the
+"5 expressions" idea got reconsidered mid-flight in favor of dropping
+the custom art dependency entirely. `MoodWidget` and `TeacupChart` now
+render a plain `lucide-react` mug icon (`Coffee`), colored by the
+mood's accent — no PNGs, no generation step, no art asset to keep in
+sync. The 5 `teacup_*.png` files and the default `mood_icon.png` were
+deleted from `public/`; nothing else referenced them. `TeacupChart`'s
+month-count `useEffect`+`setState` was also folded into a `useMemo`
+while touching that file (an unrelated pre-existing lint issue, fixed
+opportunistically).

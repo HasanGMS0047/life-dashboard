@@ -1,25 +1,25 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import Image from "next/image";
-import { Coffee, Sun } from "lucide-react";
+import { Coffee, Sun, Heart } from "lucide-react";
 import { useDailyLogStore, getTodayKey } from "@/store/dailyLogStore";
-import { getMoodAccent } from "@/lib/moods";
+import { getMoodAccent, ACCENT_TEXT_CLASSES } from "@/lib/moods";
 import { MoodPicker } from "@/components/ui/mood-picker";
 import { MoodIntensityMark } from "@/components/ui/mood-intensity-mark";
+import { cn } from "@/lib/utils";
 
 export function MoodWidget() {
   const today = getTodayKey();
   const mood = useDailyLogStore((s) => s.logs[today]?.mood);
   const setMood = useDailyLogStore((s) => s.setMood);
 
-  const iconSrc = mood ? `/teacup_${getMoodAccent(mood)}.png` : "/mood_icon.png";
+  const colorClass = mood ? ACCENT_TEXT_CLASSES[getMoodAccent(mood)] : "text-muted";
 
   return (
     <Card className="flex flex-col items-center justify-center p-6 gap-3 bg-background relative overflow-hidden group border-2 hover:border-terracotta/30 transition-colors">
-      <div className="relative w-28 h-28 drop-shadow-md group-hover:scale-105 transition-transform">
+      <div className="relative w-20 h-20 flex items-center justify-center drop-shadow-md group-hover:scale-105 transition-transform">
         <MoodIntensityMark mood={mood} />
-        <Image src={iconSrc} alt="Today's Mood" fill unoptimized sizes="112px" className="object-contain" />
+        <Coffee className={cn("w-16 h-16", colorClass)} strokeWidth={1.5} />
       </div>
 
       <div className="text-center">
@@ -35,7 +35,7 @@ export function MoodWidget() {
           <Sun className="w-4 h-4" />
         </div>
         <div className="w-8 h-8 rounded-full bg-surface shadow-sm border border-border flex items-center justify-center text-terracotta -rotate-6">
-          <Coffee className="w-4 h-4" />
+          <Heart className="w-4 h-4" />
         </div>
       </div>
     </Card>

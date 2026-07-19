@@ -1,9 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import { Coffee } from "lucide-react";
+import { useMemo } from "react";
 import { useJournalStore, JournalEntry } from "@/store/journalStore";
+import { ACCENTS, ACCENT_TEXT_CLASSES } from "@/lib/moods";
+import { cn } from "@/lib/utils";
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const MAX_CUPS = 7;
@@ -24,21 +26,10 @@ function buildMonthlyCounts(entries: JournalEntry[]): number[] {
 
 export function TeacupChart() {
   const entries = useJournalStore((s) => s.entries);
-  const [monthlyCounts, setMonthlyCounts] = useState<number[]>(new Array(12).fill(0));
+  const monthlyCounts = useMemo(() => buildMonthlyCounts(entries), [entries]);
 
-  useEffect(() => {
-    setMonthlyCounts(buildMonthlyCounts(entries));
-  }, [entries]);
-
-  // Cycle through the generated teacup illustrations for the scrapbook feel
-  const cupIcons = [
-    "/teacup_terracotta.png",
-    "/teacup_olive.png",
-    "/teacup_mustard.png",
-    "/teacup_blush.png",
-    "/teacup_sky.png",
-  ];
-  const getCupIcon = (index: number) => cupIcons[index % cupIcons.length];
+  // Cycle through the theme's accent colors for the scrapbook feel
+  const getCupAccent = (index: number) => ACCENTS[index % ACCENTS.length];
 
   return (
     <div className="w-full mt-8 p-6 bg-surface rounded-3xl border border-border shadow-sm flex flex-col items-center">
@@ -57,15 +48,11 @@ export function TeacupChart() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 + monthIndex * 0.05 }}
-                    className="relative z-10 hover:z-20 group-hover:scale-110 transition-transform -mt-4 first:mt-0 w-12 h-12 drop-shadow-sm"
+                    className="relative z-10 hover:z-20 group-hover:scale-110 transition-transform -mt-4 first:mt-0 w-12 h-12 flex items-center justify-center drop-shadow-sm"
                   >
-                    <Image
-                      src={getCupIcon(i)}
-                      alt="Teacup"
-                      fill
-                      unoptimized
-                      sizes="48px"
-                      className="object-contain"
+                    <Coffee
+                      className={cn("w-9 h-9", ACCENT_TEXT_CLASSES[getCupAccent(i)])}
+                      strokeWidth={1.5}
                     />
                   </motion.div>
                 ))}
