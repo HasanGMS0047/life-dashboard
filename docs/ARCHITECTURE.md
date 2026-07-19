@@ -296,7 +296,12 @@ src/components/ui/mood-picker.tsx  Flat, one-tap mood picker (15 moods,
                        journal composer and the Mood widget.
 src/components/dashboard/ Sidebar, TopBar, SearchBar, HeatmapQuilt,
                        TeacupChart, PageHeader (shared title+subtitle
-                       block used by every secondary page).
+                       block used by every secondary page), HelpModal
+                       (static "what does what" glossary, opened from
+                       the TopBar's `?` icon — its close handler must
+                       live on the full-viewport panel wrapper, not a
+                       separate backdrop div, or backdrop clicks silently
+                       no-op since the wrapper sits on top of it).
 src/components/replay/  ReplayShell (full-screen slideshow engine),
                        AnimatedNumber, and scene primitives
                        (Title/Stats/Quote/Achievement/List).
@@ -310,9 +315,17 @@ src/app/api/account/   GET — current user's name/email/preferences. PATCH —
                        update name, password (current-password check
                        required), and/or preferences (favoriteColor,
                        hobbies, pets). Backs the Account page.
+src/app/api/account/reset/  POST — deletes every row across Journal/
+                       DailyMetric/LearningEntry/SocialEntry/Habit/Goal
+                       scoped to the session's userId, in one
+                       transaction. Leaves the User row (credentials,
+                       theme, preferences) untouched — clears logged
+                       data, not the account.
 src/app/dashboard/account/  The Account page: profile header + sign-out,
                        name/password, Preferences (favorite accent color,
-                       hobbies, pets as tag chips), Appearance, Your Data.
+                       hobbies, pets as tag chips), Appearance, Your Data
+                       (export/import backup), Reset Data (type "RESET"
+                       to confirm, then calls the reset route above).
                        Reached from the TopBar account icon and the
                        Sidebar's Account nav item.
 src/components/ui/password-input.tsx  Shared password `<input>` with a

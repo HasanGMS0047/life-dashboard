@@ -342,3 +342,36 @@ left as-is.
   correlation cards with real logged data, every touched page still
   renders with no horizontal overflow on mobile and no console errors,
   day/night theme still applies correctly everywhere.
+
+## Reset data, and a help guide
+
+- **Reset Data**, on the Account page: permanently deletes journal,
+  daily mood/sleep/energy/water logs, learning, memories, habits, and
+  goals for the signed-in account — the account itself (email/
+  password/name/theme/preferences) is untouched, this only clears
+  logged content. Requires typing `RESET` to confirm before the button
+  enables, on top of the destructive styling, since this is a bigger
+  blast radius than deleting a single entry. Server-side
+  (`POST /api/account/reset`) scopes every delete to the session's
+  `userId`, matching how every other account-scoped route already
+  works. Added a `destructive` variant to the shared `Button`
+  component for this and any future dangerous action.
+- **"What does what" help guide**: a `?` icon in the TopBar (next to
+  the theme toggle) opens a modal listing every section of the app —
+  Mood, Sleep, Energy, Water, Journal, Kind Deeds, Learning, People &
+  Places, Habits, Goals, Timeline, Gallery, Heart Patterns, Heatmap,
+  Life Replay, Account — with a one-line description of what it does.
+  Static content, no new data model. Caught and fixed a real bug while
+  building it: the backdrop wasn't actually wired to close the modal
+  (the full-viewport panel wrapper sat on top of it and absorbed the
+  click before it reached the backdrop's own handler) — moved the
+  close handler onto the wrapper itself.
+- On the "Tender" mood question that came up while testing this:
+  `Tender` was one of the original 5 mood options in the very first
+  version of this app, long before this session's mood-system rework.
+  If an account has old journal/daily-log entries saved under it, it's
+  real historical data, not a bug — Heart Patterns just started
+  showing exact mood labels instead of hiding them behind grouped
+  categories, so old data that was always there became visible by
+  name for the first time. Reset Data (above) is the clean way to
+  clear it out if it's not wanted.
