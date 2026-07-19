@@ -16,6 +16,7 @@ const SECTIONS: HelpSection[] = [
       { label: "Sleep", description: "How many hours you slept last night." },
       { label: "Energy", description: "How energized you feel today, from Low to Amazing." },
       { label: "Water", description: "How many liters of water you've had today, in half-liter steps." },
+      { label: "Confirming your check-in", description: "Tapping Mood/Sleep/Energy/Water just stages a pick — nothing saves until you tap Confirm on the bar fixed to the bottom of the screen. It stays put while you scroll, so you can set up all four and confirm them together." },
     ],
   },
   {

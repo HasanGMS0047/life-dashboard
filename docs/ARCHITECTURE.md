@@ -294,6 +294,37 @@ related code:
     a finished vision into a fresh month goal" flow is ever wanted,
     that's new product surface, not a bug in the current one-way
     design.
+24. **Mood/Sleep/Energy/Water are draft-then-confirm, everything else in
+    the app is instant-save — this is an intentional split, not an
+    inconsistency.** `dailyLogStore.draft` holds unsaved picks for
+    *today only* (these widgets never show/edit a past date, so there's
+    no need to key the draft by date); `confirmCheckIn` is the only
+    thing that ever calls `POST /api/daily-log` for these four fields,
+    merging `draft.field ?? logs[today].field` so an unconfirmed pick
+    on one widget doesn't wipe an already-saved value on another. If a
+    fifth "set up today" style field is ever added here, extend
+    `CheckInDraft`/`confirmCheckIn` rather than giving it its own
+    instant-save action — that would reintroduce the exact
+    inconsistency this was built to remove. Habits/Goals/Kind Deeds
+    stay instant-save on purpose — each is a discrete "did I do this"
+    checklist action, not a batch of values being set up together, and
+    Habits already ties its celebration/streak mechanics (note #22) to
+    the moment of the click itself, which a delayed confirm would
+    break. Don't route those through the draft store.
+25. **A `fixed`-positioned element escapes an `overflow-hidden` ancestor
+    unless that ancestor also has `transform`/`filter`/`perspective`/
+    `will-change: transform`/`contain: layout|paint`** (any of the
+    properties that create a new containing block for fixed-position
+    descendants). The dashboard shell's outer card
+    (`dashboard/layout.tsx`) uses `overflow-hidden` for its
+    rounded-corner clipping but only `relative`, not one of those
+    triggering properties — which is exactly why `CheckInConfirmBar`'s
+    `fixed bottom-5` positioning correctly floats above the whole
+    viewport instead of being clipped at the card's rounded edge.
+    `HelpModal` and the mobile nav drawer already relied on this same
+    fact; worth remembering explicitly before ever adding
+    `transform`/`will-change` to that outer card, which would silently
+    break every `fixed` element nested inside it.
 
 ## Where things live
 
@@ -310,9 +341,11 @@ src/proxy.ts           Next's middleware equivalent — redirects signed-out
                        authorization happens per-API-route via getServerSession.
 src/types/next-auth.d.ts  Module augmentation adding `session.user.id`.
 src/store/             One Zustand store per domain: journalStore,
-                       dailyLogStore, learningStore, socialStore, habitStore,
-                       goalStore, themeStore — all fetch from user-scoped
-                       API routes and use in-memory caches (no `persist`).
+                       dailyLogStore (Mood/Sleep/Energy/Water are
+                       draft-then-confirm, see note #24), learningStore,
+                       socialStore, habitStore, goalStore, themeStore —
+                       all fetch from user-scoped API routes and use
+                       in-memory caches (no `persist`).
 src/lib/               Pure helpers + cross-store aggregation:
                        moods.ts (two-tier mood system, see note #6),
                        garden.ts (habit-tracker plant growth, see
@@ -336,7 +369,11 @@ src/components/dashboard/ Sidebar, TopBar, SearchBar, HeatmapQuilt,
                        the TopBar's `?` icon — its close handler must
                        live on the full-viewport panel wrapper, not a
                        separate backdrop div, or backdrop clicks silently
-                       no-op since the wrapper sits on top of it).
+                       no-op since the wrapper sits on top of it),
+                       CheckInConfirmBar (fixed bottom bar for confirming
+                       staged Mood/Sleep/Energy/Water picks, rendered from
+                       dashboard/layout.tsx so it persists across page
+                       navigation — see notes #24 and #25).
 src/components/replay/  ReplayShell (full-screen slideshow engine),
                        AnimatedNumber, and scene primitives
                        (Title/Stats/Quote/Achievement/List).

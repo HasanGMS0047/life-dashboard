@@ -460,3 +460,36 @@ left as-is.
   adding a vision goal shows both sections in the right order, and the
   progress +/- buttons still work correctly after `GoalRow` was
   extracted out of the widget.
+
+## Today's check-in now needs an explicit Confirm
+
+- Mood/Sleep/Energy/Water used to save instantly on every tap — the
+  same pattern as Habits/Goals/Kind Deeds. That's fine for a checklist,
+  but it meant there was no moment to review "today's set" before it
+  went out, unlike the Journal composer's explicit save. Requested
+  change: bring these four in line with Journal's confirm-before-log
+  pattern.
+- Tapping any of Mood/Sleep/Energy/Water now only stages a pick in
+  `dailyLogStore`'s new `draft` state — nothing is sent to the server
+  yet. The widget shows the picked value in mustard with a "· tap
+  Confirm" hint so it's visually distinct from an already-saved value.
+  A **`CheckInConfirmBar`**, fixed to the bottom of the screen (stays
+  put through scrolling and through navigating to other dashboard
+  pages, since it lives in `dashboard/layout.tsx`), shows a live count
+  of pending picks and a Confirm button. One tap sends every staged
+  field in a single `POST /api/daily-log` call — not four separate
+  requests — then clears the draft and briefly shows "Saved".
+- If the page is reloaded (or the tab closed) before confirming, the
+  draft is gone — nothing was ever saved, matching the explicit
+  "nothing logs until you confirm" behavior that was asked for. This
+  is in-memory-only, the same as every other store in the app (no
+  `persist` middleware).
+- Once confirmed, the data flows through the same `dailyLogStore.logs`
+  that Timeline/Heart Patterns/Heatmap/Replay already read from, so
+  those pages reflect it immediately with no extra wiring — verified
+  Heart Patterns shows a freshly confirmed mood right after saving it.
+- Habits, Goals, and Kind Deeds were deliberately left as instant-save
+  — each is a discrete checklist action ("did I do this today"), not
+  a batch of values being set up together, and Habits/Goals already
+  have their own celebration/streak mechanics tied to the moment of
+  the click itself.

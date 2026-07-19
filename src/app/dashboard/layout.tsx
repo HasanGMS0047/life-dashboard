@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
+import { CheckInConfirmBar } from "@/components/dashboard/CheckInConfirmBar";
 import { useThemeStore } from "@/store/themeStore";
 import { useJournalStore } from "@/store/journalStore";
 import { useDailyLogStore } from "@/store/dailyLogStore";
@@ -69,6 +70,8 @@ export default function DashboardLayout({
           </main>
         </div>
       </div>
+
+      <CheckInConfirmBar />
     </div>
   );
 }

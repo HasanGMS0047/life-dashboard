@@ -10,8 +10,11 @@ const DAILY_GOAL = 2;
 
 export function WaterWidget() {
   const today = getTodayKey();
-  const liters = useDailyLogStore((s) => s.logs[today]?.waterLiters);
-  const setWaterLiters = useDailyLogStore((s) => s.setWaterLiters);
+  const savedLiters = useDailyLogStore((s) => s.logs[today]?.waterLiters);
+  const draftLiters = useDailyLogStore((s) => s.draft.waterLiters);
+  const setDraftWaterLiters = useDailyLogStore((s) => s.setDraftWaterLiters);
+  const pending = draftLiters !== undefined;
+  const liters = draftLiters ?? savedLiters;
   const metGoal = liters !== undefined && liters >= DAILY_GOAL;
 
   return (
@@ -22,9 +25,11 @@ export function WaterWidget() {
 
       <div className="text-center">
         <h3 className="font-serif text-base font-semibold text-foreground">Water</h3>
-        <p className="text-xs text-muted font-medium">
+        <p className={cn("text-xs font-medium", pending ? "text-mustard" : "text-muted")}>
           {liters !== undefined ? `${liters}L today` : "Not logged yet"}
-          {liters !== undefined && !metGoal && ` · aim for ${DAILY_GOAL}L+`}
+          {pending
+            ? " · tap Confirm"
+            : liters !== undefined && !metGoal && ` · aim for ${DAILY_GOAL}L+`}
         </p>
       </div>
 
@@ -32,7 +37,7 @@ export function WaterWidget() {
         {LITER_OPTIONS.map((l) => (
           <button
             key={l}
-            onClick={() => setWaterLiters(today, l)}
+            onClick={() => setDraftWaterLiters(l)}
             className={cn(
               "min-w-7 h-7 px-1.5 rounded-full text-xs font-medium border transition-colors flex items-center justify-center",
               liters === l

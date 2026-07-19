@@ -9,15 +9,26 @@ export interface DailyLog {
   deeds: Record<string, boolean>;
 }
 
+// Pending, unsaved picks for today's check-in (mood/sleep/energy/water) —
+// held in memory until confirmCheckIn actually persists them, so a tap on
+// one of these widgets is a draft, not an instant save (unlike everything
+// else in the app). Deeds/journal/habits/goals are unaffected — they keep
+// saving instantly, since each is its own discrete action, not a batch
+// "set up today" flow.
+export type CheckInDraft = Pick<DailyLog, "mood" | "sleepHours" | "energy" | "waterLiters">;
+
 interface DailyLogState {
   logs: Record<string, DailyLog>;
   loaded: boolean;
+  draft: Partial<CheckInDraft>;
+  confirming: boolean;
   fetchLogs: () => Promise<void>;
-  setMood: (date: string, mood: string) => Promise<void>;
-  setSleepHours: (date: string, hours: number) => Promise<void>;
-  setEnergy: (date: string, energy: number) => Promise<void>;
-  setWaterLiters: (date: string, liters: number) => Promise<void>;
   toggleDeed: (date: string, deedId: string) => Promise<void>;
+  setDraftMood: (mood: string) => void;
+  setDraftSleepHours: (hours: number) => void;
+  setDraftEnergy: (energy: number) => void;
+  setDraftWaterLiters: (liters: number) => void;
+  confirmCheckIn: () => Promise<boolean>;
 }
 
 interface DailyMetricResponse {
@@ -82,6 +93,8 @@ function toLog(metric: DailyMetricResponse): DailyLog {
 export const useDailyLogStore = create<DailyLogState>((set, get) => ({
   logs: {},
   loaded: false,
+  draft: {},
+  confirming: false,
   fetchLogs: async () => {
     if (get().loaded) return;
 
@@ -100,136 +113,54 @@ export const useDailyLogStore = create<DailyLogState>((set, get) => ({
       set({ loaded: true });
     }
   },
-  setMood: async (date, mood) => {
-    const currentLog = getOrCreateLog(get().logs, date);
+  setDraftMood: (mood) => set((state) => ({ draft: { ...state.draft, mood } })),
+  setDraftSleepHours: (sleepHours) => set((state) => ({ draft: { ...state.draft, sleepHours } })),
+  setDraftEnergy: (energy) => set((state) => ({ draft: { ...state.draft, energy } })),
+  setDraftWaterLiters: (waterLiters) => set((state) => ({ draft: { ...state.draft, waterLiters } })),
+  confirmCheckIn: async () => {
+    const today = getTodayKey();
+    const { draft, logs } = get();
+    if (Object.keys(draft).length === 0) return true;
+
+    const currentLog = getOrCreateLog(logs, today);
     const payload = {
-      date,
-      mood,
-      sleepHours: currentLog.sleepHours,
-      energy: currentLog.energy,
-      waterLiters: currentLog.waterLiters,
+      date: today,
+      mood: draft.mood ?? currentLog.mood,
+      sleepHours: draft.sleepHours ?? currentLog.sleepHours,
+      energy: draft.energy ?? currentLog.energy,
+      waterLiters: draft.waterLiters ?? currentLog.waterLiters,
       deeds: currentLog.deeds,
     };
 
+    set({ confirming: true });
     try {
       const res = await fetch("/api/daily-log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        set({ confirming: false });
+        return false;
+      }
 
       const metric: DailyMetricResponse = await res.json();
       set((state) => ({
         logs: {
           ...state.logs,
-          [date]: {
-            ...getOrCreateLog(state.logs, date),
+          [today]: {
+            ...getOrCreateLog(state.logs, today),
             ...toLog(metric),
           },
         },
+        draft: {},
+        confirming: false,
       }));
+      return true;
     } catch (err) {
-      console.error("Failed to save mood", err);
-    }
-  },
-  setSleepHours: async (date, hours) => {
-    const currentLog = getOrCreateLog(get().logs, date);
-    const payload = {
-      date,
-      mood: currentLog.mood,
-      sleepHours: hours,
-      energy: currentLog.energy,
-      waterLiters: currentLog.waterLiters,
-      deeds: currentLog.deeds,
-    };
-
-    try {
-      const res = await fetch("/api/daily-log", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) return;
-
-      const metric: DailyMetricResponse = await res.json();
-      set((state) => ({
-        logs: {
-          ...state.logs,
-          [date]: {
-            ...getOrCreateLog(state.logs, date),
-            ...toLog(metric),
-          },
-        },
-      }));
-    } catch (err) {
-      console.error("Failed to save sleep hours", err);
-    }
-  },
-  setEnergy: async (date, energy) => {
-    const currentLog = getOrCreateLog(get().logs, date);
-    const payload = {
-      date,
-      mood: currentLog.mood,
-      sleepHours: currentLog.sleepHours,
-      energy,
-      waterLiters: currentLog.waterLiters,
-      deeds: currentLog.deeds,
-    };
-
-    try {
-      const res = await fetch("/api/daily-log", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) return;
-
-      const metric: DailyMetricResponse = await res.json();
-      set((state) => ({
-        logs: {
-          ...state.logs,
-          [date]: {
-            ...getOrCreateLog(state.logs, date),
-            ...toLog(metric),
-          },
-        },
-      }));
-    } catch (err) {
-      console.error("Failed to save energy", err);
-    }
-  },
-  setWaterLiters: async (date, liters) => {
-    const currentLog = getOrCreateLog(get().logs, date);
-    const payload = {
-      date,
-      mood: currentLog.mood,
-      sleepHours: currentLog.sleepHours,
-      energy: currentLog.energy,
-      waterLiters: liters,
-      deeds: currentLog.deeds,
-    };
-
-    try {
-      const res = await fetch("/api/daily-log", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) return;
-
-      const metric: DailyMetricResponse = await res.json();
-      set((state) => ({
-        logs: {
-          ...state.logs,
-          [date]: {
-            ...getOrCreateLog(state.logs, date),
-            ...toLog(metric),
-          },
-        },
-      }));
-    } catch (err) {
-      console.error("Failed to save water intake", err);
+      console.error("Failed to confirm today's check-in", err);
+      set({ confirming: false });
+      return false;
     }
   },
   toggleDeed: async (date, deedId) => {
