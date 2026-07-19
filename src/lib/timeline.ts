@@ -4,7 +4,7 @@ import { JournalEntry } from "@/store/journalStore";
 import { LearningEntry } from "@/store/learningStore";
 import { SocialEntry } from "@/store/socialStore";
 import { Goal } from "@/store/goalStore";
-import { MOODS } from "@/lib/moods";
+import { getMoodAccent } from "@/lib/moods";
 
 export interface TimelineEvent {
   id: string;
@@ -16,8 +16,7 @@ export interface TimelineEvent {
 }
 
 function moodAccent(mood?: string): ReplayAccent {
-  const match = MOODS.find((m) => m.label === mood);
-  return (match?.accent as ReplayAccent) ?? "terracotta";
+  return getMoodAccent(mood) as ReplayAccent;
 }
 
 const SOCIAL_ICON: Record<SocialEntry["type"], LucideIcon> = {
