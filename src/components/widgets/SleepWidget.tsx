@@ -9,8 +9,11 @@ const HOUR_OPTIONS = [5, 6, 7, 8, 9, 10];
 
 export function SleepWidget() {
   const today = getTodayKey();
-  const hours = useDailyLogStore((s) => s.logs[today]?.sleepHours);
-  const setSleepHours = useDailyLogStore((s) => s.setSleepHours);
+  const savedHours = useDailyLogStore((s) => s.logs[today]?.sleepHours);
+  const draftHours = useDailyLogStore((s) => s.draft.sleepHours);
+  const setDraftSleepHours = useDailyLogStore((s) => s.setDraftSleepHours);
+  const pending = draftHours !== undefined;
+  const hours = draftHours ?? savedHours;
 
   return (
     <Card className="flex flex-col items-center justify-center p-6 gap-2 bg-background border-2 hover:border-terracotta/30 transition-colors">
@@ -20,8 +23,9 @@ export function SleepWidget() {
 
       <div className="text-center">
         <h3 className="font-serif text-base font-semibold text-foreground">Sleep</h3>
-        <p className="text-xs text-muted font-medium">
+        <p className={cn("text-xs font-medium", pending ? "text-mustard" : "text-muted")}>
           {hours ? `${hours}h last night` : "Not logged yet"}
+          {pending && " · tap Confirm"}
         </p>
       </div>
 
@@ -29,7 +33,7 @@ export function SleepWidget() {
         {HOUR_OPTIONS.map((h) => (
           <button
             key={h}
-            onClick={() => setSleepHours(today, h)}
+            onClick={() => setDraftSleepHours(h)}
             className={cn(
               "w-7 h-7 rounded-full text-xs font-medium border transition-colors flex items-center justify-center",
               hours === h

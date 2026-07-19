@@ -15,8 +15,11 @@ const ENERGY_LEVELS = [
 
 export function EnergyWidget() {
   const today = getTodayKey();
-  const energy = useDailyLogStore((s) => s.logs[today]?.energy);
-  const setEnergy = useDailyLogStore((s) => s.setEnergy);
+  const savedEnergy = useDailyLogStore((s) => s.logs[today]?.energy);
+  const draftEnergy = useDailyLogStore((s) => s.draft.energy);
+  const setDraftEnergy = useDailyLogStore((s) => s.setDraftEnergy);
+  const pending = draftEnergy !== undefined;
+  const energy = draftEnergy ?? savedEnergy;
 
   return (
     <Card className="flex flex-col items-center justify-center p-6 gap-2 bg-background border-2 hover:border-terracotta/30 transition-colors">
@@ -26,8 +29,9 @@ export function EnergyWidget() {
 
       <div className="text-center">
         <h3 className="font-serif text-base font-semibold text-foreground">Energy</h3>
-        <p className="text-xs text-muted font-medium">
+        <p className={cn("text-xs font-medium", pending ? "text-mustard" : "text-muted")}>
           {energy ? `${energy}% today` : "Not logged yet"}
+          {pending && " · tap Confirm"}
         </p>
       </div>
 
@@ -36,7 +40,7 @@ export function EnergyWidget() {
           <button
             key={level.label}
             title={level.label}
-            onClick={() => setEnergy(today, level.value)}
+            onClick={() => setDraftEnergy(level.value)}
             className={cn(
               "w-3.5 h-3.5 rounded-full border-2 transition-colors",
               energy !== undefined && energy >= level.value

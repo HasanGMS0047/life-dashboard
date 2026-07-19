@@ -9,8 +9,11 @@ import { cn } from "@/lib/utils";
 
 export function MoodWidget() {
   const today = getTodayKey();
-  const mood = useDailyLogStore((s) => s.logs[today]?.mood);
-  const setMood = useDailyLogStore((s) => s.setMood);
+  const savedMood = useDailyLogStore((s) => s.logs[today]?.mood);
+  const draftMood = useDailyLogStore((s) => s.draft.mood);
+  const setDraftMood = useDailyLogStore((s) => s.setDraftMood);
+  const pending = draftMood !== undefined;
+  const mood = draftMood ?? savedMood;
 
   return (
     <Card className="flex flex-col items-center justify-center p-6 gap-3 bg-background relative overflow-hidden group border-2 hover:border-terracotta/30 transition-colors">
@@ -20,10 +23,13 @@ export function MoodWidget() {
 
       <div className="text-center">
         <h3 className="font-serif text-lg font-semibold text-foreground">Today&apos;s Mood:</h3>
-        <p className="text-sm font-medium text-terracotta">{mood ?? "Not logged yet"}</p>
+        <p className={cn("text-sm font-medium", pending ? "text-mustard" : "text-terracotta")}>
+          {mood ?? "Not logged yet"}
+          {pending && " · tap Confirm below"}
+        </p>
       </div>
 
-      <MoodPicker value={mood ?? ""} onChange={(m) => setMood(today, m)} />
+      <MoodPicker value={mood ?? ""} onChange={(m) => setDraftMood(m)} />
 
       {/* Little decorative tags */}
       <div className="absolute right-4 top-6 flex flex-col gap-2">
