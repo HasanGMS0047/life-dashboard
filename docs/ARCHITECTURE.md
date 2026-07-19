@@ -80,28 +80,37 @@ related code:
    `ctx.fillStyle = "#fff"; ctx.fillRect(...)` before `drawImage` in
    `src/lib/image.ts`'s `resizeImageFile`.
 6. **Moods are a flat, single-tier list** (`src/lib/moods.ts`) — 15
-   moods total, each declared with its own accent color and intensity
-   (1-3) directly, no family/banner grouping the user has to navigate
-   through. An earlier two-step "pick a family, then the mood inside
-   it" version (~39 moods across 5 families) was scrapped after it
+   moods total, no family/banner grouping the user has to navigate
+   through (an earlier two-step "pick a family, then the mood inside
+   it" version, ~39 moods across 5 families, was scrapped after it
    read as an unnecessary extra step for something meant to take five
-   seconds; `MoodPicker` (`src/components/ui/mood-picker.tsx`) is now
-   one flat wrapped row, one tap to select. Moods still carry one of
-   the five theme accent colors (terracotta/sky/mustard/olive/blush)
-   so the mood-widget icon, Timeline dots, and Heart Patterns chart
-   stay meaningful — `getMoodAccent`/`getMoodIntensity` are still the
-   only correct way to look those up, never string-match `MOODS`
-   directly. The mood icon itself is a plain colored `lucide-react`
-   `Coffee` mug, not custom art — the 5 illustrated teacup PNGs were
-   removed since all 5 shared the same face under different paint,
-   so the icon route was simpler than commissioning 5 real
-   expressions.
+   seconds). `MoodPicker` (`src/components/ui/mood-picker.tsx`) is a
+   fixed grid (3 cols, 5 on wider screens — not a wrapped flex row, so
+   all 15 line up evenly), one tap to select.
+   **Every mood has its own unique color**, not one of 5 shared ones —
+   `--mood-*` custom properties in `globals.css` (day + night variants
+   each), referenced via Tailwind arbitrary-value classes like
+   `bg-[var(--mood-cozy)]/20` in `MOOD_ACTIVE_CLASSES`/
+   `MOOD_PILL_CLASSES` in `moods.ts`. Each mood also still carries an
+   `accent` (one of the 5 original theme colors: terracotta/sky/
+   mustard/olive/blush) purely as an internal grouping — used by
+   `getMoodAccent` for Timeline dots, the legacy-entry fallback, and
+   Heart Patterns' bucketing, never shown as something to pick from.
+   The mood icon itself is a plain colored `lucide-react` `Coffee`
+   mug (via `getMoodTextClass`), not custom art — the 5 illustrated
+   teacup PNGs were removed since all 5 shared the same face under
+   different paint, so the icon route was simpler than commissioning
+   real expressions. The steam-wisp "intensity" marks that used to sit
+   above the mug (hinting which of 3 same-colored moods was meant)
+   were removed along with them — with a unique color per mood, that
+   job is already done by the color itself; there is no more
+   `getMoodIntensity` or `mood-intensity-mark.tsx`.
    Entries saved under either retired system still resolve to a
-   correct color via a lookup-only `LEGACY_MOOD_ACCENT` map — no data
-   migration needed, nothing silently turns gray. Heart Patterns
-   buckets by accent color group (`ACCENT_GROUP_LABEL`: Warm/Calm/
-   Energized/Heavy/Tender) instead of the retired family names, so its
-   charts stay 5 meaningful bars. Sleep is hours (5–10 picker), energy
+   correct (accent-family) color via a lookup-only `LEGACY_MOOD_ACCENT`
+   map — no data migration needed, nothing silently turns gray. Heart
+   Patterns buckets by accent color group (`ACCENT_GROUP_LABEL`: Warm/
+   Calm/Energized/Heavy/Tender) instead of the retired family names, so
+   its charts stay 5 meaningful bars. Sleep is hours (5–10 picker), energy
    is a 0–100 percentage, water is liters in 0.5 increments.
 7. **Prisma 7 requires an explicit driver adapter** — `new PrismaClient()`
    with no arguments throws. `PrismaClientOptions` in Prisma 7 only
@@ -277,10 +286,8 @@ src/components/widgets/  Dashboard home-page cards (Mood, Sleep, Energy,
                        Water, KindDeeds, Journal, Learning, Social,
                        Habits, Goals).
 src/components/ui/mood-picker.tsx  Flat, one-tap mood picker (15 moods,
-                       one row) — used by the journal composer and
-                       the Mood widget.
-src/components/ui/mood-intensity-mark.tsx  SVG steam-wisp overlay on the
-                       mood-widget teacup, 1-3 wisps by intensity.
+                       each its own color, fixed grid) — used by the
+                       journal composer and the Mood widget.
 src/components/dashboard/ Sidebar, TopBar, SearchBar, HeatmapQuilt,
                        TeacupChart.
 src/components/replay/  ReplayShell (full-screen slideshow engine),

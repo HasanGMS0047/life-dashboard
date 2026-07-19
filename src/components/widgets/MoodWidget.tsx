@@ -3,9 +3,8 @@
 import { Card } from "@/components/ui/card";
 import { Coffee, Sun, Heart } from "lucide-react";
 import { useDailyLogStore, getTodayKey } from "@/store/dailyLogStore";
-import { getMoodAccent, ACCENT_TEXT_CLASSES } from "@/lib/moods";
+import { getMoodTextClass } from "@/lib/moods";
 import { MoodPicker } from "@/components/ui/mood-picker";
-import { MoodIntensityMark } from "@/components/ui/mood-intensity-mark";
 import { cn } from "@/lib/utils";
 
 export function MoodWidget() {
@@ -13,13 +12,10 @@ export function MoodWidget() {
   const mood = useDailyLogStore((s) => s.logs[today]?.mood);
   const setMood = useDailyLogStore((s) => s.setMood);
 
-  const colorClass = mood ? ACCENT_TEXT_CLASSES[getMoodAccent(mood)] : "text-muted";
-
   return (
     <Card className="flex flex-col items-center justify-center p-6 gap-3 bg-background relative overflow-hidden group border-2 hover:border-terracotta/30 transition-colors">
       <div className="relative w-20 h-20 flex items-center justify-center drop-shadow-md group-hover:scale-105 transition-transform">
-        <MoodIntensityMark mood={mood} />
-        <Coffee className={cn("w-16 h-16", colorClass)} strokeWidth={1.5} />
+        <Coffee className={cn("w-16 h-16", getMoodTextClass(mood))} strokeWidth={1.5} />
       </div>
 
       <div className="text-center">

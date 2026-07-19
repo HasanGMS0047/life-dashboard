@@ -8,23 +8,20 @@ interface MoodPickerProps {
   onChange: (mood: string) => void;
 }
 
-// One flat, one-tap list. The previous version made you pick a "family"
-// banner first and then the specific mood inside it — an extra step that
-// read as confusing for something meant to take five seconds. Every mood
-// still carries one of the five theme colors, it's just baked into each
-// button directly instead of gated behind a navigation step.
+// A fixed grid (not a wrapped flex row) so all 15 moods line up in even
+// columns regardless of label length, instead of a ragged word-wrap.
 export function MoodPicker({ value, onChange }: MoodPickerProps) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-1.5">
+    <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
       {MOODS.map((m) => (
         <button
           key={m.label}
           type="button"
           onClick={() => onChange(m.label)}
           className={cn(
-            "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
+            "px-2 py-1.5 rounded-full text-xs font-medium border text-center transition-colors",
             value === m.label
-              ? MOOD_ACTIVE_CLASSES[m.accent]
+              ? MOOD_ACTIVE_CLASSES[m.label]
               : "border-border text-muted hover:bg-black/5"
           )}
         >

@@ -277,3 +277,21 @@ deleted from `public/`; nothing else referenced them. `TeacupChart`'s
 month-count `useEffect`+`setState` was also folded into a `useMemo`
 while touching that file (an unrelated pre-existing lint issue, fixed
 opportunistically).
+
+## Mood colors: 15 distinct colors, one per mood
+
+Went further than the 5 shared accent colors — every one of the 15
+moods now has its own color (`--mood-*` custom properties in
+`globals.css`, day and night variants, same soft watercolor family as
+the original 5 accents). `MoodPicker` also moved from a wrapped flex
+row to a fixed 3-column (5 on wider screens) grid so all 15 line up
+evenly instead of ragged-wrapping. The steam-wisp "intensity" marks
+above the mood icon were removed entirely (`mood-intensity-mark.tsx`
+deleted) — they existed to hint which of 3 moods sharing one color was
+meant; with a unique color per mood that job is already done by the
+color itself. `getMoodAccent`/`ACCENT_GROUP_LABEL` (5 buckets) are
+kept internally for Heart Patterns' charts, which still show 5
+meaningful bars rather than 15 sparse ones — the grouping just isn't
+exposed as something to pick from anymore. Legacy entries from either
+retired mood system still resolve to their old accent-family color, so
+nothing pre-existing lost its color.
