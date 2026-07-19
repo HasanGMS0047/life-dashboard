@@ -93,6 +93,21 @@ export function moodsInFamily(family: MoodFamily): string[] {
   return MOOD_OPTIONS.filter((m) => m.family === family).map((m) => m.label);
 }
 
+// Where a mood sits within its family's mild-to-intense ordering (see the
+// comment above MOOD_OPTIONS) — used to hint at intensity visually (e.g.
+// steam wisps on the mood cup) without needing a distinct icon per mood.
+export function getMoodIntensity(label?: string): 1 | 2 | 3 {
+  const family = getMoodFamily(label);
+  if (!family || !label) return 1;
+  const list = moodsInFamily(family);
+  const index = list.indexOf(label);
+  if (index < 0) return 1;
+  const ratio = index / Math.max(list.length - 1, 1);
+  if (ratio < 0.34) return 1;
+  if (ratio < 0.67) return 2;
+  return 3;
+}
+
 // Tailwind needs literal class strings to keep them in the production build —
 // building these with template interpolation would get purged.
 export const MOOD_ACTIVE_CLASSES: Record<AccentKey, string> = {
@@ -101,6 +116,14 @@ export const MOOD_ACTIVE_CLASSES: Record<AccentKey, string> = {
   mustard: "bg-mustard/20 border-mustard/40 text-mustard",
   blush: "bg-blush/20 border-blush/40 text-blush",
   sky: "bg-sky/20 border-sky/40 text-sky",
+};
+
+export const ACCENT_TEXT_CLASSES: Record<AccentKey, string> = {
+  terracotta: "text-terracotta",
+  olive: "text-olive",
+  mustard: "text-mustard",
+  blush: "text-blush",
+  sky: "text-sky",
 };
 
 const ACCENT_PILL_CLASSES: Record<AccentKey, string> = {
