@@ -411,3 +411,26 @@ left as-is.
   intended design.
 - Updated the help guide's "Habits" entry to describe the plant and
   the watering rule.
+
+## Duolingo-style celebration for finishing today's watering
+
+- **`WaterCelebration`** (`src/components/widgets/WaterCelebration.tsx`):
+  a small burst of eight petal-colored dots (cycling the five theme
+  accents) fires outward from the plant, alongside a "Watered — N
+  days 🌿" pill, then both fade out after ~1.1s. Fires exactly once,
+  at the moment the *last* unwatered habit for today gets checked —
+  checking a habit while another is still unwatered stays silent,
+  since that action didn't actually finish today's watering.
+- The check is done in `HabitsWidget`'s `handleToggle`: it compares
+  "were all habits done before this click" against "will all habits
+  be done after this click" using the habit list already in memory,
+  so no extra store round-trip is needed to know whether to
+  celebrate.
+- Burst angles are fixed (8 evenly-spaced directions), not
+  `Math.random()` — picking a random value during render in a client
+  component risks a hydration mismatch (see ARCHITECTURE.md note #18);
+  an evenly-spaced burst reads just as lively and sidesteps the issue
+  entirely.
+- Verified via Playwright: partially completing habits produces no
+  burst, completing the last one does, and both the burst and the
+  toast clean up on their own afterward.

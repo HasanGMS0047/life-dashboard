@@ -278,6 +278,11 @@ related code:
     is concerned — hit this directly while testing and had to
     backdate `createdAt` via a direct SQL update against the local
     dev DB to actually exercise the higher growth stages.
+    `WaterCelebration.tsx` fires off this same signal at the widget
+    level: `HabitsWidget`'s `handleToggle` diffs "fully watered
+    before this click" vs. "fully watered after", entirely from the
+    in-memory habit list, so the celebration burst never needs its own
+    round-trip or its own copy of the streak logic.
 
 ## Where things live
 
@@ -306,8 +311,8 @@ src/lib/               Pure helpers + cross-store aggregation:
                        ai/ollama.ts.
 src/components/widgets/  Dashboard home-page cards (Mood, Sleep, Energy,
                        Water, KindDeeds, Journal, Learning, Social,
-                       Habits ("Your Garden" — habit list + PlantVisual,
-                       see note #22), Goals).
+                       Habits ("Your Garden" — habit list + PlantVisual +
+                       WaterCelebration, see note #22), Goals).
 src/components/ui/mood-picker.tsx  Flat, one-tap mood picker (15 moods,
                        each its own color, fixed grid) — used by the
                        journal composer and the Mood widget.

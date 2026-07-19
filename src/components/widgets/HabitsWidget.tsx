@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { computeGardenStreak, computeGrowthStage, hasEverWatered, STAGE_LABELS } from "@/lib/garden";
 import { PlantVisual } from "@/components/widgets/PlantVisual";
+import { WaterCelebration } from "@/components/widgets/WaterCelebration";
 
 export function HabitsWidget() {
   const habits = useHabitStore((s) => s.habits);
@@ -18,11 +19,26 @@ export function HabitsWidget() {
   const removeHabit = useHabitStore((s) => s.removeHabit);
   const toggleToday = useHabitStore((s) => s.toggleToday);
   const [title, setTitle] = useState("");
+  const [celebrate, setCelebrate] = useState(false);
 
   const handleAdd = () => {
     if (!title.trim()) return;
     addHabit(title.trim());
     setTitle("");
+  };
+
+  const handleToggle = (habitId: string) => {
+    const isChecking = !isCompletedToday(habits.find((h) => h.id === habitId)!);
+    const wasFullyWatered = habits.length > 0 && habits.every(isCompletedToday);
+    const willBeFullyWatered =
+      habits.length > 0 &&
+      habits.every((h) => (h.id === habitId ? isChecking : isCompletedToday(h)));
+
+    toggleToday(habitId);
+
+    if (isChecking && !wasFullyWatered && willBeFullyWatered) {
+      setCelebrate(true);
+    }
   };
 
   const gardenStreak = computeGardenStreak(habits);
@@ -53,7 +69,10 @@ export function HabitsWidget() {
       </div>
 
       <div className="flex items-center gap-4">
-        <PlantVisual stage={stage} wilted={wilted} />
+        <div className="relative w-24 h-24 shrink-0">
+          <PlantVisual stage={stage} wilted={wilted} />
+          <WaterCelebration active={celebrate} streak={gardenStreak} onDone={() => setCelebrate(false)} />
+        </div>
         <div className="flex flex-col gap-1 min-w-0">
           <p className="text-sm font-semibold text-foreground">{stageLabel}</p>
           <p className="text-xs text-muted leading-snug">{statusLine}</p>
@@ -73,7 +92,7 @@ export function HabitsWidget() {
                 className="flex items-center gap-3 group"
               >
                 <button
-                  onClick={() => toggleToday(habit.id)}
+                  onClick={() => handleToggle(habit.id)}
                   className={cn(
                     "w-6 h-6 rounded-full border flex items-center justify-center shrink-0 transition-colors",
                     done
