@@ -9,6 +9,8 @@ import {
   computeHabitStreak,
 } from "@/store/habitStore";
 import { cn } from "@/lib/utils";
+import { computeGardenStreak, computeGrowthStage, hasEverWatered, STAGE_LABELS } from "@/lib/garden";
+import { PlantVisual } from "@/components/widgets/PlantVisual";
 
 export function HabitsWidget() {
   const habits = useHabitStore((s) => s.habits);
@@ -23,11 +25,39 @@ export function HabitsWidget() {
     setTitle("");
   };
 
+  const gardenStreak = computeGardenStreak(habits);
+  const everWatered = hasEverWatered(habits);
+  const wilted = gardenStreak === 0 && everWatered;
+  const stage = computeGrowthStage(gardenStreak);
+  const stageLabel = STAGE_LABELS[wilted && stage === 0 ? 1 : stage];
+
+  const statusLine =
+    habits.length === 0
+      ? "Add a habit to plant your first seed."
+      : gardenStreak > 0
+        ? `Watered ${gardenStreak} day${gardenStreak === 1 ? "" : "s"} in a row`
+        : everWatered
+          ? "Needs water today — check off your habits"
+          : "Check off every habit today to start growing";
+
   return (
     <Card className="flex flex-col gap-4 p-6 bg-background border-2 hover:border-terracotta/30 transition-colors">
       <div className="flex items-center justify-between">
-        <h3 className="font-serif text-lg font-semibold text-foreground">Daily Habits</h3>
-        <Flame className="w-5 h-5 text-terracotta" />
+        <h3 className="font-serif text-lg font-semibold text-foreground">Your Garden</h3>
+        {gardenStreak > 0 && (
+          <span className="text-xs font-medium text-terracotta flex items-center gap-0.5">
+            <Flame className="w-3.5 h-3.5" />
+            {gardenStreak}
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-4">
+        <PlantVisual stage={stage} wilted={wilted} />
+        <div className="flex flex-col gap-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground">{stageLabel}</p>
+          <p className="text-xs text-muted leading-snug">{statusLine}</p>
+        </div>
       </div>
 
       {habits.length === 0 ? (
