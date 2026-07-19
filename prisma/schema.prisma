@@ -30,6 +30,7 @@ model User {
   socialEntries SocialEntry[]
   habits Habit[]
   goals Goal[]
+  tasks Task[]
 }
 
 model Journal {
@@ -91,6 +92,19 @@ model Habit {
   createdAt    DateTime @default(now())
 
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Task {
+  id           String   @id @default(cuid())
+  userId       String
+  title        String
+  date         String   // yyyy-MM-dd, the day it's scheduled for
+  completed    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
 }
 
 model Goal {

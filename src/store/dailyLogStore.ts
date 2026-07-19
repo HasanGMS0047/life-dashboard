@@ -28,6 +28,7 @@ interface DailyLogState {
   setDraftSleepHours: (hours: number) => void;
   setDraftEnergy: (energy: number) => void;
   setDraftWaterLiters: (liters: number) => void;
+  discardDraft: () => void;
   confirmCheckIn: () => Promise<boolean>;
 }
 
@@ -117,6 +118,7 @@ export const useDailyLogStore = create<DailyLogState>((set, get) => ({
   setDraftSleepHours: (sleepHours) => set((state) => ({ draft: { ...state.draft, sleepHours } })),
   setDraftEnergy: (energy) => set((state) => ({ draft: { ...state.draft, energy } })),
   setDraftWaterLiters: (waterLiters) => set((state) => ({ draft: { ...state.draft, waterLiters } })),
+  discardDraft: () => set({ draft: {} }),
   confirmCheckIn: async () => {
     const today = getTodayKey();
     const { draft, logs } = get();

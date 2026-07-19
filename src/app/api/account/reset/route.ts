@@ -4,9 +4,9 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 // Wipes everything the user has logged (journal, daily mood/sleep/energy/
-// water, learning, social, habits, goals) but leaves the account itself
-// (email/password/name/theme/preferences) untouched — a fresh start on
-// data, not a deleted account.
+// water, learning, social, habits, goals, tasks) but leaves the account
+// itself (email/password/name/theme/preferences) untouched — a fresh
+// start on data, not a deleted account.
 export async function POST() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -23,6 +23,7 @@ export async function POST() {
       prisma.socialEntry.deleteMany({ where: { userId } }),
       prisma.habit.deleteMany({ where: { userId } }),
       prisma.goal.deleteMany({ where: { userId } }),
+      prisma.task.deleteMany({ where: { userId } }),
     ]);
 
     return NextResponse.json({ ok: true });

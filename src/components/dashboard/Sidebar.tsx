@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Home, BookOpen, Heart, Grid, User, Clapperboard, Clock, Images, X } from "lucide-react";
+import { Home, BookOpen, Heart, Grid, User, Clapperboard, Clock, Images, X, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -10,6 +10,7 @@ import { SearchBar } from "@/components/dashboard/SearchBar";
 
 const navItems = [
   { icon: Home, label: "Home", href: "/dashboard" },
+  { icon: CalendarDays, label: "Calendar", href: "/dashboard/calendar" },
   { icon: Clock, label: "Timeline", href: "/dashboard/timeline" },
   { icon: BookOpen, label: "Journal", href: "/dashboard/journal" },
   { icon: Images, label: "Gallery", href: "/dashboard/gallery" },
