@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import Image from "next/image";
+import { NotebookPen } from "lucide-react";
 import { useJournalStore } from "@/store/journalStore";
 import { AIReflectPanel } from "@/components/journal/AIReflectPanel";
 
@@ -32,8 +32,8 @@ export function JournalWidget() {
             </p>
           )}
         </div>
-        <div className="relative w-20 h-20 shrink-0 drop-shadow-md">
-          <Image src="/journal_icon.png" alt="Daily Journal" fill sizes="80px" className="object-contain" />
+        <div className="w-20 h-20 shrink-0 flex items-center justify-center">
+          <NotebookPen className="w-14 h-14 text-terracotta" strokeWidth={1.5} />
         </div>
       </div>
 
