@@ -18,6 +18,7 @@ export async function GET() {
     id: goal.id,
     title: goal.title,
     progress: goal.progress,
+    timeframe: goal.timeframe,
     createdAt: goal.createdAt.toISOString(),
     completedAt: goal.completedAt?.toISOString(),
   })));
@@ -30,10 +31,13 @@ export async function POST(request: Request) {
   }
 
   const payload = await request.json();
-  const { title } = payload ?? {};
+  const { title, timeframe } = payload ?? {};
 
   if (typeof title !== "string" || !title.trim()) {
     return NextResponse.json({ error: "Title is required." }, { status: 400 });
+  }
+  if (timeframe !== undefined && timeframe !== "month" && timeframe !== "vision") {
+    return NextResponse.json({ error: "Timeframe must be 'month' or 'vision'." }, { status: 400 });
   }
 
   const goal = await prisma.goal.create({
@@ -41,6 +45,7 @@ export async function POST(request: Request) {
       userId: session.user.id,
       title: title.trim(),
       progress: 0,
+      timeframe: timeframe ?? "month",
     },
   });
 
@@ -48,6 +53,7 @@ export async function POST(request: Request) {
     id: goal.id,
     title: goal.title,
     progress: goal.progress,
+    timeframe: goal.timeframe,
     createdAt: goal.createdAt.toISOString(),
     completedAt: goal.completedAt?.toISOString(),
   });

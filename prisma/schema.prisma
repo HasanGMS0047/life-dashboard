@@ -98,6 +98,7 @@ model Goal {
   userId       String
   title        String
   progress     Int      @default(0)
+  timeframe    String   @default("month") // "month" | "vision" (six-month vision)
   completedAt  DateTime?
   createdAt    DateTime @default(now())
 
