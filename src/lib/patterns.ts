@@ -1,63 +1,70 @@
 import { format, subDays } from "date-fns";
 import { DailyLog } from "@/store/dailyLogStore";
 import { JournalEntry } from "@/store/journalStore";
-import { MOODS, MoodLabel } from "@/lib/moods";
+import { MOOD_FAMILIES, MoodFamily, getMoodFamily } from "@/lib/moods";
 
 export interface MoodCount {
-  mood: MoodLabel;
+  mood: MoodFamily;
   count: number;
 }
 
-// Counts how often each mood was logged, combining the daily mood picker
-// and journal entry tags — both are real signals of how a day felt.
+// Counts how often each mood family was logged, combining the daily mood
+// picker and journal entry tags (both are real signals of how a day felt),
+// rolling specific moods (e.g. "Disappointed") up to their family ("Tender")
+// so the chart stays five meaningful bars instead of dozens of sparse ones.
 export function computeMoodCounts(
   logs: Record<string, DailyLog>,
   journalEntries: JournalEntry[]
 ): MoodCount[] {
-  const counts: Record<string, number> = {};
-  for (const label of MOODS.map((m) => m.label)) counts[label] = 0;
+  const counts: Record<MoodFamily, number> = Object.fromEntries(
+    MOOD_FAMILIES.map((f) => [f.family, 0])
+  ) as Record<MoodFamily, number>;
 
   for (const log of Object.values(logs)) {
-    if (log.mood && counts[log.mood] !== undefined) counts[log.mood] += 1;
+    const family = getMoodFamily(log.mood);
+    if (family) counts[family] += 1;
   }
   for (const entry of journalEntries) {
-    if (entry.mood && counts[entry.mood] !== undefined) counts[entry.mood] += 1;
+    const family = getMoodFamily(entry.mood);
+    if (family) counts[family] += 1;
   }
 
-  return MOODS.map((m) => ({ mood: m.label, count: counts[m.label] }));
+  return MOOD_FAMILIES.map((f) => ({ mood: f.family, count: counts[f.family] }));
 }
 
 export interface MoodCorrelation {
-  mood: MoodLabel;
+  mood: MoodFamily;
   count: number;
   avgSleep: number;
   avgEnergy: number;
 }
 
-// For each mood logged via the daily picker, averages that day's sleep and
-// energy — sleep/energy only exist on daily logs, not journal entries.
+// For each mood family logged via the daily picker, averages that day's
+// sleep and energy — sleep/energy only exist on daily logs, not journal
+// entries.
 export function computeMoodCorrelations(logs: Record<string, DailyLog>): MoodCorrelation[] {
-  const byMood: Record<string, { sleep: number[]; energy: number[] }> = {};
+  const byFamily: Record<string, { sleep: number[]; energy: number[] }> = {};
 
   for (const log of Object.values(logs)) {
-    if (!log.mood) continue;
-    if (!byMood[log.mood]) byMood[log.mood] = { sleep: [], energy: [] };
-    if (log.sleepHours !== undefined) byMood[log.mood].sleep.push(log.sleepHours);
-    if (log.energy !== undefined) byMood[log.mood].energy.push(log.energy);
+    const family = getMoodFamily(log.mood);
+    if (!family) continue;
+    if (!byFamily[family]) byFamily[family] = { sleep: [], energy: [] };
+    if (log.sleepHours !== undefined) byFamily[family].sleep.push(log.sleepHours);
+    if (log.energy !== undefined) byFamily[family].energy.push(log.energy);
   }
 
   const avg = (values: number[]) =>
     values.length === 0 ? 0 : values.reduce((s, v) => s + v, 0) / values.length;
 
-  return MOODS.map((m) => m.label)
-    .filter((label) => byMood[label])
-    .map((label) => ({
-      mood: label,
-      count: byMood[label].sleep.length + byMood[label].energy.length > 0
-        ? Math.max(byMood[label].sleep.length, byMood[label].energy.length)
+  return MOOD_FAMILIES.map((f) => f.family)
+    .filter((family) => byFamily[family])
+    .map((family) => ({
+      mood: family,
+      count: byFamily[family].sleep.length + byFamily[family].energy.length > 0
+        ? Math.max(byFamily[family].sleep.length, byFamily[family].energy.length)
         : 0,
-      avgSleep: avg(byMood[label].sleep),
-      avgEnergy: avg(byMood[label].energy),
+      avgSleep: avg(byFamily[family].sleep),
+      avgEnergy: avg(byFamily[family].energy),
     }));
 }
 
