@@ -4,23 +4,12 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { CalendarDays, Sparkles, Play } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export default function ReplayChooserPage() {
   return (
     <div className="max-w-4xl mx-auto py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-10 text-center"
-      >
-        <h1 className="font-serif text-4xl text-foreground font-semibold leading-snug">
-          Life Replay.
-        </h1>
-        <p className="text-muted text-lg mt-2 font-medium">
-          Relive your story, one chapter at a time.
-        </p>
-      </motion.div>
+      <PageHeader title="Life Replay." subtitle="Relive your story, one chapter at a time." />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <motion.div

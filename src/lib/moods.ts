@@ -54,17 +54,6 @@ export function getMoodAccent(label?: string): AccentKey {
   return MOOD_TO_ACCENT[label] ?? LEGACY_MOOD_ACCENT[label] ?? "terracotta";
 }
 
-// Groups moods by their family accent for charts (Heart Patterns) that need
-// a handful of meaningful buckets rather than fifteen sparse ones — a
-// display grouping only, never surfaced as something to pick from.
-export const ACCENT_GROUP_LABEL: Record<AccentKey, string> = {
-  terracotta: "Warm",
-  sky: "Calm",
-  mustard: "Energized",
-  olive: "Heavy",
-  blush: "Tender",
-};
-
 export const ACCENTS: AccentKey[] = ["terracotta", "sky", "mustard", "olive", "blush"];
 
 export const ACCENT_TEXT_CLASSES: Record<AccentKey, string> = {
@@ -157,4 +146,24 @@ export const MOOD_PILL_CLASSES: Record<string, string> = {
 export function getMoodTextClass(label?: string): string {
   if (!label) return "text-muted";
   return MOOD_TEXT_CLASSES_OWN[label] ?? ACCENT_TEXT_CLASSES[getMoodAccent(label)];
+}
+
+const MOOD_COLOR_VAR: Record<string, string> = Object.fromEntries(
+  MOODS.map((m) => [m.label, `var(--mood-${m.label.toLowerCase()})`])
+);
+
+const ACCENT_VAR: Record<AccentKey, string> = {
+  terracotta: "var(--terracotta)",
+  sky: "var(--sky)",
+  mustard: "var(--mustard)",
+  olive: "var(--olive)",
+  blush: "var(--blush)",
+};
+
+// Raw CSS color value for a mood, for inline styles (chart bar fills, dots)
+// rather than Tailwind classes — its own color if it's one of the current
+// 15, otherwise its old accent-family color.
+export function getMoodColorVar(label?: string): string {
+  if (!label) return ACCENT_VAR.terracotta;
+  return MOOD_COLOR_VAR[label] ?? ACCENT_VAR[getMoodAccent(label)];
 }

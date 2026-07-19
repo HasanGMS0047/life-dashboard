@@ -7,6 +7,7 @@ import { useLearningStore } from "@/store/learningStore";
 import { useSocialStore } from "@/store/socialStore";
 import { useGoalStore } from "@/store/goalStore";
 import { buildTimelineEvents, TimelineEvent } from "@/lib/timeline";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 import { cn } from "@/lib/utils";
 
 const ACCENT_DOT: Record<string, string> = {
@@ -63,17 +64,7 @@ export default function TimelinePage() {
 
   return (
     <div className="max-w-2xl mx-auto py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-10 text-center"
-      >
-        <h1 className="font-serif text-4xl text-foreground font-semibold leading-snug">
-          Your Timeline.
-        </h1>
-        <p className="text-muted text-lg mt-2 font-medium">Every moment, in order.</p>
-      </motion.div>
+      <PageHeader title="Your Timeline." subtitle="Every moment, in order." />
 
       {events.length === 0 ? (
         <div className="text-center text-muted py-16">

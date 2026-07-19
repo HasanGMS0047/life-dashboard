@@ -309,3 +309,33 @@ dashboard now follows the same minimal-icon language. Removed the 3
 now-unused PNGs from `public/`. The landing page's hero illustration
 (`cozy_desk_hero.png`) is scene artwork, not a section icon, and was
 left as-is.
+
+## UI overhaul, second pass: Heart Patterns realigned, shared page header
+
+- **Heart Patterns no longer disagrees with the mood picker.** It used
+  to bucket everything into 5 group labels ("Warm", "Calm",
+  "Energized", "Heavy", "Tender") that don't appear anywhere else in
+  the app anymore — since `MoodPicker` dropped family grouping
+  entirely, seeing "Warm: 3" on this page had no obvious link back to
+  which actual moods were logged. `computeMoodCounts`/
+  `computeMoodCorrelations` (`src/lib/patterns.ts`) now work per exact
+  mood instead, and the "Mood Rhythm" bars and "Mood & Body" cards
+  render the real mood name in its own color (`getMoodColorVar` in
+  `src/lib/moods.ts`) — the same color you tapped in the picker. Only
+  moods actually logged are shown, most-logged first, so the list
+  stays short in normal use rather than listing 15 mostly-empty rows.
+- **Extracted a shared `PageHeader` component**
+  (`src/components/dashboard/PageHeader.tsx`) — Journal, Timeline,
+  Heatmap, Gallery, Account, Heart Patterns, and the Life Replay
+  chooser had all hand-duplicated the exact same title+subtitle
+  animation block. One component now, used everywhere, so the look
+  can't drift page to page. Account's header was also switched from
+  left-aligned to centered to match the rest.
+- Life Replay's actual full-screen slideshow (`ReplayShell` and its
+  scene primitives) was deliberately left untouched — it's meant to
+  look and feel like a distinct cinematic experience, not another
+  dashboard page, and already had no real bugs.
+- Verified: Heart Patterns shows correctly colored per-mood bars and
+  correlation cards with real logged data, every touched page still
+  renders with no horizontal overflow on mobile and no console errors,
+  day/night theme still applies correctly everywhere.

@@ -3,34 +3,16 @@
 import { motion } from "framer-motion";
 import { Heart, Moon, Zap } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 import { useDailyLogStore } from "@/store/dailyLogStore";
 import { useJournalStore } from "@/store/journalStore";
 import { computeMoodCounts, computeMoodCorrelations, getRecentTrend } from "@/lib/patterns";
-import { AccentKey } from "@/lib/moods";
-import { cn } from "@/lib/utils";
-
-const ACCENT_VAR: Record<AccentKey, string> = {
-  terracotta: "var(--terracotta)",
-  sky: "var(--sky)",
-  mustard: "var(--mustard)",
-  olive: "var(--olive)",
-  blush: "var(--blush)",
-};
-
-const ACCENT_CARD_CLASSES: Record<AccentKey, string> = {
-  terracotta: "bg-terracotta/10 text-terracotta border-terracotta/20",
-  sky: "bg-sky/10 text-sky border-sky/20",
-  mustard: "bg-mustard/10 text-mustard border-mustard/20",
-  olive: "bg-olive/10 text-olive border-olive/20",
-  blush: "bg-blush/10 text-blush border-blush/20",
-};
 
 export default function HeartPatternsPage() {
   const logs = useDailyLogStore((s) => s.logs);
   const journalEntries = useJournalStore((s) => s.entries);
 
   const moodCounts = computeMoodCounts(logs, journalEntries);
-  const totalMoodCount = moodCounts.reduce((sum, m) => sum + m.count, 0);
   const maxMoodCount = Math.max(1, ...moodCounts.map((m) => m.count));
 
   const correlations = computeMoodCorrelations(logs);
@@ -38,17 +20,7 @@ export default function HeartPatternsPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-8 flex flex-col gap-6">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-2"
-      >
-        <h1 className="font-serif text-4xl text-foreground font-semibold leading-snug">
-          Heart Patterns.
-        </h1>
-        <p className="text-muted text-lg mt-2 font-medium">The quiet rhythms behind your days.</p>
-      </motion.div>
+      <PageHeader title="Heart Patterns." subtitle="The quiet rhythms behind your days." className="mb-2" />
 
       {/* Mood Rhythm */}
       <Card className="p-6 bg-background border-2">
@@ -57,7 +29,7 @@ export default function HeartPatternsPage() {
           <h3 className="font-serif text-lg font-semibold text-foreground">Mood Rhythm</h3>
         </div>
 
-        {totalMoodCount === 0 ? (
+        {moodCounts.length === 0 ? (
           <p className="text-sm text-muted">
             Log a mood on your dashboard or in a journal entry to see your rhythm here.
           </p>
@@ -65,14 +37,14 @@ export default function HeartPatternsPage() {
           <div className="flex flex-col gap-3">
             {moodCounts.map((m, i) => (
               <div key={m.mood} className="flex items-center gap-3">
-                <span className="text-sm text-foreground w-24 shrink-0">{m.mood}</span>
+                <span className="text-sm text-foreground w-24 shrink-0 truncate">{m.mood}</span>
                 <div className="flex-1 h-2.5 rounded-full bg-border overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${(m.count / maxMoodCount) * 100}%` }}
-                    transition={{ duration: 0.6, delay: i * 0.05 }}
+                    transition={{ duration: 0.5, delay: Math.min(i, 10) * 0.04 }}
                     className="h-full rounded-full"
-                    style={{ backgroundColor: ACCENT_VAR[m.accent] }}
+                    style={{ backgroundColor: m.color }}
                   />
                 </div>
                 <span className="text-xs text-muted w-6 text-right shrink-0">{m.count}</span>
@@ -98,10 +70,12 @@ export default function HeartPatternsPage() {
             {correlations.map((c) => (
               <div
                 key={c.mood}
-                className={cn(
-                  "rounded-2xl border px-4 py-3 flex flex-col gap-1",
-                  ACCENT_CARD_CLASSES[c.accent]
-                )}
+                className="rounded-2xl border px-4 py-3 flex flex-col gap-1"
+                style={{
+                  backgroundColor: `color-mix(in srgb, ${c.color} 10%, transparent)`,
+                  borderColor: `color-mix(in srgb, ${c.color} 25%, transparent)`,
+                  color: c.color,
+                }}
               >
                 <span className="text-sm font-semibold">{c.mood}</span>
                 <span className="text-xs text-foreground/80">
@@ -131,7 +105,7 @@ export default function HeartPatternsPage() {
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${day.energy}%` }}
-                    transition={{ duration: 0.4, delay: i * 0.03 }}
+                    transition={{ duration: 0.4, delay: Math.min(i, 10) * 0.03 }}
                     className="w-1.5 rounded-full bg-mustard"
                   />
                 ) : (
@@ -141,7 +115,7 @@ export default function HeartPatternsPage() {
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${Math.min(100, (day.sleepHours / 12) * 100)}%` }}
-                    transition={{ duration: 0.4, delay: i * 0.03 }}
+                    transition={{ duration: 0.4, delay: Math.min(i, 10) * 0.03 }}
                     className="w-1.5 rounded-full bg-sky"
                   />
                 ) : (

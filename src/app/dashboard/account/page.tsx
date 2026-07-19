@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { motion } from "framer-motion";
 import { Sun, Moon, Download, Upload, LogOut, X as XIcon, User as UserIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 import { useThemeStore } from "@/store/themeStore";
 import { exportData, importData } from "@/lib/backup";
 import { cn } from "@/lib/utils";
@@ -242,17 +242,7 @@ export default function AccountPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-10"
-      >
-        <h1 className="font-serif text-4xl text-foreground font-semibold leading-snug">
-          Your Account.
-        </h1>
-        <p className="text-muted text-lg mt-2 font-medium">Make this space feel like yours.</p>
-      </motion.div>
+      <PageHeader title="Your Account." subtitle="Make this space feel like yours." />
 
       <Card className="p-6 bg-background border-2 flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4 min-w-0">
