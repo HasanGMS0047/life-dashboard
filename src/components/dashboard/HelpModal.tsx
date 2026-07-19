@@ -31,7 +31,7 @@ const SECTIONS: HelpSection[] = [
       { label: "Kind Deeds", description: "Small acts of kindness you did today — check them off as you go." },
       { label: "Learning", description: "Track books or articles you've finished and hours spent studying." },
       { label: "People & Places", description: "Log memories, trips, and friendships — attach a photo if you like." },
-      { label: "Daily Habits", description: "Habits you're building. Check one off each day to keep its streak alive." },
+      { label: "Your Garden", description: "Habits you're building, with a little plant that grows as you keep them. Water it by checking off every habit each day — miss one and it wilts, but it never dies, so a slip is never the end." },
       { label: "Goals", description: "Longer-term goals tracked with a 0–100% progress bar." },
     ],
   },

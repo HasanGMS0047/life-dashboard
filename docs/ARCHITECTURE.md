@@ -264,6 +264,20 @@ related code:
     another domain, enforce it the same way: in the route handler
     against the server's own clock, not by trusting the client to not
     call the API directly.
+22. **The garden/plant feature (`src/lib/garden.ts`) is entirely
+    derived state, no new schema.** `computeGardenStreak` walks
+    backward from today exactly like `computeHabitStreak` does per
+    habit, except it requires *every* habit that existed on a given
+    day (`new Date(h.createdAt) <= cursor`) to have a completion for
+    that day — one unchecked habit breaks the whole garden's streak,
+    not just its own. This means a habit's `createdAt` matters for
+    the calculation, not just its `completions`: seeding test data by
+    only backdating `completions` (without also backdating
+    `createdAt`) silently caps the computed streak at 1, since the
+    habit didn't "exist" on those earlier days as far as the filter
+    is concerned — hit this directly while testing and had to
+    backdate `createdAt` via a direct SQL update against the local
+    dev DB to actually exercise the higher growth stages.
 
 ## Where things live
 
@@ -285,12 +299,15 @@ src/store/             One Zustand store per domain: journalStore,
                        API routes and use in-memory caches (no `persist`).
 src/lib/               Pure helpers + cross-store aggregation:
                        moods.ts (two-tier mood system, see note #6),
-                       prompts.ts (journal writing prompts/quotes),
-                       streak.ts, timeline.ts, search.ts, patterns.ts,
-                       backup.ts, image.ts, ai/ollama.ts.
+                       garden.ts (habit-tracker plant growth, see
+                       note #22), prompts.ts (journal writing
+                       prompts/quotes), streak.ts, timeline.ts,
+                       search.ts, patterns.ts, backup.ts, image.ts,
+                       ai/ollama.ts.
 src/components/widgets/  Dashboard home-page cards (Mood, Sleep, Energy,
                        Water, KindDeeds, Journal, Learning, Social,
-                       Habits, Goals).
+                       Habits ("Your Garden" — habit list + PlantVisual,
+                       see note #22), Goals).
 src/components/ui/mood-picker.tsx  Flat, one-tap mood picker (15 moods,
                        each its own color, fixed grid) — used by the
                        journal composer and the Mood widget.

@@ -375,3 +375,39 @@ left as-is.
   categories, so old data that was always there became visible by
   name for the first time. Reset Data (above) is the clean way to
   clear it out if it's not wanted.
+
+## Habits, gamified: a garden that needs daily watering
+
+- The Habits widget is now **"Your Garden"** (`HabitsWidget.tsx`): a
+  hand-drawn SVG plant (`PlantVisual.tsx`) sits above the habit list
+  and grows through five stages — seed, sprout, young plant, budding,
+  in full bloom — as a garden streak builds. No new database model;
+  the plant is entirely derived from the existing `Habit.completions`
+  and `createdAt` data, same as the per-habit streak already was.
+- **Garden streak rule** (`src/lib/garden.ts`,
+  `computeGardenStreak`): a day only counts as "watered" if *every*
+  habit that existed by that day was checked off — one missed habit
+  breaks the streak for the whole garden, not just that habit's own
+  count. This is stricter than the per-habit streak on purpose: the
+  plant is meant to reward showing up for all of today's habits, not
+  just one.
+- **Wilting, not dying**: if the streak breaks after the garden had
+  ever been watered at least once, the plant droops (grey-toned,
+  bent stem) instead of resetting to a bare seed. A garden that's
+  never been watered still shows a plain seed. The intent, matching
+  what was asked for, is a gentle nudge rather than a punishing reset
+  — a missed day is recoverable, not a fresh start.
+- Growth-stage thresholds: 0 days = seed, 1–2 = sprout, 3–6 = young
+  plant, 7–13 = budding, 14+ = in full bloom. All colors reuse the
+  existing `--terracotta` / `--olive` / `--mustard` / `--blush` theme
+  vars via inline SVG `fill`, so it matches day/night theme
+  automatically with no extra CSS.
+- Verified via Playwright against the local dev database directly
+  (backdating a habit's `createdAt` with a raw SQL update, since the
+  garden streak intentionally ignores completions from before a habit
+  existed) — walked through all five stages, the wilted state, night
+  mode, and the "second habit left unchecked breaks an otherwise
+  14-day streak back to a wilted sprout" case. All matched the
+  intended design.
+- Updated the help guide's "Habits" entry to describe the plant and
+  the watering rule.
