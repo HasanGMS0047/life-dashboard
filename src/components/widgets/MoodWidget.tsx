@@ -27,7 +27,7 @@ export function MoodWidget() {
         <p className="text-sm font-medium text-terracotta">{mood ?? "Not logged yet"}</p>
       </div>
 
-      <MoodPicker value={mood ?? "Cozy"} onChange={(m) => setMood(today, m)} />
+      <MoodPicker value={mood ?? ""} onChange={(m) => setMood(today, m)} />
 
       {/* Little decorative tags */}
       <div className="absolute right-4 top-6 flex flex-col gap-2">
