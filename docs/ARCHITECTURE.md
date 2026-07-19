@@ -386,6 +386,22 @@ related code:
     Import in particular needs a real design decision (merge vs.
     replace existing data, how to handle partial failures across 7
     domains) rather than a quick patch.
+30. **"Fits without scrolling" and "mobile-optimized" are two different
+    asks — don't conflate them.** Calendar was rebuilt to fit in one
+    screen because it's a bounded, single-purpose widget (a month grid
+    has a fixed, known amount of content). Home, Account, Journal,
+    Heart Patterns, etc. are content-driven pages where the amount of
+    content varies (widget count, entry count, log history) — forcing
+    those to fit one screen would mean hiding or shrinking real content
+    to meaninglessness, not fixing a bug. The actual mobile-optimization
+    work on those pages was trimming *chrome* (`PageHeader` sizing, page
+    `py-8`, Card padding, section gaps) via responsive Tailwind
+    variants, not changing what content exists or how it's shown —
+    scrolling to reach content that genuinely doesn't fit is normal and
+    was left alone. Confirmed via `git diff` mental model: every trim
+    in this pass added a smaller mobile/tablet value in front of the
+    existing `md:`-prefixed one, never changed the `md:` value itself
+    — desktop is pixel-identical to before.
 
 ## Where things live
 
@@ -429,7 +445,8 @@ src/components/calendar/  Calendar.tsx (view switcher + selectedDate,
                        YearOverview — the four Calendar page views.
 src/components/dashboard/ Sidebar, TopBar, SearchBar, HeatmapQuilt,
                        TeacupChart, PageHeader (shared title+subtitle
-                       block used by every secondary page), HelpModal
+                       block used by every secondary page, responsive
+                       sizing — see note #30), HelpModal
                        (page-specific "what's here" guide via
                        `PAGE_HELP`, see note #26, opened from the
                        TopBar's `?` icon — its close handler must

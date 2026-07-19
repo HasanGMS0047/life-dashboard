@@ -37,7 +37,7 @@ export default function GalleryPage() {
   const entries = useSocialStore((s) => s.entries);
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
+    <div className="max-w-4xl mx-auto py-4 sm:py-6 md:py-8">
       <PageHeader title="Memory Gallery." subtitle="The people and places you kept." />
 
       {entries.length === 0 ? (

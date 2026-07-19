@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export default function ReplayChooserPage() {
   return (
-    <div className="max-w-4xl mx-auto py-8">
+    <div className="max-w-4xl mx-auto py-4 sm:py-6 md:py-8">
       <PageHeader title="Life Replay." subtitle="Relive your story, one chapter at a time." />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

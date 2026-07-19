@@ -10,7 +10,7 @@ export default function JournalPage() {
   const entries = useJournalStore((s) => s.entries);
 
   return (
-    <div className="max-w-2xl mx-auto py-8 flex flex-col gap-8">
+    <div className="max-w-2xl mx-auto py-4 sm:py-6 md:py-8 flex flex-col gap-5 sm:gap-6 md:gap-8">
       <PageHeader
         title="Your Journal."
         subtitle="A little scrapbook about the day, a little memory to keep."

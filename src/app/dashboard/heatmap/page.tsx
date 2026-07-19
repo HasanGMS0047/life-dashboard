@@ -7,7 +7,7 @@ import { TeacupChart } from "@/components/dashboard/TeacupChart";
 
 export default function HeatmapPage() {
   return (
-    <div className="max-w-4xl mx-auto py-8">
+    <div className="max-w-4xl mx-auto py-4 sm:py-6 md:py-8">
       <PageHeader title="Tapestry of Days." subtitle="Your year, beautifully patterned." />
 
       <motion.div

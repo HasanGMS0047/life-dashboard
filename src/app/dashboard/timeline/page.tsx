@@ -63,7 +63,7 @@ export default function TimelinePage() {
   const groups = groupByMonth(events);
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
+    <div className="max-w-2xl mx-auto py-4 sm:py-6 md:py-8">
       <PageHeader title="Your Timeline." subtitle="Every moment, in order." />
 
       {events.length === 0 ? (

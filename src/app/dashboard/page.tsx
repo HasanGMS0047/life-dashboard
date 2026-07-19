@@ -60,14 +60,14 @@ const fadeIn = {
 
 export default function DashboardHome() {
   return (
-    <div className="max-w-5xl mx-auto py-6 md:py-8">
-      <motion.div {...fadeIn} className="mb-8 md:mb-10">
+    <div className="max-w-5xl mx-auto py-4 sm:py-6 md:py-8">
+      <motion.div {...fadeIn} className="mb-5 sm:mb-6 md:mb-10">
         <Suspense fallback={null}>
           <DashboardWelcome />
         </Suspense>
       </motion.div>
 
-      <motion.section {...fadeIn} className="mb-10">
+      <motion.section {...fadeIn} className="mb-6 sm:mb-8 md:mb-10">
         <SectionHeading eyebrow="Check in" title="Today" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-3">
@@ -79,7 +79,7 @@ export default function DashboardHome() {
         </div>
       </motion.section>
 
-      <motion.section {...fadeIn} className="mb-10">
+      <motion.section {...fadeIn} className="mb-6 sm:mb-8 md:mb-10">
         <SectionHeading eyebrow="Reflect" title="Journal" />
         <JournalWidget />
       </motion.section>
