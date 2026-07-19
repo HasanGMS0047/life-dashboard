@@ -299,8 +299,8 @@ related code:
 
 ```
 prisma/schema.prisma   User (real accounts), Journal, DailyMetric,
-                       LearningEntry, SocialEntry, Habit (all userId-scoped
-                       and persisted through Prisma).
+                       LearningEntry, SocialEntry, Habit, Goal (all
+                       userId-scoped and persisted through Prisma).
 prisma.config.ts       Prisma 7 config (schema path, migrations path, DATABASE_URL).
 src/lib/prisma.ts      PrismaClient singleton — see note #7 re: driver adapter.
 src/lib/auth.ts        NextAuth authOptions (credentials provider, JWT callbacks).
