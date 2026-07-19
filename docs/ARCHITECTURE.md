@@ -205,6 +205,43 @@ related code:
     the client. Fix is to initialize with a fixed, deterministic value
     and only randomize inside a `useEffect` (client-only, runs after
     hydration) — see `JournalComposer.tsx`.
+19. **`useState(deriveFromProp(prop))` only computes once, at mount —
+    it does not track later changes to `prop`.** Real bug: `MoodPicker`
+    initialized `expandedFamily` from `getMoodFamily(value)` this way;
+    since the real `mood` value almost always arrives *after* the
+    initial render (daily logs fetch asynchronously post-mount, so the
+    picker first renders with a placeholder), the picker kept showing
+    whatever family matched the placeholder, not the actual saved mood,
+    on nearly every page load. Any state derived from a prop that can
+    itself change after mount for reasons outside a click handler (an
+    async fetch resolving, a parent re-rendering with new data) needs a
+    `useEffect(() => setDerived(deriveFromProp(prop)), [prop])` to stay
+    in sync — a `useState` initializer alone is not enough.
+20. **Any full-bleed page outside the dashboard shell (login, register,
+    the landing page) must branch its background on
+    `useThemeStore((s) => s.theme)` itself** — `dashboard/layout.tsx`
+    already does this correctly (day: `calm_scenery_bg.png` + a light
+    overlay; night: `moonlit_scenery_bg.png` + starfield + a dark
+    overlay), but login/register/landing were built with the day
+    version hardcoded and no theme check at all. Because `ThemeSync` in
+    the root layout sets `data-theme` on `<html>` globally and it
+    persists across client-side navigation within a tab, this produced
+    a real, visible bug: theme-aware elements on those pages (`bg-
+    surface`, `text-foreground`, etc.) would correctly flip dark while
+    the hardcoded background image/overlay stayed stuck on the daytime
+    version — cards going dark on top of a bright daytime photo. Any
+    new full-bleed page needs the same day/night branch as
+    `dashboard/layout.tsx`, not just theme-aware utility classes.
+21. **Journal entries are editable/deletable same-day only, enforced
+    server-side, not just hidden in the UI.** `PATCH`/`DELETE
+    /api/journal/[id]` both check `isSameDay(entry.createdAt, new
+    Date())` and return 403 regardless of what the client sends —
+    `JournalEntryCard` just hides the edit/delete buttons behind a lock
+    icon once a day has passed, as a UI convenience, not the actual
+    boundary. If a similar "editable while fresh" rule gets added to
+    another domain, enforce it the same way: in the route handler
+    against the server's own clock, not by trusting the client to not
+    call the API directly.
 
 ## Where things live
 
@@ -260,8 +297,11 @@ src/app/dashboard/account/  The Account page: profile header + sign-out,
 src/components/ui/password-input.tsx  Shared password `<input>` with a
                        show/hide eye toggle — used by login, register, and
                        the Account page's password form.
-src/app/api/journal/   GET/POST (list/create), [id]/ DELETE — all check
-                       getServerSession server-side before touching Prisma.
+src/app/api/journal/   GET/POST (list/create), [id]/ PATCH/DELETE (edit/
+                       remove, both 403 if the entry isn't from today —
+                       see engineering note #21). All check
+                       getServerSession server-side before touching
+                       Prisma.
 src/app/api/daily-log/, src/app/api/learning/, src/app/api/social/, src/app/api/habits/, src/app/api/goals/, src/app/api/theme/  User-scoped CRUD-like routes for the migrated domains.
 src/app/dashboard/*/    Page routes: home, journal, gallery, timeline,
                        heatmap, patterns (Heart Patterns), account, replay
