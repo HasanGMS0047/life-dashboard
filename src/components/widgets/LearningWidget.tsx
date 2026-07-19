@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { BookOpen, Plus } from "lucide-react";
-import { useLearningStore, countBooksFinished, sumStudyHours } from "@/store/learningStore";
+import { useLearningStore, countBooksFinished, sumStudyHours, sumWordsRead } from "@/store/learningStore";
 
 export function LearningWidget() {
   const entries = useLearningStore((s) => s.entries);
@@ -11,16 +11,20 @@ export function LearningWidget() {
   const addStudySession = useLearningStore((s) => s.addStudySession);
 
   const [bookTitle, setBookTitle] = useState("");
+  const [bookWordCount, setBookWordCount] = useState("");
   const [studyTitle, setStudyTitle] = useState("");
   const [studyHours, setStudyHours] = useState("");
 
   const booksThisYear = countBooksFinished(entries);
   const hoursThisYear = sumStudyHours(entries);
+  const wordsThisYear = sumWordsRead(entries);
 
   const handleAddBook = () => {
     if (!bookTitle.trim()) return;
-    addBook(bookTitle.trim());
+    const wordCount = parseInt(bookWordCount, 10);
+    addBook(bookTitle.trim(), wordCount > 0 ? wordCount : undefined);
     setBookTitle("");
+    setBookWordCount("");
   };
 
   const handleAddStudy = () => {
@@ -47,6 +51,14 @@ export function LearningWidget() {
           <p className="font-serif text-2xl font-semibold text-foreground">{hoursThisYear}h</p>
           <p className="text-xs text-muted uppercase tracking-wide">Study hours</p>
         </div>
+        {wordsThisYear > 0 && (
+          <div>
+            <p className="font-serif text-2xl font-semibold text-foreground">
+              {wordsThisYear >= 1000 ? `${(wordsThisYear / 1000).toFixed(1)}k` : wordsThisYear}
+            </p>
+            <p className="text-xs text-muted uppercase tracking-wide">Words read</p>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -54,8 +66,18 @@ export function LearningWidget() {
           <input
             value={bookTitle}
             onChange={(e) => setBookTitle(e.target.value)}
-            placeholder="Book you finished..."
+            placeholder="Book or article you finished..."
             className="flex-1 min-w-0 bg-background/50 border border-border rounded-full px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-terracotta/50 placeholder:text-muted/70"
+          />
+          <input
+            value={bookWordCount}
+            onChange={(e) => setBookWordCount(e.target.value)}
+            placeholder="Words"
+            type="number"
+            min="0"
+            step="1"
+            title="Word count (optional)"
+            className="w-20 bg-background/50 border border-border rounded-full px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-terracotta/50 placeholder:text-muted/70"
           />
           <button
             onClick={handleAddBook}

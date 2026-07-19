@@ -49,6 +49,7 @@ model DailyMetric {
   mood        String?
   energy      Int?
   sleepHours  Float?
+  waterLiters Float?
   deeds       Json?
   focusTime   Int?     // In minutes
   moodScore   Int?
@@ -65,6 +66,7 @@ model LearningEntry {
   type      String
   title     String
   hours     Float?
+  wordCount Int?
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

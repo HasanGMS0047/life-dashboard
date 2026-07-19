@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   }
 
   const payload = await request.json();
-  const { date, mood, energy, sleepHours, deeds } = payload ?? {};
+  const { date, mood, energy, sleepHours, waterLiters, deeds } = payload ?? {};
 
   if (!date || typeof date !== "string") {
     return NextResponse.json({ error: "Date is required." }, { status: 400 });
@@ -43,12 +43,14 @@ export async function POST(request: Request) {
       mood: typeof mood === "string" ? mood : null,
       energy: typeof energy === "number" ? energy : null,
       sleepHours: typeof sleepHours === "number" ? sleepHours : null,
+      waterLiters: typeof waterLiters === "number" ? waterLiters : null,
       deeds: deeds && typeof deeds === "object" ? deeds : {},
     },
     update: {
       mood: typeof mood === "string" ? mood : null,
       energy: typeof energy === "number" ? energy : null,
       sleepHours: typeof sleepHours === "number" ? sleepHours : null,
+      waterLiters: typeof waterLiters === "number" ? waterLiters : null,
       deeds: deeds && typeof deeds === "object" ? deeds : {},
     },
   });

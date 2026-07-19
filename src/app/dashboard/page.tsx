@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { MoodWidget } from "@/components/widgets/MoodWidget";
 import { SleepWidget } from "@/components/widgets/SleepWidget";
 import { EnergyWidget } from "@/components/widgets/EnergyWidget";
+import { WaterWidget } from "@/components/widgets/WaterWidget";
 import { KindDeedsWidget } from "@/components/widgets/KindDeedsWidget";
 import { JournalWidget } from "@/components/widgets/JournalWidget";
 import { LearningWidget } from "@/components/widgets/LearningWidget";
@@ -84,13 +85,13 @@ export default function DashboardHome() {
         </motion.div>
 
         {/* Bottom Row */}
-        <motion.div 
-          className="md:col-span-2"
+        <motion.div
+          className="md:col-span-1"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <KindDeedsWidget />
+          <WaterWidget />
         </motion.div>
 
         <motion.div
@@ -99,7 +100,7 @@ export default function DashboardHome() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <JournalWidget />
+          <KindDeedsWidget />
         </motion.div>
 
         <motion.div
@@ -108,7 +109,7 @@ export default function DashboardHome() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
         >
-          <LearningWidget />
+          <JournalWidget />
         </motion.div>
 
         <motion.div
@@ -117,7 +118,7 @@ export default function DashboardHome() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.7 }}
         >
-          <SocialWidget />
+          <LearningWidget />
         </motion.div>
 
         <motion.div
@@ -126,7 +127,7 @@ export default function DashboardHome() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.8 }}
         >
-          <HabitsWidget />
+          <SocialWidget />
         </motion.div>
 
         <motion.div
@@ -134,6 +135,15 @@ export default function DashboardHome() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.9 }}
+        >
+          <HabitsWidget />
+        </motion.div>
+
+        <motion.div
+          className="md:col-span-2"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 1.0 }}
         >
           <GoalsWidget />
         </motion.div>

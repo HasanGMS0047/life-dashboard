@@ -17,6 +17,7 @@ export async function GET() {
   return NextResponse.json(entries.map((entry) => ({
     ...entry,
     type: entry.type as "book" | "study",
+    wordCount: entry.wordCount ?? undefined,
     createdAt: entry.createdAt.toISOString(),
   })));
 }
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
   }
 
   const payload = await request.json();
-  const { type, title, hours } = payload ?? {};
+  const { type, title, hours, wordCount } = payload ?? {};
 
   if (type !== "book" && type !== "study") {
     return NextResponse.json({ error: "Invalid type." }, { status: 400 });
@@ -42,12 +43,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Study hours must be a positive number." }, { status: 400 });
   }
 
+  if (wordCount !== undefined && (typeof wordCount !== "number" || wordCount <= 0)) {
+    return NextResponse.json({ error: "Word count must be a positive number." }, { status: 400 });
+  }
+
   const entry = await prisma.learningEntry.create({
     data: {
       userId: session.user.id,
       type,
       title: title.trim(),
       hours: type === "study" ? hours : null,
+      wordCount: type === "book" && typeof wordCount === "number" ? wordCount : null,
     },
   });
 
@@ -56,6 +62,7 @@ export async function POST(request: Request) {
     type: entry.type as "book" | "study",
     title: entry.title,
     hours: entry.hours ?? undefined,
+    wordCount: entry.wordCount ?? undefined,
     createdAt: entry.createdAt.toISOString(),
   });
 }
