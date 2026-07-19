@@ -209,3 +209,32 @@ back as a separate, larger piece of work rather than guessed at blind
 across every page. Plan going in: prototype the Dashboard home page
 first, get a reaction, then carry that direction through the rest of
 the app.
+
+## UI overhaul, first pass: Dashboard home and journal perf
+
+- **Dashboard home restructured**: the 10 widgets used to sit in one
+  flat, unevenly-spanned grid inside a column narrower than the app
+  shell around it. Regrouped into three clearly labeled sections —
+  "Today" (mood, sleep, energy, water), "Journal", and "Your story"
+  (kind deeds, learning, people & places, habits, goals) — using the
+  shell's full width. The mood widget now spans the full row instead
+  of a cramped column, so the two-step mood picker lays out in far
+  fewer wrapped lines.
+- **Found the real cause of the Journal page feeling slow**: every
+  entry card's fade-in delay was `0.05 * index` with no cap, so a
+  history of 25 entries took over a second of pure animation delay
+  before the last card even started appearing, and it only got worse
+  the longer someone journaled. Capped it at 0.24s (Timeline and
+  Gallery already capped theirs the same way — Journal was the one
+  page that didn't). Verified with 25 seeded entries: the last card
+  now finishes fading in well under a second of animation time
+  instead of scaling unboundedly with entry count.
+- Replaced the home page's long per-card animation stagger (up to a
+  full second before the last widget appeared) with one quick shared
+  fade per section, so the page reads as loading at once rather than
+  trickling in.
+
+Still ahead: carrying this same layout language (section headings,
+capped/lighter motion) through the remaining pages — Journal's own
+composer/history layout, Timeline, Heart Patterns, Heatmap, Gallery,
+Account, and Life Replay.
