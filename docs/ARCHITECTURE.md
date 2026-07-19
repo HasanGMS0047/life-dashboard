@@ -79,26 +79,25 @@ related code:
    opaque black once exported without an alpha channel. Fix:
    `ctx.fillStyle = "#fff"; ctx.fillRect(...)` before `drawImage` in
    `src/lib/image.ts`'s `resizeImageFile`.
-6. **Moods are a two-tier system**, not a flat list (`src/lib/moods.ts`).
-   Five families (`MOOD_FAMILIES`) each own one of the five accent
-   colors and are unchanged from the original design (Cozy/terracotta,
-   Calm/sky, Grateful/mustard, Reflective/olive, Tender/blush). Under
-   each family sits `MOOD_OPTIONS`, ~39 specific moods total (e.g.
-   Tender also covers Sad, Down, Disappointed, Lonely, Hurt, Vulnerable,
-   Homesick, Wistful), ordered mild-to-intense within their family —
-   `getMoodIntensity` uses that ordering to pick how many steam-wisp
-   marks show on the mood-widget cup. A saved `mood` is always one of
-   the specific labels (or a bare family name, which is also a valid
-   mood in its own right and how every pre-existing entry still
-   resolves). Look up a mood's family/color with `getMoodFamily`/
-   `getMoodAccent`, never by string-matching the family list directly.
-   The `MoodPicker` component (`src/components/ui/mood-picker.tsx`) is
-   the two-step UI for this — pick a family banner, then the specific
-   mood within it — used by both the journal composer and the daily
-   mood widget. Heart Patterns rolls specific moods back up to family
-   for its correlation charts, so they stay 5 meaningful bars instead of
-   dozens of sparse ones. Sleep is hours (5–10 picker), energy is a
-   0–100 percentage, water is liters in 0.5 increments.
+6. **Moods are a flat, single-tier list** (`src/lib/moods.ts`) — 15
+   moods total, each declared with its own accent color and intensity
+   (1-3) directly, no family/banner grouping the user has to navigate
+   through. An earlier two-step "pick a family, then the mood inside
+   it" version (~39 moods across 5 families) was scrapped after it
+   read as an unnecessary extra step for something meant to take five
+   seconds; `MoodPicker` (`src/components/ui/mood-picker.tsx`) is now
+   one flat wrapped row, one tap to select. Moods still carry one of
+   the five theme accent colors (terracotta/sky/mustard/olive/blush)
+   so the teacup art, Timeline dots, and Heart Patterns chart stay
+   meaningful — `getMoodAccent`/`getMoodIntensity` are still the only
+   correct way to look those up, never string-match `MOODS` directly.
+   Entries saved under either retired system still resolve to a
+   correct color via a lookup-only `LEGACY_MOOD_ACCENT` map — no data
+   migration needed, nothing silently turns gray. Heart Patterns
+   buckets by accent color group (`ACCENT_GROUP_LABEL`: Warm/Calm/
+   Energized/Heavy/Tender) instead of the retired family names, so its
+   charts stay 5 meaningful bars. Sleep is hours (5–10 picker), energy
+   is a 0–100 percentage, water is liters in 0.5 increments.
 7. **Prisma 7 requires an explicit driver adapter** — `new PrismaClient()`
    with no arguments throws. `PrismaClientOptions` in Prisma 7 only
    accepts `adapter` or `accelerateUrl`, not a plain connection string.
@@ -216,7 +215,10 @@ related code:
     itself change after mount for reasons outside a click handler (an
     async fetch resolving, a parent re-rendering with new data) needs a
     `useEffect(() => setDerived(deriveFromProp(prop)), [prop])` to stay
-    in sync — a `useState` initializer alone is not enough.
+    in sync — a `useState` initializer alone is not enough. (This
+    specific instance no longer applies — `MoodPicker` was rewritten
+    as a flat, stateless list with no `expandedFamily` to derive — but
+    the general lesson still stands for any future derived state.)
 20. **Any full-bleed page outside the dashboard shell (login, register,
     the landing page) must branch its background on
     `useThemeStore((s) => s.theme)` itself** — `dashboard/layout.tsx`
@@ -269,9 +271,9 @@ src/lib/               Pure helpers + cross-store aggregation:
 src/components/widgets/  Dashboard home-page cards (Mood, Sleep, Energy,
                        Water, KindDeeds, Journal, Learning, Social,
                        Habits, Goals).
-src/components/ui/mood-picker.tsx  Two-step mood picker (family banner,
-                       then specific mood) — used by the journal
-                       composer and the Mood widget.
+src/components/ui/mood-picker.tsx  Flat, one-tap mood picker (15 moods,
+                       one row) — used by the journal composer and
+                       the Mood widget.
 src/components/ui/mood-intensity-mark.tsx  SVG steam-wisp overlay on the
                        mood-widget teacup, 1-3 wisps by intensity.
 src/components/dashboard/ Sidebar, TopBar, SearchBar, HeatmapQuilt,
