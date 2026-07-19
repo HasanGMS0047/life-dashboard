@@ -289,12 +289,15 @@ evenly instead of ragged-wrapping. The steam-wisp "intensity" marks
 above the mood icon were removed entirely (`mood-intensity-mark.tsx`
 deleted) — they existed to hint which of 3 moods sharing one color was
 meant; with a unique color per mood that job is already done by the
-color itself. `getMoodAccent`/`ACCENT_GROUP_LABEL` (5 buckets) are
-kept internally for Heart Patterns' charts, which still show 5
-meaningful bars rather than 15 sparse ones — the grouping just isn't
-exposed as something to pick from anymore. Legacy entries from either
-retired mood system still resolve to their old accent-family color, so
-nothing pre-existing lost its color.
+color itself. `getMoodAccent` (5 buckets) is kept internally for
+anything that still needs a small fixed grouping rather than 15 exact
+values. Legacy entries from either retired mood system still resolve
+to their old accent-family color, so nothing pre-existing lost its
+color.
+
+(Heart Patterns still bucketed into 5 accent groups at this point in
+the session — see "UI overhaul, second pass" below for when it moved
+to per-exact-mood instead.)
 
 ## Last of the illustrated widget icons → minimal icons
 

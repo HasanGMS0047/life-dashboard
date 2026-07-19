@@ -94,8 +94,9 @@ related code:
    `MOOD_PILL_CLASSES` in `moods.ts`. Each mood also still carries an
    `accent` (one of the 5 original theme colors: terracotta/sky/
    mustard/olive/blush) purely as an internal grouping — used by
-   `getMoodAccent` for Timeline dots, the legacy-entry fallback, and
-   Heart Patterns' bucketing, never shown as something to pick from.
+   `getMoodAccent` for Timeline dots and the legacy-entry color
+   fallback, never shown as something to pick from (Heart Patterns
+   used to bucket by this too; see below for why it doesn't anymore).
    The mood icon itself is a plain colored `lucide-react` `Coffee`
    mug (via `getMoodTextClass`), not custom art — the 5 illustrated
    teacup PNGs were removed since all 5 shared the same face under
