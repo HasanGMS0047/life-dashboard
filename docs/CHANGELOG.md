@@ -153,3 +153,59 @@ Pair with `docs/ARCHITECTURE.md` for how things fit together.
   mood-widget teacup, 1 to 3 depending on where the selected mood sits
   in its family's mild-to-intense ordering — a lightweight way to hint
   at intensity without needing new artwork per mood.
+
+## Bug sweep: mood picker, theme sync, mobile chart, plus journal editing
+
+Prompted by a report that the UI felt slow, buggy, and that dark/light
+mode was inconsistent — investigated each complaint rather than
+guessing at fixes.
+
+- **The mood picker bug, found**: `MoodPicker` computed which family to
+  show expanded exactly once, on mount. Since the real saved mood
+  always arrives a moment after the initial render (daily logs fetch
+  asynchronously after the dashboard mounts), the picker was showing
+  the wrong family expanded relative to the actual mood on nearly every
+  page load — almost certainly the main source of "buggy as heck."
+  Fixed by resyncing whenever the value prop actually changes. Also
+  stopped defaulting an unlogged mood to "Cozy" in the mood widget,
+  which visually implied a mood was already picked.
+- **The dark/light desync bug, found**: `login`, `register`, and the
+  landing page had a hardcoded daytime background image and light
+  overlay with no theme check at all, while the dashboard shell already
+  branched correctly on night mode. Since the theme setting persists
+  across client-side navigation within a tab, this meant surface/text
+  colors could correctly flip dark while the background behind them
+  stayed stuck showing a fixed daytime scene — exactly the "some part
+  stays light while the rest is dark" symptom reported. All three pages
+  now branch on theme the same way the dashboard already did.
+- **Mobile**: the monthly "teacup" chart's 12 month columns had no
+  responsive handling and visibly crushed into unreadable text on
+  narrow screens — fixed with horizontal scroll, the same pattern
+  already used for the heatmap grid. The register page wasn't getting
+  the same no-scroll treatment the login page got in an earlier pass —
+  now consistent. A full mobile pass across dashboard, journal, account,
+  and heatmap otherwise found no overflow or cramping.
+- **"Very slow", re-confirmed rather than re-guessed**: every API call
+  still pays the same round-trip cost documented earlier — Vercel's
+  Hobby tier pins the function to `iad1` (Virginia), and the requests
+  in this session were arriving via a Mumbai edge node, a genuine
+  ~13,000km round trip. Not fixable through app code; still needs a
+  hosting-tier decision.
+- **New: journal entries can now be edited or deleted — but only on the
+  day they were written.** `PATCH`/`DELETE /api/journal/[id]` both
+  check `isSameDay(entry.createdAt, now)` server-side and return 403 on
+  a past-day entry regardless of what the client sends; the UI swaps
+  the edit/delete buttons for a lock icon once a day has passed.
+  Verified by backdating a real entry directly in the database and
+  confirming both the UI and a direct API call correctly reject it.
+  Mood/sleep/energy/water didn't need equivalent changes — today's
+  values were already freely re-editable (the picker just re-saves),
+  and there's no UI that reaches a past day's log at all, so the
+  "locked after a day passes" rule already held there by omission.
+
+**Not yet done**: a full visual redesign of the UI (the user doesn't
+like the current look and asked for an overhaul) — deliberately held
+back as a separate, larger piece of work rather than guessed at blind
+across every page. Plan going in: prototype the Dashboard home page
+first, get a reaction, then carry that direction through the rest of
+the app.
