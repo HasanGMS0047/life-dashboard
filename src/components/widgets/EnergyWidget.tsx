@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import Image from "next/image";
+import { Zap } from "lucide-react";
 import { useDailyLogStore, getTodayKey } from "@/store/dailyLogStore";
 import { cn } from "@/lib/utils";
 
@@ -20,8 +20,8 @@ export function EnergyWidget() {
 
   return (
     <Card className="flex flex-col items-center justify-center p-6 gap-2 bg-background border-2 hover:border-terracotta/30 transition-colors">
-      <div className="relative w-20 h-20 drop-shadow-sm">
-        <Image src="/energy_icon.png" alt="Energy of the sun" fill sizes="80px" className="object-contain" />
+      <div className="w-20 h-20 flex items-center justify-center">
+        <Zap className="w-14 h-14 text-mustard" strokeWidth={1.5} />
       </div>
 
       <div className="text-center">

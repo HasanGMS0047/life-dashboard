@@ -295,3 +295,17 @@ meaningful bars rather than 15 sparse ones — the grouping just isn't
 exposed as something to pick from anymore. Legacy entries from either
 retired mood system still resolve to their old accent-family color, so
 nothing pre-existing lost its color.
+
+## Last of the illustrated widget icons → minimal icons
+
+Sleep, Energy, and Journal were the only three dashboard widgets still
+showing a custom illustrated PNG instead of a plain colored icon like
+every other widget already had (Water's droplet, Mood's mug, Learning's
+book, Habits' flame, Goals' target). Switched them to `lucide-react`
+icons too — `BedDouble` for Sleep, `Zap` for Energy, `NotebookPen` for
+Journal (deliberately not `BookOpen`, which the Learning widget and
+the sidebar's own Journal link already use) — so every widget on the
+dashboard now follows the same minimal-icon language. Removed the 3
+now-unused PNGs from `public/`. The landing page's hero illustration
+(`cozy_desk_hero.png`) is scene artwork, not a section icon, and was
+left as-is.
