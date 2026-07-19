@@ -1,23 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Shuffle } from "lucide-react";
 import { useJournalStore } from "@/store/journalStore";
 import { MOODS, MOOD_ACTIVE_CLASSES, MoodLabel } from "@/lib/moods";
+import { JOURNAL_PROMPTS, getRandomPrompt } from "@/lib/prompts";
 import { cn } from "@/lib/utils";
 
 export function JournalComposer() {
   const addEntry = useJournalStore((s) => s.addEntry);
   const [text, setText] = useState("");
   const [mood, setMood] = useState<MoodLabel>(MOODS[0].label);
+  // Starts on a fixed prompt so server- and client-rendered HTML match, then
+  // swaps to a random one after mount — picking randomly during the initial
+  // render would give the server and client different results and trigger
+  // a hydration mismatch.
+  const [prompt, setPrompt] = useState(JOURNAL_PROMPTS[0]);
+
+  useEffect(() => {
+    setPrompt(getRandomPrompt());
+  }, []);
 
   const handleSave = () => {
     if (!text.trim()) return;
     addEntry(text.trim(), mood);
     setText("");
+    setPrompt(getRandomPrompt(prompt.text));
   };
 
   return (
     <div className="bg-surface rounded-3xl border border-border p-6 flex flex-col gap-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-sm text-muted italic leading-snug">
+          {prompt.text}
+          {prompt.attribution && <span className="not-italic"> — {prompt.attribution}</span>}
+        </p>
+        <button
+          type="button"
+          onClick={() => setPrompt(getRandomPrompt(prompt.text))}
+          title="Try a different prompt"
+          className="shrink-0 text-muted hover:text-terracotta transition-colors"
+        >
+          <Shuffle className="w-4 h-4" />
+        </button>
+      </div>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}

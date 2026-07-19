@@ -5,6 +5,7 @@ export interface LearningEntry {
   type: "book" | "study";
   title: string;
   hours?: number;
+  wordCount?: number;
   createdAt: string;
 }
 
@@ -12,7 +13,7 @@ interface LearningState {
   entries: LearningEntry[];
   loaded: boolean;
   fetchEntries: () => Promise<void>;
-  addBook: (title: string) => Promise<void>;
+  addBook: (title: string, wordCount?: number) => Promise<void>;
   addStudySession: (title: string, hours: number) => Promise<void>;
 }
 
@@ -36,12 +37,12 @@ export const useLearningStore = create<LearningState>((set, get) => ({
       set({ loaded: true });
     }
   },
-  addBook: async (title) => {
+  addBook: async (title, wordCount) => {
     try {
       const res = await fetch("/api/learning", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "book", title }),
+        body: JSON.stringify({ type: "book", title, wordCount }),
       });
       if (!res.ok) return;
 
@@ -89,4 +90,14 @@ export function sumStudyHours(
   return entries
     .filter((e) => e.type === "study" && inPeriod(e, year, month))
     .reduce((sum, e) => sum + (e.hours ?? 0), 0);
+}
+
+export function sumWordsRead(
+  entries: LearningEntry[],
+  year: number = new Date().getFullYear(),
+  month?: number
+): number {
+  return entries
+    .filter((e) => e.type === "book" && inPeriod(e, year, month))
+    .reduce((sum, e) => sum + (e.wordCount ?? 0), 0);
 }
