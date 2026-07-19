@@ -11,6 +11,7 @@ import { useLearningStore } from "@/store/learningStore";
 import { useSocialStore } from "@/store/socialStore";
 import { useHabitStore } from "@/store/habitStore";
 import { useGoalStore } from "@/store/goalStore";
+import { useTaskStore } from "@/store/taskStore";
 
 export default function DashboardLayout({
   children,
@@ -26,6 +27,7 @@ export default function DashboardLayout({
   const fetchSocialEntries = useSocialStore((s) => s.fetchEntries);
   const fetchHabits = useHabitStore((s) => s.fetchHabits);
   const fetchGoals = useGoalStore((s) => s.fetchGoals);
+  const fetchTasks = useTaskStore((s) => s.fetchTasks);
 
   useEffect(() => {
     fetchJournalEntries();
@@ -34,7 +36,16 @@ export default function DashboardLayout({
     fetchSocialEntries();
     fetchHabits();
     fetchGoals();
-  }, [fetchJournalEntries, fetchDailyLogs, fetchLearningEntries, fetchSocialEntries, fetchHabits, fetchGoals]);
+    fetchTasks();
+  }, [
+    fetchJournalEntries,
+    fetchDailyLogs,
+    fetchLearningEntries,
+    fetchSocialEntries,
+    fetchHabits,
+    fetchGoals,
+    fetchTasks,
+  ]);
 
   return (
     <div

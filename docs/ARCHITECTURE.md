@@ -325,13 +325,40 @@ related code:
     fact; worth remembering explicitly before ever adding
     `transform`/`will-change` to that outer card, which would silently
     break every `fixed` element nested inside it.
+26. **`HelpModal` content is looked up by route, not hardcoded once.**
+    `PAGE_HELP` in `HelpModal.tsx` maps route prefixes to a page's help
+    items, matched via `usePathname()` with the exact same
+    most-specific-first, `/dashboard`-is-the-fallback convention as
+    `TopBar`'s `getPageTitle`. The two lookup tables are intentionally
+    separate (not shared/extracted) since they serve different
+    purposes — one a short label, one a content block — and the
+    duplication is small; if a third route-keyed lookup like this ever
+    shows up, that's the point to extract a shared "page directory."
+    Any new dashboard route should get an entry in `PAGE_HELP` (and in
+    `TopBar`'s `PAGE_TITLES`, and the `Sidebar` `navItems`) — nothing
+    enforces this at compile time, so it's easy to add a page and
+    forget one of the three.
+27. **Calendar's four views share one `selectedDate` and drill down,
+    they don't each maintain independent state.** `Calendar.tsx` owns
+    `selectedDate`/`view`; Week/Month/Year are intentionally read-only
+    rollups (`countTasksForDate`/`countTasksByDate` from
+    `taskStore.ts`) that only ever *navigate* (tapping a day/month
+    calls `onSelectDay`/`onSelectMonth`, which sets `selectedDate` and
+    switches `view`) — only `DayAgenda` calls
+    `addTask`/`toggleTask`/`removeTask`. Don't add task editing to
+    Week/Month/Year; that would duplicate the add/toggle/delete UI
+    four times over for no benefit, since Day is always one tap away.
+    A `Task`'s `date` is a plain `yyyy-MM-dd` string exactly like
+    `DailyMetric.date` and `Habit`/`Goal` use for their date keys —
+    same convention, no timezone-aware `DateTime` field for the
+    scheduled day.
 
 ## Where things live
 
 ```
 prisma/schema.prisma   User (real accounts), Journal, DailyMetric,
-                       LearningEntry, SocialEntry, Habit, Goal (all
-                       userId-scoped and persisted through Prisma).
+                       LearningEntry, SocialEntry, Habit, Goal, Task
+                       (all userId-scoped and persisted through Prisma).
 prisma.config.ts       Prisma 7 config (schema path, migrations path, DATABASE_URL).
 src/lib/prisma.ts      PrismaClient singleton — see note #7 re: driver adapter.
 src/lib/auth.ts        NextAuth authOptions (credentials provider, JWT callbacks).
@@ -343,9 +370,10 @@ src/types/next-auth.d.ts  Module augmentation adding `session.user.id`.
 src/store/             One Zustand store per domain: journalStore,
                        dailyLogStore (Mood/Sleep/Energy/Water are
                        draft-then-confirm, see note #24), learningStore,
-                       socialStore, habitStore, goalStore, themeStore —
-                       all fetch from user-scoped API routes and use
-                       in-memory caches (no `persist`).
+                       socialStore, habitStore, goalStore, taskStore
+                       (see note #27), themeStore — all fetch from
+                       user-scoped API routes and use in-memory caches
+                       (no `persist`).
 src/lib/               Pure helpers + cross-store aggregation:
                        moods.ts (two-tier mood system, see note #6),
                        garden.ts (habit-tracker plant growth, see
@@ -362,16 +390,21 @@ src/components/widgets/  Dashboard home-page cards (Mood, Sleep, Energy,
 src/components/ui/mood-picker.tsx  Flat, one-tap mood picker (15 moods,
                        each its own color, fixed grid) — used by the
                        journal composer and the Mood widget.
+src/components/calendar/  Calendar.tsx (view switcher + selectedDate,
+                       see note #27), DayAgenda/WeekRollup/MonthGrid/
+                       YearOverview — the four Calendar page views.
 src/components/dashboard/ Sidebar, TopBar, SearchBar, HeatmapQuilt,
                        TeacupChart, PageHeader (shared title+subtitle
                        block used by every secondary page), HelpModal
-                       (static "what does what" glossary, opened from
-                       the TopBar's `?` icon — its close handler must
+                       (page-specific "what's here" guide via
+                       `PAGE_HELP`, see note #26, opened from the
+                       TopBar's `?` icon — its close handler must
                        live on the full-viewport panel wrapper, not a
                        separate backdrop div, or backdrop clicks silently
                        no-op since the wrapper sits on top of it),
                        CheckInConfirmBar (fixed bottom bar for confirming
-                       staged Mood/Sleep/Energy/Water picks, rendered from
+                       staged Mood/Sleep/Energy/Water picks, with Undo,
+                       rendered from
                        dashboard/layout.tsx so it persists across page
                        navigation — see notes #24 and #25).
 src/components/replay/  ReplayShell (full-screen slideshow engine),
@@ -388,8 +421,8 @@ src/app/api/account/   GET — current user's name/email/preferences. PATCH —
                        required), and/or preferences (favoriteColor,
                        hobbies, pets). Backs the Account page.
 src/app/api/account/reset/  POST — deletes every row across Journal/
-                       DailyMetric/LearningEntry/SocialEntry/Habit/Goal
-                       scoped to the session's userId, in one
+                       DailyMetric/LearningEntry/SocialEntry/Habit/Goal/
+                       Task scoped to the session's userId, in one
                        transaction. Leaves the User row (credentials,
                        theme, preferences) untouched — clears logged
                        data, not the account.
@@ -408,10 +441,10 @@ src/app/api/journal/   GET/POST (list/create), [id]/ PATCH/DELETE (edit/
                        see engineering note #21). All check
                        getServerSession server-side before touching
                        Prisma.
-src/app/api/daily-log/, src/app/api/learning/, src/app/api/social/, src/app/api/habits/, src/app/api/goals/, src/app/api/theme/  User-scoped CRUD-like routes for the migrated domains.
-src/app/dashboard/*/    Page routes: home, journal, gallery, timeline,
-                       heatmap, patterns (Heart Patterns), account, replay
-                       (chooser). Protected by proxy.ts.
+src/app/api/daily-log/, src/app/api/learning/, src/app/api/social/, src/app/api/habits/, src/app/api/goals/, src/app/api/tasks/, src/app/api/theme/  User-scoped CRUD-like routes for the migrated domains.
+src/app/dashboard/*/    Page routes: home, calendar, journal, gallery,
+                       timeline, heatmap, patterns (Heart Patterns),
+                       account, replay (chooser). Protected by proxy.ts.
 src/app/replay/{monthly,yearly}/  Full-screen Replay routes — deliberately
                        outside the dashboard shell (no sidebar/topbar chrome).
 src/app/api/ai/reflect/  Server route calling local Ollama; always returns

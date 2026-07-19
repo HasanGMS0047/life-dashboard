@@ -493,3 +493,61 @@ left as-is.
   a batch of values being set up together, and Habits/Goals already
   have their own celebration/streak mechanics tied to the moment of
   the click itself.
+- Follow-up: `CheckInConfirmBar` now also has an **Undo** button next
+  to Confirm, calling a new `discardDraft` store action that clears
+  the staged picks without saving anything — a way to back out of a
+  check-in you started but don't want to log after all.
+
+## Help guide is now page-specific
+
+- The `?` guide used to show one long static list of every feature in
+  the app regardless of which page you opened it from. It now shows
+  only what's relevant to the current page — `HelpModal` reads
+  `usePathname()` and looks it up in a `PAGE_HELP` table (same
+  most-specific-first matching convention as `TopBar`'s route-aware
+  title), so opening it on the Journal page shows only Journal-related
+  items, opening it on Calendar shows only Calendar items, and so on.
+  `/dashboard` (Home) is the fallback entry and covers the widgets
+  that only live there (Mood/Sleep/Energy/Water, Kind Deeds, Learning,
+  People & Places, Your Garden, Goals).
+
+## Calendar: daily tasks with weekly/monthly/yearly rollups
+
+- The last of the three friend-suggested ideas from earlier in this
+  project, now built for real (previously scoped down to a lightweight
+  Goals extension when only two features were wanted at the time — see
+  "Goals, split into..." above; this is the fuller version).
+- New `Task` model (`id`, `userId`, `title`, `date` as `yyyy-MM-dd`,
+  `completed`, `createdAt`), its own `POST/GET /api/tasks` and
+  `PATCH/DELETE /api/tasks/[id]` routes, and `taskStore.ts` — all
+  following the exact same shape as `habitStore`/`goalStore`. Reset
+  Data now also clears tasks.
+- New **`/dashboard/calendar`** page (`src/components/calendar/`),
+  reachable from the Sidebar, with four views sharing one
+  `selectedDate`:
+  - **Day** — the only view where tasks are actually added, checked
+    off, or deleted. Prev/next day arrows, "Jump to today."
+  - **Week** — a 7-day rollup showing each day's `done/total` and a
+    small progress bar; tapping a day jumps into Day view for it.
+  - **Month** — a real calendar grid; each date shows a small
+    `done/total` fraction (green once complete, amber otherwise);
+    tapping a date jumps into Day view for it.
+  - **Year** — all 12 months at a glance with a completion count and
+    progress bar each; tapping a month jumps into Month view for it.
+  This gives a Year → Month → Week (peek) → Day (edit) drill-down:
+  only Day edits tasks, everything above it is a read-only rollup that
+  jumps you closer to the day you want, matching the "daily tasks,
+  then weekly/monthly/yearly *progress*" framing the feature was
+  originally requested with.
+- Added to the Sidebar (both desktop rail and mobile drawer, same
+  `navItems` array), `TopBar`'s route-aware title, and the Help guide.
+- Deliberately **not** wired into global Search — tasks don't have a
+  natural single-item destination the way journal entries or goals do
+  (a task's "page" is a specific day inside Calendar, which the page
+  doesn't yet support deep-linking to via URL), so it was left out
+  rather than pointing search results somewhere unhelpful.
+- Verified via Playwright: adding/completing tasks in Day view is
+  correctly reflected in Week's per-day fraction, Month's per-date
+  fraction and header stat, and Year's per-month stat; the new
+  Sidebar icon doesn't overflow the desktop rail now that it holds
+  eight items instead of seven.

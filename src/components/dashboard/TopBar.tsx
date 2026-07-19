@@ -11,6 +11,7 @@ import { HelpModal } from "@/components/dashboard/HelpModal";
 
 const PAGE_TITLES: { href: string; label: string }[] = [
   { href: "/dashboard/replay", label: "Life Replay" },
+  { href: "/dashboard/calendar", label: "Calendar" },
   { href: "/dashboard/heatmap", label: "Heatmap" },
   { href: "/dashboard/timeline", label: "Timeline" },
   { href: "/dashboard/journal", label: "Journal" },

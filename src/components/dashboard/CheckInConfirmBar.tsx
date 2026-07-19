@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Undo2 } from "lucide-react";
 import { useDailyLogStore } from "@/store/dailyLogStore";
 
 export function CheckInConfirmBar() {
   const draft = useDailyLogStore((s) => s.draft);
   const confirming = useDailyLogStore((s) => s.confirming);
   const confirmCheckIn = useDailyLogStore((s) => s.confirmCheckIn);
+  const discardDraft = useDailyLogStore((s) => s.discardDraft);
   const [justSaved, setJustSaved] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -48,6 +49,18 @@ export function CheckInConfirmBar() {
                     </span>
                   )}
                 </span>
+                <button
+                  onClick={() => {
+                    setFailed(false);
+                    discardDraft();
+                  }}
+                  disabled={confirming}
+                  title="Discard these picks"
+                  className="flex items-center gap-1.5 text-muted text-sm font-medium rounded-full px-3 py-1.5 hover:bg-black/5 hover:text-foreground transition-colors disabled:opacity-60"
+                >
+                  <Undo2 className="w-3.5 h-3.5" />
+                  Undo
+                </button>
                 <button
                   onClick={handleConfirm}
                   disabled={confirming}
