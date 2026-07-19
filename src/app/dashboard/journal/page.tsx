@@ -36,9 +36,12 @@ export default function JournalPage() {
         {entries.map((entry, i) => (
           <motion.div
             key={entry.id}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.05 * i }}
+            // Stagger only the first handful of cards — an unbounded 0.05s-per-entry
+            // delay meant a long journal history took seconds to finish fading in,
+            // reading as the page being slow to load.
+            transition={{ duration: 0.3, delay: Math.min(0.04 * i, 0.24) }}
           >
             <JournalEntryCard entry={entry} />
           </motion.div>

@@ -39,115 +39,61 @@ function DashboardWelcome() {
   );
 }
 
+function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className="flex items-baseline gap-3 mb-4">
+      <h2 className="font-serif text-xl font-semibold text-foreground">{title}</h2>
+      <span className="text-[11px] uppercase tracking-[0.14em] text-muted font-medium">
+        {eyebrow}
+      </span>
+    </div>
+  );
+}
+
+// A single quick fade for the whole page instead of a long per-card stagger —
+// ten cards each waiting their own 0.1-1.0s delay read as the page "loading slowly".
+const fadeIn = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.35 },
+};
+
 export default function DashboardHome() {
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      {/* Welcome Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-10"
-      >
+    <div className="max-w-5xl mx-auto py-6 md:py-8">
+      <motion.div {...fadeIn} className="mb-8 md:mb-10">
         <Suspense fallback={null}>
           <DashboardWelcome />
         </Suspense>
       </motion.div>
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Top Row */}
-        <motion.div 
-          className="md:col-span-2"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <MoodWidget />
-        </motion.div>
-        
-        <motion.div 
-          className="md:col-span-1"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
+      <motion.section {...fadeIn} className="mb-10">
+        <SectionHeading eyebrow="Check in" title="Today" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-3">
+            <MoodWidget />
+          </div>
           <SleepWidget />
-        </motion.div>
-        
-        <motion.div 
-          className="md:col-span-1"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
           <EnergyWidget />
-        </motion.div>
-
-        {/* Bottom Row */}
-        <motion.div
-          className="md:col-span-1"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
           <WaterWidget />
-        </motion.div>
+        </div>
+      </motion.section>
 
-        <motion.div
-          className="md:col-span-2"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-        >
+      <motion.section {...fadeIn} className="mb-10">
+        <SectionHeading eyebrow="Reflect" title="Journal" />
+        <JournalWidget />
+      </motion.section>
+
+      <motion.section {...fadeIn}>
+        <SectionHeading eyebrow="Grow" title="Your story" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <KindDeedsWidget />
-        </motion.div>
-
-        <motion.div
-          className="md:col-span-2"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-        >
-          <JournalWidget />
-        </motion.div>
-
-        <motion.div
-          className="md:col-span-2"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-        >
           <LearningWidget />
-        </motion.div>
-
-        <motion.div
-          className="md:col-span-2"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-        >
           <SocialWidget />
-        </motion.div>
-
-        <motion.div
-          className="md:col-span-2"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.9 }}
-        >
           <HabitsWidget />
-        </motion.div>
-
-        <motion.div
-          className="md:col-span-2"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 1.0 }}
-        >
           <GoalsWidget />
-        </motion.div>
-      </div>
+        </div>
+      </motion.section>
     </div>
   );
 }
