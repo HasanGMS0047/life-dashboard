@@ -121,3 +121,35 @@ Pair with `docs/ARCHITECTURE.md` for how things fit together.
   sync step could hang indefinitely against a connection pooler that
   doesn't support schema changes — switched it to use the direct
   (non-pooled) database connection instead.
+
+## Tracking expansion and mood system rework
+
+- **Water intake**: a new Water widget on the dashboard (0.5L-increment
+  buttons, a 2L/day reference point), stored per day alongside mood/
+  sleep/energy.
+- **Word count**: an optional word-count field on book/article entries
+  in the Learning widget, surfaced as a "Words read" stat.
+- **Journal prompts**: a rotating writing prompt/quote above the
+  composer, with a shuffle button and a fresh prompt after each save.
+  First version picked the prompt randomly during the initial render,
+  which made the server- and client-rendered HTML disagree and threw a
+  hydration error — fixed by rendering a fixed prompt first and only
+  randomizing after mount.
+- **Mood system rework**: expanded from 5 moods to ~39, grouped under
+  the original 5 as "families" (unchanged colors) — e.g. Tender/blush
+  now also covers Sad, Down, Disappointed, Lonely, Hurt, Vulnerable,
+  Homesick, Wistful. The Grateful/mustard family was reframed as
+  "activated/intense" to fit Fiery and Angry in alongside the positive
+  moods, since none of the original 5 colors was built for anger
+  specifically. A new two-step `MoodPicker` (pick a family banner, then
+  the specific mood within it) replaces the old flat 5-button row in
+  both the journal composer and the daily mood widget — moods under the
+  same banner are told apart by their label, the same way the original
+  five always were. Heart Patterns correlations now roll specific moods
+  back up to their family so the chart stays 5 meaningful bars instead
+  of dozens of sparse ones; old entries with only the original 5 labels
+  keep working unchanged.
+- **Mood intensity marks**: small SVG steam wisps layered above the
+  mood-widget teacup, 1 to 3 depending on where the selected mood sits
+  in its family's mild-to-intense ordering — a lightweight way to hint
+  at intensity without needing new artwork per mood.

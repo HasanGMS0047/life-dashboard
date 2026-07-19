@@ -39,8 +39,9 @@ is a recovery convenience, not the system of record.
   (`public/*.png`), serif headings (Lora) + sans body (Inter).
 - Five accent colors defined as CSS vars in `globals.css` and mapped to
   Tailwind color tokens via `@theme inline`: `terracotta`, `olive`,
-  `mustard`, `blush`, `sky`. Every mood, category, and chart in the app
-  maps onto one of these five.
+  `mustard`, `blush`, `sky`. Every category and chart in the app maps
+  onto one of these five; moods do too, but through a two-tier system —
+  see engineering note #6.
 - **Day/Night theme**: a `theme` store (`src/store/themeStore.ts`) drives
   a `data-theme="night"` attribute on `<html>` (applied by
   `src/components/ThemeSync.tsx`). Night-mode CSS variables live under
@@ -78,9 +79,26 @@ related code:
    opaque black once exported without an alpha channel. Fix:
    `ctx.fillStyle = "#fff"; ctx.fillRect(...)` before `drawImage` in
    `src/lib/image.ts`'s `resizeImageFile`.
-6. **Mood is always one of the five labels in `MOODS`**
-   (`src/lib/moods.ts`: Cozy, Calm, Grateful, Reflective, Tender), sleep
-   is hours (5–10 picker), energy is a 0–100 percentage.
+6. **Moods are a two-tier system**, not a flat list (`src/lib/moods.ts`).
+   Five families (`MOOD_FAMILIES`) each own one of the five accent
+   colors and are unchanged from the original design (Cozy/terracotta,
+   Calm/sky, Grateful/mustard, Reflective/olive, Tender/blush). Under
+   each family sits `MOOD_OPTIONS`, ~39 specific moods total (e.g.
+   Tender also covers Sad, Down, Disappointed, Lonely, Hurt, Vulnerable,
+   Homesick, Wistful), ordered mild-to-intense within their family —
+   `getMoodIntensity` uses that ordering to pick how many steam-wisp
+   marks show on the mood-widget cup. A saved `mood` is always one of
+   the specific labels (or a bare family name, which is also a valid
+   mood in its own right and how every pre-existing entry still
+   resolves). Look up a mood's family/color with `getMoodFamily`/
+   `getMoodAccent`, never by string-matching the family list directly.
+   The `MoodPicker` component (`src/components/ui/mood-picker.tsx`) is
+   the two-step UI for this — pick a family banner, then the specific
+   mood within it — used by both the journal composer and the daily
+   mood widget. Heart Patterns rolls specific moods back up to family
+   for its correlation charts, so they stay 5 meaningful bars instead of
+   dozens of sparse ones. Sleep is hours (5–10 picker), energy is a
+   0–100 percentage, water is liters in 0.5 increments.
 7. **Prisma 7 requires an explicit driver adapter** — `new PrismaClient()`
    with no arguments throws. `PrismaClientOptions` in Prisma 7 only
    accepts `adapter` or `accelerateUrl`, not a plain connection string.
@@ -177,6 +195,16 @@ related code:
     cancel it (`vercel remove <deployment-url> --yes`, since a stuck
     build won't self-cancel) and check whether it's connecting through a
     pooler again.
+18. **Never pick a random value inside `useState(() => ...)` or during
+    render in a "use client" component** — it still renders once on the
+    server for the initial HTML. If that pick is random (`Math.random()`,
+    array shuffle, etc.), the server and client computations disagree
+    and React throws a hydration mismatch. The journal composer's
+    writing-prompt feature hit this directly: `useState(() =>
+    getRandomPrompt())` picked a different prompt on the server than on
+    the client. Fix is to initialize with a fixed, deterministic value
+    and only randomize inside a `useEffect` (client-only, runs after
+    hydration) — see `JournalComposer.tsx`.
 
 ## Where things live
 
@@ -197,10 +225,18 @@ src/store/             One Zustand store per domain: journalStore,
                        goalStore, themeStore — all fetch from user-scoped
                        API routes and use in-memory caches (no `persist`).
 src/lib/               Pure helpers + cross-store aggregation:
-                       moods.ts, streak.ts, timeline.ts, search.ts,
-                       patterns.ts, backup.ts, image.ts, ai/ollama.ts.
+                       moods.ts (two-tier mood system, see note #6),
+                       prompts.ts (journal writing prompts/quotes),
+                       streak.ts, timeline.ts, search.ts, patterns.ts,
+                       backup.ts, image.ts, ai/ollama.ts.
 src/components/widgets/  Dashboard home-page cards (Mood, Sleep, Energy,
-                       KindDeeds, Journal, Learning, Social, Habits, Goals).
+                       Water, KindDeeds, Journal, Learning, Social,
+                       Habits, Goals).
+src/components/ui/mood-picker.tsx  Two-step mood picker (family banner,
+                       then specific mood) — used by the journal
+                       composer and the Mood widget.
+src/components/ui/mood-intensity-mark.tsx  SVG steam-wisp overlay on the
+                       mood-widget teacup, 1-3 wisps by intensity.
 src/components/dashboard/ Sidebar, TopBar, SearchBar, HeatmapQuilt,
                        TeacupChart.
 src/components/replay/  ReplayShell (full-screen slideshow engine),
