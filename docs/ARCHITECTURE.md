@@ -88,9 +88,14 @@ related code:
    seconds; `MoodPicker` (`src/components/ui/mood-picker.tsx`) is now
    one flat wrapped row, one tap to select. Moods still carry one of
    the five theme accent colors (terracotta/sky/mustard/olive/blush)
-   so the teacup art, Timeline dots, and Heart Patterns chart stay
-   meaningful — `getMoodAccent`/`getMoodIntensity` are still the only
-   correct way to look those up, never string-match `MOODS` directly.
+   so the mood-widget icon, Timeline dots, and Heart Patterns chart
+   stay meaningful — `getMoodAccent`/`getMoodIntensity` are still the
+   only correct way to look those up, never string-match `MOODS`
+   directly. The mood icon itself is a plain colored `lucide-react`
+   `Coffee` mug, not custom art — the 5 illustrated teacup PNGs were
+   removed since all 5 shared the same face under different paint,
+   so the icon route was simpler than commissioning 5 real
+   expressions.
    Entries saved under either retired system still resolve to a
    correct color via a lookup-only `LEGACY_MOOD_ACCENT` map — no data
    migration needed, nothing silently turns gray. Heart Patterns
