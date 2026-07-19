@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MOOD_FAMILIES, MOOD_ACTIVE_CLASSES, moodsInFamily, getMoodFamily, MoodFamily } from "@/lib/moods";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,14 @@ interface MoodPickerProps {
 // original moods always have been.
 export function MoodPicker({ value, onChange }: MoodPickerProps) {
   const [expandedFamily, setExpandedFamily] = useState<MoodFamily | undefined>(getMoodFamily(value));
+
+  // `value` often starts as a placeholder and gets replaced once the real
+  // saved mood loads asynchronously (daily logs fetch after mount) — a
+  // useState initializer only runs once, so without this the picker would
+  // keep showing the wrong family expanded relative to the actual mood.
+  useEffect(() => {
+    setExpandedFamily(getMoodFamily(value));
+  }, [value]);
 
   return (
     <div className="flex flex-col gap-2">
