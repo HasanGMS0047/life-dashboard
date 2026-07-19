@@ -16,6 +16,25 @@
   --mustard: #d4a373;
   --blush: #e2b4bd;
   --sky: #a8dadc;
+
+  /* One distinct color per mood (src/lib/moods.ts) — same soft watercolor
+     family as the accents above, just one hue per specific feeling instead
+     of five shared across three moods each. */
+  --mood-cozy: #B8695C;
+  --mood-grateful: #C98A3D;
+  --mood-fulfilled: #D98A5E;
+  --mood-calm: #7FB3C7;
+  --mood-relieved: #6FB8A0;
+  --mood-peaceful: #8E9FD1;
+  --mood-hopeful: #D9B24C;
+  --mood-motivated: #E08A3C;
+  --mood-proud: #C99A2E;
+  --mood-tired: #9C9184;
+  --mood-overwhelmed: #7C8A66;
+  --mood-angry: #B5533F;
+  --mood-lonely: #B08CA0;
+  --mood-sad: #8896A8;
+  --mood-hurt: #D189A0;
 }
 
 :root[data-theme="night"] {
@@ -33,6 +52,23 @@
   --mustard: #e6c58f;
   --blush: #f0cdd6;
   --sky: #93d9e8;
+
+  /* Same 15 mood hues, lightened to stay readable against the dark sky */
+  --mood-cozy: #d99184;
+  --mood-grateful: #e0ab63;
+  --mood-fulfilled: #eaab84;
+  --mood-calm: #8fd3e8;
+  --mood-relieved: #8fddc4;
+  --mood-peaceful: #aab8f0;
+  --mood-hopeful: #f0d080;
+  --mood-motivated: #f5a860;
+  --mood-proud: #e8c060;
+  --mood-tired: #b8ada0;
+  --mood-overwhelmed: #9db084;
+  --mood-angry: #d97a63;
+  --mood-lonely: #d0aec0;
+  --mood-sad: #a8b6c8;
+  --mood-hurt: #e8a8c0;
 }
 
 @theme inline {
