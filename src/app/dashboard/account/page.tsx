@@ -515,8 +515,8 @@ export default function AccountPage() {
         <h3 className="font-serif text-lg font-semibold text-terracotta mb-1">Reset Data</h3>
         <p className="text-sm text-muted mb-5">
           Permanently deletes your journal, mood/sleep/energy/water logs, learning, memories,
-          habits, and goals. Your account (name, email, password) stays — this only clears what
-          you&apos;ve logged. Export a backup first if you might want it back.
+          habits, goals, and calendar tasks. Your account (name, email, password) stays — this
+          only clears what you&apos;ve logged. Export a backup first if you might want it back.
         </p>
 
         {!resetConfirming ? (

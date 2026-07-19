@@ -551,3 +551,49 @@ left as-is.
   fraction and header stat, and Year's per-month stat; the new
   Sidebar icon doesn't overflow the desktop rail now that it holds
   eight items instead of seven.
+
+## Calendar fits without scrolling; a site-wide mobile audit
+
+- Month view needed to scroll to see past roughly the third week —
+  measured at a common 1280×800 desktop viewport, the page needed
+  936px of height but only had 622px visible. The single biggest cost
+  was `aspect-square` day cells: at a fixed `max-w-3xl` card width,
+  each cell's height was locked to its width (~95px), times 6 rows.
+  Switched to a fixed `h-10 sm:h-12` instead, which decouples row
+  height from column width — cells stay wide enough to read a date
+  and a `done/total` fraction, but don't grow tall just because the
+  card is wide. Combined with dropping the shared `PageHeader` in
+  favor of one compact title+view-switcher row, and trimming Card
+  padding across all four calendar views (`p-6` → `p-3 sm:p-4`), the
+  same 1280×800 check now measures 622px needed for 622px available —
+  an exact fit, verified at mobile (375) and tablet (768) widths too.
+  Day/Week/Year kept their own layouts but got the same padding trim
+  and smaller header text for visual consistency across the four
+  views.
+- Audited every dashboard page at 375px and 768px widths for
+  horizontal overflow — found none anywhere; the app's existing
+  Tailwind classes were already responsive throughout. Two real,
+  narrower issues turned up on inspection and were fixed:
+  - The Home page's welcome heading was a fixed `text-4xl` with a
+    forced `<br/>` between the greeting and subtitle, which wrapped
+    to 3–4 lines on a phone-width screen before any real content was
+    visible. Made responsive (`text-2xl sm:text-3xl md:text-4xl`),
+    matching the two-line layout it already had on desktop.
+  - The Account page's Reset Data description still listed only
+    "journal, mood/sleep/energy/water logs, learning, memories,
+    habits, and goals" — missed adding calendar tasks to the copy
+    when the reset route itself was updated to delete them. Fixed the
+    wording; the actual delete behavior was already correct.
+- Also spot-checked (all clean, no changes needed): the mobile nav
+  drawer, the page-specific Help modal, and `CheckInConfirmBar` all
+  render correctly at 375px with no overflow or overlap.
+- **Found, not fixed — flagged for a follow-up**: `src/lib/backup.ts`
+  (Account page's Export/Import) reads and writes `localStorage` keys
+  like `life-dashboard-journal` that predate the migration to
+  Postgres-backed stores. No store writes to `localStorage` anymore
+  (confirmed: no store in `src/store/` uses Zustand's `persist`
+  middleware), so Export currently produces a near-empty file and
+  Import writes to keys nothing reads — this is unrelated to mobile
+  layout, predates this session's work, and is a real correctness bug
+  worth a dedicated fix (rewriting it to pull from/push to the actual
+  API routes) rather than a quick patch bundled into this pass.

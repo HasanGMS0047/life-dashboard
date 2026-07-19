@@ -30,7 +30,7 @@ function DashboardWelcome() {
       : "Welcome back.";
 
   return (
-    <h1 className="font-serif text-4xl text-foreground font-semibold leading-snug">
+    <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-foreground font-semibold leading-snug">
       {greeting} <br />
       <span className="text-muted">
         {isFirstVisit ? "Your story starts here." : "The home fire is warm."}

@@ -352,6 +352,40 @@ related code:
     `DailyMetric.date` and `Habit`/`Goal` use for their date keys —
     same convention, no timezone-aware `DateTime` field for the
     scheduled day.
+28. **`aspect-square` grid cells make row height a function of column
+    width, which silently breaks "fits in one screen" for any grid
+    with more than a couple of rows.** `MonthGrid`'s calendar cells
+    were originally `aspect-square` inside a `max-w-3xl`-capped card:
+    at 7 columns, each cell computed out to ~95px, so 6 rows of weeks
+    plus the weekday-label row plus the page header added up to needing
+    ~936px on a common 1280×800 desktop viewport — with only ~622px of
+    actual scrollable room, meaning a third of the calendar was below
+    the fold on a completely ordinary screen. Fixed by giving cells an
+    explicit height (`h-10 sm:h-12`) instead of deriving it from width
+    — decouples row height from column width entirely, so widening the
+    card (more columns of space) no longer also makes it taller. Any
+    future dense grid (more calendar-style views, a photo grid, etc.)
+    should default to an explicit height unless the design specifically
+    wants cells that scale with available width.
+29. **`src/lib/backup.ts`'s Export/Import is currently non-functional.**
+    It reads/writes `localStorage` keys like `life-dashboard-journal`,
+    which was how the app persisted data *before* the migration to
+    Postgres-backed stores (see "Dual data models" in project history).
+    No store under `src/store/` uses Zustand's `persist` middleware
+    anymore — confirmed by grep, zero matches — so those
+    `localStorage` keys are never written to by the current app, which
+    means Export produces a near-empty file and Import silently does
+    nothing useful. This predates the Calendar/mobile work in this
+    session; found while checking the Account page's Reset Data flow
+    (which explicitly tells users to "export a backup first" — a
+    broken promise as things stand). Fixing this properly means
+    rewriting both directions to go through the real API routes
+    (`/api/journal`, `/api/daily-log`, `/api/learning`, `/api/social`,
+    `/api/habits`, `/api/goals`, `/api/tasks`) instead of
+    `localStorage` — not done yet, flagged for a dedicated pass since
+    Import in particular needs a real design decision (merge vs.
+    replace existing data, how to handle partial failures across 7
+    domains) rather than a quick patch.
 
 ## Where things live
 
@@ -491,10 +525,13 @@ machine with the Vercel CLI logged in.
   the `md` breakpoint), full-bleed shell below `md`, boxed floating-card
   shell at `md`+. See `src/app/dashboard/layout.tsx`, `Sidebar.tsx`,
   `TopBar.tsx`.
-- Data backup: the app keeps a browser-based export/import flow on the
-  Account page (`src/lib/backup.ts`) for convenience, but the primary
-  user data lives in Postgres — backup is a recovery tool, not the
-  system of record.
+- Data backup: the Account page has an Export/Import flow
+  (`src/lib/backup.ts`) that's currently **broken, not just
+  incomplete** — see engineering note #28. Primary user data lives in
+  Postgres regardless; backup was only ever meant to be a recovery
+  convenience, not the system of record, but a broken recovery
+  convenience is worse than an absent one since it looks like it
+  worked.
 - **A known, unresolved performance characteristic**: every API route on
   production takes ~350–500ms regardless of what it does, including
   routes that touch zero database calls — ruling out query cost as the
