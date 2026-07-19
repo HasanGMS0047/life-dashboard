@@ -30,20 +30,23 @@ export function Calendar() {
   };
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex rounded-full border border-border p-0.5 w-fit mx-auto">
-        {VIEWS.map((v) => (
-          <button
-            key={v.key}
-            onClick={() => setView(v.key)}
-            className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium transition-colors",
-              view === v.key ? "bg-terracotta/15 text-terracotta" : "text-muted hover:text-foreground"
-            )}
-          >
-            {v.label}
-          </button>
-        ))}
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-2">
+        <h1 className="font-serif text-lg font-semibold text-foreground">Your Calendar</h1>
+        <div className="flex rounded-full border border-border p-0.5 w-fit">
+          {VIEWS.map((v) => (
+            <button
+              key={v.key}
+              onClick={() => setView(v.key)}
+              className={cn(
+                "px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors",
+                view === v.key ? "bg-terracotta/15 text-terracotta" : "text-muted hover:text-foreground"
+              )}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {view === "day" && <DayAgenda date={selectedDate} onChangeDate={setSelectedDate} />}

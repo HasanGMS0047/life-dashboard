@@ -21,30 +21,30 @@ export function WeekRollup({
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
   return (
-    <Card className="flex flex-col gap-4 p-6 bg-background">
+    <Card className="flex flex-col gap-3 p-3 sm:p-4 bg-background">
       <div className="flex items-center justify-between">
         <button
           onClick={() => onChangeDate(subWeeks(date, 1))}
-          className="w-8 h-8 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
+          className="w-7 h-7 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-3.5 h-3.5" />
         </button>
         <div className="text-center">
-          <p className="font-serif text-lg font-semibold text-foreground">
+          <p className="text-sm font-semibold text-foreground">
             {format(weekStart, "MMM d")} – {format(weekEnd, "MMM d, yyyy")}
           </p>
           <button
             onClick={() => onChangeDate(new Date())}
-            className="text-xs text-terracotta font-medium hover:underline"
+            className="text-[11px] text-terracotta font-medium hover:underline"
           >
             This week
           </button>
         </div>
         <button
           onClick={() => onChangeDate(addWeeks(date, 1))}
-          className="w-8 h-8 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
+          className="w-7 h-7 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
