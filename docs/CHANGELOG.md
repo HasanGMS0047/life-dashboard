@@ -597,3 +597,45 @@ left as-is.
   layout, predates this session's work, and is a real correctness bug
   worth a dedicated fix (rewriting it to pull from/push to the actual
   API routes) rather than a quick patch bundled into this pass.
+
+## Round two: trimming every page's header/padding, not just Calendar
+
+- Follow-up request: apply the same "cut unnecessary space" treatment
+  from Calendar and the Home hero to every other page, as long as
+  pages with genuinely more content than fits (Home's widget stack,
+  Account's settings, a growing Journal entry list) keep scrolling
+  normally — scrolling itself was never the problem, wasted chrome
+  above the fold was.
+- **`PageHeader`** (used by Journal, Timeline, Gallery, Heart
+  Patterns, Heatmap, Account, and the Replay chooser — 7 pages from
+  one component): title `text-4xl` → `text-2xl sm:text-3xl md:text-4xl`,
+  subtitle and margins scaled down the same way. Every page using it
+  got shorter mobile headers for free from this one change.
+- Trimmed every page's outer `py-8` to `py-4 sm:py-6 md:py-8`
+  (Timeline, Gallery, Replay, Heatmap, Journal, Patterns, Account,
+  Home), and the `p-6` Card padding on Heart Patterns' three cards and
+  every card on Account down to `p-4 sm:p-5 md:p-6`, with matching
+  `mt-`/`mb-`/`gap-` reductions between sections. `TeacupChart` (used
+  on the Heatmap page) got the same trim on its own outer
+  margin/padding/heading, since a fixed `mt-8`/`p-6`/`mb-6` was adding
+  real height on every screen size regardless of the chart itself.
+  Desktop sizes (`md:` breakpoint) were left exactly as they were —
+  only mobile and the space between mobile and desktop actually
+  shrank.
+- Home's section gaps (`mb-10` between Today/Journal/Your story)
+  scaled down to `mb-6 sm:mb-8 md:mb-10` for the same reason.
+- Deliberately **not** touched: individual widget Card padding on the
+  Home page (Mood/Sleep/Energy/Water/Habits/Goals/etc. all still use a
+  flat `p-6`). Those already read fine at every width tested and
+  touching all ten widget files for a marginal ~8px-per-side saving
+  wasn't worth the risk of introducing a real regression for a
+  cosmetic one.
+- Re-ran the same 375px/768px audit from the pass above after these
+  changes: zero horizontal overflow anywhere (unchanged, still good),
+  and every scrollable page needs meaningfully less scrolling on
+  mobile — Account dropped from 2159px to 1902px of content height,
+  Home from 2953px to 2761px, Heart Patterns from 794px to 649px,
+  Heatmap from 840px to 719px, all against the same 611px of visible
+  height. Confirmed at 1400×900 desktop that nothing changed there —
+  screenshots before/after are visually identical above the `md`
+  breakpoint.

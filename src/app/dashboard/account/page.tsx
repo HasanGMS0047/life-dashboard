@@ -269,10 +269,10 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
+    <div className="max-w-2xl mx-auto py-4 sm:py-6 md:py-8">
       <PageHeader title="Your Account." subtitle="Make this space feel like yours." />
 
-      <Card className="p-6 bg-background border-2 flex items-center justify-between gap-4 flex-wrap">
+      <Card className="p-4 sm:p-5 md:p-6 bg-background border-2 flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4 min-w-0">
           <div
             className={cn(
@@ -300,7 +300,7 @@ export default function AccountPage() {
         </Button>
       </Card>
 
-      <Card className="p-6 bg-background border-2 mt-6">
+      <Card className="p-4 sm:p-5 md:p-6 bg-background border-2 mt-4 sm:mt-5 md:mt-6">
         <h3 className="font-serif text-lg font-semibold text-foreground mb-1">Account</h3>
         <p className="text-sm text-muted mb-5">Update your name or password.</p>
 
@@ -359,7 +359,7 @@ export default function AccountPage() {
         </form>
       </Card>
 
-      <Card className="p-6 bg-background border-2 mt-6">
+      <Card className="p-4 sm:p-5 md:p-6 bg-background border-2 mt-4 sm:mt-5 md:mt-6">
         <h3 className="font-serif text-lg font-semibold text-foreground mb-1">Preferences</h3>
         <p className="text-sm text-muted mb-5">A few little things that make this you.</p>
 
@@ -418,7 +418,7 @@ export default function AccountPage() {
         {prefsLoading && <p className="text-sm mt-4 text-muted">Saving...</p>}
       </Card>
 
-      <Card className="p-6 bg-background border-2 mt-6">
+      <Card className="p-4 sm:p-5 md:p-6 bg-background border-2 mt-4 sm:mt-5 md:mt-6">
         <h3 className="font-serif text-lg font-semibold text-foreground mb-1">Appearance</h3>
         <p className="text-sm text-muted mb-5">
           Switch between a sunlit cottage and a quiet, moonlit night.
@@ -467,7 +467,7 @@ export default function AccountPage() {
         </div>
       </Card>
 
-      <Card className="p-6 bg-background border-2 mt-6">
+      <Card className="p-4 sm:p-5 md:p-6 bg-background border-2 mt-4 sm:mt-5 md:mt-6">
         <h3 className="font-serif text-lg font-semibold text-foreground mb-1">Your Data</h3>
         <p className="text-sm text-muted mb-5">
           Your story is safely stored in your account, so it follows you to any device.
@@ -511,7 +511,7 @@ export default function AccountPage() {
         )}
       </Card>
 
-      <Card className="p-6 bg-background border-2 border-terracotta/30 mt-6">
+      <Card className="p-4 sm:p-5 md:p-6 bg-background border-2 border-terracotta/30 mt-4 sm:mt-5 md:mt-6">
         <h3 className="font-serif text-lg font-semibold text-terracotta mb-1">Reset Data</h3>
         <p className="text-sm text-muted mb-5">
           Permanently deletes your journal, mood/sleep/energy/water logs, learning, memories,

@@ -32,8 +32,10 @@ export function TeacupChart() {
   const getCupAccent = (index: number) => ACCENTS[index % ACCENTS.length];
 
   return (
-    <div className="w-full mt-8 p-6 bg-surface rounded-3xl border border-border shadow-sm flex flex-col items-center">
-      <h3 className="font-serif text-xl text-foreground font-semibold mb-6">Moments of Cheer by Month</h3>
+    <div className="w-full mt-4 sm:mt-6 md:mt-8 p-4 sm:p-5 md:p-6 bg-surface rounded-3xl border border-border shadow-sm flex flex-col items-center">
+      <h3 className="font-serif text-lg sm:text-xl text-foreground font-semibold mb-3 sm:mb-4 md:mb-6">
+        Moments of Cheer by Month
+      </h3>
 
       <div className="w-full overflow-x-auto scrollbar-hide">
         <div className="flex items-end justify-between gap-2 min-w-[600px] h-[260px] px-4">

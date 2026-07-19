@@ -19,12 +19,12 @@ export default function HeartPatternsPage() {
   const trend = getRecentTrend(logs, 14);
 
   return (
-    <div className="max-w-3xl mx-auto py-8 flex flex-col gap-6">
+    <div className="max-w-3xl mx-auto py-4 sm:py-6 md:py-8 flex flex-col gap-4 sm:gap-5 md:gap-6">
       <PageHeader title="Heart Patterns." subtitle="The quiet rhythms behind your days." className="mb-2" />
 
       {/* Mood Rhythm */}
-      <Card className="p-6 bg-background border-2">
-        <div className="flex items-center gap-2 mb-4">
+      <Card className="p-4 sm:p-5 md:p-6 bg-background border-2">
+        <div className="flex items-center gap-2 mb-3 md:mb-4">
           <Heart className="w-4 h-4 text-terracotta" />
           <h3 className="font-serif text-lg font-semibold text-foreground">Mood Rhythm</h3>
         </div>
@@ -55,8 +55,8 @@ export default function HeartPatternsPage() {
       </Card>
 
       {/* Mood & Body correlation */}
-      <Card className="p-6 bg-background border-2">
-        <div className="flex items-center gap-2 mb-4">
+      <Card className="p-4 sm:p-5 md:p-6 bg-background border-2">
+        <div className="flex items-center gap-2 mb-3 md:mb-4">
           <Zap className="w-4 h-4 text-mustard" />
           <h3 className="font-serif text-lg font-semibold text-foreground">Mood &amp; Body</h3>
         </div>
@@ -91,8 +91,8 @@ export default function HeartPatternsPage() {
       </Card>
 
       {/* Two-week trend */}
-      <Card className="p-6 bg-background border-2">
-        <div className="flex items-center gap-2 mb-4">
+      <Card className="p-4 sm:p-5 md:p-6 bg-background border-2">
+        <div className="flex items-center gap-2 mb-3 md:mb-4">
           <Moon className="w-4 h-4 text-sky" />
           <h3 className="font-serif text-lg font-semibold text-foreground">Two-Week Rhythm</h3>
         </div>
