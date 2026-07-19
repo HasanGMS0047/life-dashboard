@@ -1,9 +1,12 @@
 import { create } from "zustand";
 
+export type GoalTimeframe = "month" | "vision";
+
 export interface Goal {
   id: string;
   title: string;
   progress: number;
+  timeframe: GoalTimeframe;
   createdAt: string;
   completedAt?: string;
 }
@@ -12,7 +15,7 @@ interface GoalState {
   goals: Goal[];
   loaded: boolean;
   fetchGoals: () => Promise<void>;
-  addGoal: (title: string) => Promise<void>;
+  addGoal: (title: string, timeframe?: GoalTimeframe) => Promise<void>;
   removeGoal: (id: string) => Promise<void>;
   adjustProgress: (id: string, delta: number) => Promise<void>;
 }
@@ -37,12 +40,12 @@ export const useGoalStore = create<GoalState>((set, get) => ({
       set({ loaded: true });
     }
   },
-  addGoal: async (title) => {
+  addGoal: async (title, timeframe = "month") => {
     try {
       const res = await fetch("/api/goals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title }),
+        body: JSON.stringify({ title, timeframe }),
       });
       if (!res.ok) return;
 

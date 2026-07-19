@@ -283,6 +283,17 @@ related code:
     before this click" vs. "fully watered after", entirely from the
     in-memory habit list, so the celebration burst never needs its own
     round-trip or its own copy of the streak logic.
+23. **`Goal.timeframe` is set once at creation and never changes.**
+    A goal is either `"month"` or `"vision"` from the moment it's
+    added (`GoalsWidget`'s segmented toggle picks which one `addGoal`
+    sends), and `PATCH /api/goals/[id]` — used only for progress/
+    completion — never touches it. This mirrors how a goal's `title`
+    is already not editable after creation: if a goal turns out to be
+    the wrong timeframe, delete and re-add it rather than expecting an
+    edit path. If a "promote this month's goal to vision" or "convert
+    a finished vision into a fresh month goal" flow is ever wanted,
+    that's new product surface, not a bug in the current one-way
+    design.
 
 ## Where things live
 
@@ -312,7 +323,9 @@ src/lib/               Pure helpers + cross-store aggregation:
 src/components/widgets/  Dashboard home-page cards (Mood, Sleep, Energy,
                        Water, KindDeeds, Journal, Learning, Social,
                        Habits ("Your Garden" — habit list + PlantVisual +
-                       WaterCelebration, see note #22), Goals).
+                       WaterCelebration, see note #22), Goals (split into
+                       "Six-month vision" / "This month" sections by
+                       `Goal.timeframe`, see note #23)).
 src/components/ui/mood-picker.tsx  Flat, one-tap mood picker (15 moods,
                        each its own color, fixed grid) — used by the
                        journal composer and the Mood widget.

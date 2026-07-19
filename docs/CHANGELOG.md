@@ -434,3 +434,29 @@ left as-is.
 - Verified via Playwright: partially completing habits produces no
   burst, completing the last one does, and both the burst and the
   toast clean up on their own afterward.
+
+## Goals, split into "this month" and a six-month vision
+
+- Scoped-down version of a friend-suggested "six-month vision → monthly
+  goals" ladder: rather than a new system, the existing `Goal` model
+  gained one field, `timeframe` (`"month" | "vision"`, defaults to
+  `"month"` so every pre-existing goal is unaffected). No new page, no
+  new store, no new API route — `GoalsWidget` just groups by it.
+- **`GoalsWidget`**: when a vision goal exists, the widget shows a
+  "Six-month vision" section above "This month", each using the same
+  `GoalRow` (progress bar, +/-10% buttons, remove) — extracted as a
+  small subcomponent since it's now rendered twice. If there are no
+  vision goals yet, the month list renders exactly as before with no
+  extra section header, so existing users see no change until they
+  opt in. Adding a goal now has a small segmented "This month /
+  Six-month vision" toggle above the input, defaulting to "This
+  month".
+- Server-side: `POST /api/goals` accepts an optional `timeframe`,
+  validated to `"month"` or `"vision"` (400 on anything else); `GET`
+  returns it. `PATCH` (progress updates) is untouched — a goal's
+  timeframe is set once at creation, not editable after, matching how
+  a goal's title already isn't editable either.
+- Verified via Playwright: month-only goals show no vision section,
+  adding a vision goal shows both sections in the right order, and the
+  progress +/- buttons still work correctly after `GoalRow` was
+  extracted out of the widget.
