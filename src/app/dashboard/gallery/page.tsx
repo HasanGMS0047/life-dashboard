@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { Users, MapPin, Heart, LucideIcon } from "lucide-react";
 import { useSocialStore, SocialType } from "@/store/socialStore";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 import { cn } from "@/lib/utils";
 
 const TYPE_ICON: Record<SocialType, LucideIcon> = {
@@ -37,17 +38,7 @@ export default function GalleryPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-10 text-center"
-      >
-        <h1 className="font-serif text-4xl text-foreground font-semibold leading-snug">
-          Memory Gallery.
-        </h1>
-        <p className="text-muted text-lg mt-2 font-medium">The people and places you kept.</p>
-      </motion.div>
+      <PageHeader title="Memory Gallery." subtitle="The people and places you kept." />
 
       {entries.length === 0 ? (
         <div className="text-center text-muted py-16">

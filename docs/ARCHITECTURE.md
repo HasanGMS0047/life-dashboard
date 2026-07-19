@@ -107,11 +107,16 @@ related code:
    `getMoodIntensity` or `mood-intensity-mark.tsx`.
    Entries saved under either retired system still resolve to a
    correct (accent-family) color via a lookup-only `LEGACY_MOOD_ACCENT`
-   map — no data migration needed, nothing silently turns gray. Heart
-   Patterns buckets by accent color group (`ACCENT_GROUP_LABEL`: Warm/
-   Calm/Energized/Heavy/Tender) instead of the retired family names, so
-   its charts stay 5 meaningful bars. Sleep is hours (5–10 picker), energy
-   is a 0–100 percentage, water is liters in 0.5 increments.
+   map — no data migration needed, nothing silently turns gray.
+   **Heart Patterns works per exact mood, not per accent group** —
+   `computeMoodCounts`/`computeMoodCorrelations` (`src/lib/patterns.ts`)
+   count/average by the real mood label and color it via
+   `getMoodColorVar`, so what you see on that page always matches what
+   you tapped in the picker. The old `ACCENT_GROUP_LABEL` bucket-name
+   map (Warm/Calm/Energized/Heavy/Tender) was removed along with this
+   — nothing renders grouped-by-accent mood data anymore. Sleep is
+   hours (5–10 picker), energy is a 0–100 percentage, water is liters
+   in 0.5 increments.
 7. **Prisma 7 requires an explicit driver adapter** — `new PrismaClient()`
    with no arguments throws. `PrismaClientOptions` in Prisma 7 only
    accepts `adapter` or `accelerateUrl`, not a plain connection string.
@@ -289,7 +294,8 @@ src/components/ui/mood-picker.tsx  Flat, one-tap mood picker (15 moods,
                        each its own color, fixed grid) — used by the
                        journal composer and the Mood widget.
 src/components/dashboard/ Sidebar, TopBar, SearchBar, HeatmapQuilt,
-                       TeacupChart.
+                       TeacupChart, PageHeader (shared title+subtitle
+                       block used by every secondary page).
 src/components/replay/  ReplayShell (full-screen slideshow engine),
                        AnimatedNumber, and scene primitives
                        (Title/Stats/Quote/Achievement/List).

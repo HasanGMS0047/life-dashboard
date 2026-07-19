@@ -1,70 +1,70 @@
 import { format, subDays } from "date-fns";
 import { DailyLog } from "@/store/dailyLogStore";
 import { JournalEntry } from "@/store/journalStore";
-import { ACCENTS, ACCENT_GROUP_LABEL, AccentKey, getMoodAccent } from "@/lib/moods";
+import { getMoodColorVar } from "@/lib/moods";
 
 export interface MoodCount {
   mood: string;
-  accent: AccentKey;
+  color: string;
   count: number;
 }
 
-// Counts how often each mood color group was logged, combining the daily
-// mood picker and journal entry tags (both are real signals of how a day
-// felt) — grouped by color rather than by exact label so the chart stays
-// five meaningful bars instead of fifteen-plus sparse ones.
+// Counts how often each exact mood was logged, combining the daily mood
+// picker and journal entry tags (both are real signals of how a day felt).
+// Only moods that were actually logged are returned, sorted most-logged
+// first — with a unique color per mood (see src/lib/moods.ts) this stays
+// readable without needing to fall back to grouped buckets.
 export function computeMoodCounts(
   logs: Record<string, DailyLog>,
   journalEntries: JournalEntry[]
 ): MoodCount[] {
-  const counts: Record<AccentKey, number> = Object.fromEntries(
-    ACCENTS.map((a) => [a, 0])
-  ) as Record<AccentKey, number>;
+  const counts: Record<string, number> = {};
 
   for (const log of Object.values(logs)) {
-    if (log.mood) counts[getMoodAccent(log.mood)] += 1;
+    if (log.mood) counts[log.mood] = (counts[log.mood] ?? 0) + 1;
   }
   for (const entry of journalEntries) {
-    if (entry.mood) counts[getMoodAccent(entry.mood)] += 1;
+    if (entry.mood) counts[entry.mood] = (counts[entry.mood] ?? 0) + 1;
   }
 
-  return ACCENTS.map((a) => ({ mood: ACCENT_GROUP_LABEL[a], accent: a, count: counts[a] }));
+  return Object.entries(counts)
+    .map(([mood, count]) => ({ mood, color: getMoodColorVar(mood), count }))
+    .sort((a, b) => b.count - a.count);
 }
 
 export interface MoodCorrelation {
   mood: string;
-  accent: AccentKey;
+  color: string;
   count: number;
   avgSleep: number;
   avgEnergy: number;
 }
 
-// For each mood color group logged via the daily picker, averages that
-// day's sleep and energy — sleep/energy only exist on daily logs, not
-// journal entries.
+// For each exact mood logged via the daily picker, averages that day's
+// sleep and energy — sleep/energy only exist on daily logs, not journal
+// entries.
 export function computeMoodCorrelations(logs: Record<string, DailyLog>): MoodCorrelation[] {
-  const byAccent: Record<string, { sleep: number[]; energy: number[] }> = {};
+  const byMood: Record<string, { sleep: number[]; energy: number[] }> = {};
 
   for (const log of Object.values(logs)) {
     if (!log.mood) continue;
-    const accent = getMoodAccent(log.mood);
-    if (!byAccent[accent]) byAccent[accent] = { sleep: [], energy: [] };
-    if (log.sleepHours !== undefined) byAccent[accent].sleep.push(log.sleepHours);
-    if (log.energy !== undefined) byAccent[accent].energy.push(log.energy);
+    if (!byMood[log.mood]) byMood[log.mood] = { sleep: [], energy: [] };
+    if (log.sleepHours !== undefined) byMood[log.mood].sleep.push(log.sleepHours);
+    if (log.energy !== undefined) byMood[log.mood].energy.push(log.energy);
   }
 
   const avg = (values: number[]) =>
     values.length === 0 ? 0 : values.reduce((s, v) => s + v, 0) / values.length;
 
-  return ACCENTS.filter((a) => byAccent[a]).map((accent) => ({
-    mood: ACCENT_GROUP_LABEL[accent],
-    accent,
-    count: byAccent[accent].sleep.length + byAccent[accent].energy.length > 0
-      ? Math.max(byAccent[accent].sleep.length, byAccent[accent].energy.length)
-      : 0,
-    avgSleep: avg(byAccent[accent].sleep),
-    avgEnergy: avg(byAccent[accent].energy),
-  }));
+  return Object.keys(byMood)
+    .map((mood) => ({
+      mood,
+      color: getMoodColorVar(mood),
+      count: Math.max(byMood[mood].sleep.length, byMood[mood].energy.length),
+      avgSleep: avg(byMood[mood].sleep),
+      avgEnergy: avg(byMood[mood].energy),
+    }))
+    .sort((a, b) => b.count - a.count);
 }
 
 export interface DayTrendPoint {
