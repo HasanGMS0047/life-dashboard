@@ -1,112 +1,76 @@
 export type AccentKey = "terracotta" | "sky" | "mustard" | "olive" | "blush";
-export type MoodFamily = "Cozy" | "Calm" | "Grateful" | "Reflective" | "Tender";
-export type MoodLabel = string;
 
-// The five "banners" — every specific mood below belongs to exactly one of
-// these, and inherits its color. A mood is told apart from siblings under
-// the same banner by its label (the word itself); the shared color signals
-// the family/valence at a glance across the app (Timeline, Heatmap,
-// Heart Patterns), the same way it always has for the original five.
-export const MOOD_FAMILIES: { family: MoodFamily; accent: AccentKey }[] = [
-  { family: "Cozy", accent: "terracotta" },
-  { family: "Calm", accent: "sky" },
-  { family: "Grateful", accent: "mustard" },
-  { family: "Reflective", accent: "olive" },
-  { family: "Tender", accent: "blush" },
+// One flat list, one tap to log — the old system asked people to pick a
+// "family" banner first and then a specific mood inside it, which read as
+// an extra, confusing step for something meant to take five seconds. Every
+// mood still carries one of the five theme colors (so the teacup art,
+// Timeline dots, and Heart Patterns chart stay meaningful), the color is
+// just no longer something the user has to navigate through.
+export const MOODS: { label: string; accent: AccentKey; intensity: 1 | 2 | 3 }[] = [
+  { label: "Cozy", accent: "terracotta", intensity: 1 },
+  { label: "Grateful", accent: "terracotta", intensity: 2 },
+  { label: "Fulfilled", accent: "terracotta", intensity: 3 },
+
+  { label: "Calm", accent: "sky", intensity: 1 },
+  { label: "Relieved", accent: "sky", intensity: 2 },
+  { label: "Peaceful", accent: "sky", intensity: 3 },
+
+  { label: "Hopeful", accent: "mustard", intensity: 1 },
+  { label: "Motivated", accent: "mustard", intensity: 2 },
+  { label: "Proud", accent: "mustard", intensity: 3 },
+
+  { label: "Tired", accent: "olive", intensity: 1 },
+  { label: "Overwhelmed", accent: "olive", intensity: 2 },
+  { label: "Angry", accent: "olive", intensity: 3 },
+
+  { label: "Lonely", accent: "blush", intensity: 1 },
+  { label: "Sad", accent: "blush", intensity: 2 },
+  { label: "Hurt", accent: "blush", intensity: 3 },
 ];
 
-const FAMILY_ACCENT: Record<MoodFamily, AccentKey> = Object.fromEntries(
-  MOOD_FAMILIES.map((f) => [f.family, f.accent])
-) as Record<MoodFamily, AccentKey>;
-
-// Specific moods a person might actually reach for, grouped under the
-// family they're closest to in spirit. Ordered roughly mild -> intense
-// within each family. The original five family names are kept as
-// selectable moods in their own right (and as the fallback for any
-// previously-saved entry that only ever stored one of them).
-export const MOOD_OPTIONS: { label: string; family: MoodFamily }[] = [
-  // Cozy / terracotta — warm contentment
-  { label: "Cozy", family: "Cozy" },
-  { label: "Content", family: "Cozy" },
-  { label: "Safe", family: "Cozy" },
-  { label: "Affectionate", family: "Cozy" },
-  { label: "Playful", family: "Cozy" },
-  { label: "Joyful", family: "Cozy" },
-  { label: "Fulfilled", family: "Cozy" },
-
-  // Calm / sky — settled, low arousal
-  { label: "Calm", family: "Calm" },
-  { label: "Bored", family: "Calm" },
-  { label: "Drained", family: "Calm" },
-  { label: "At Ease", family: "Calm" },
-  { label: "Relieved", family: "Calm" },
-  { label: "Peaceful", family: "Calm" },
-
-  // Grateful / mustard — activated, energized (positive through intense)
-  { label: "Grateful", family: "Grateful" },
-  { label: "Hopeful", family: "Grateful" },
-  { label: "Proud", family: "Grateful" },
-  { label: "Motivated", family: "Grateful" },
-  { label: "Inspired", family: "Grateful" },
-  { label: "Ambitious", family: "Grateful" },
-  { label: "Fiery", family: "Grateful" },
-  { label: "Angry", family: "Grateful" },
-
-  // Reflective / olive — introspective, worn down
-  { label: "Reflective", family: "Reflective" },
-  { label: "Uncertain", family: "Reflective" },
-  { label: "Pensive", family: "Reflective" },
-  { label: "Nostalgic", family: "Reflective" },
-  { label: "Numb", family: "Reflective" },
-  { label: "Overstimulated", family: "Reflective" },
-  { label: "Overwhelmed", family: "Reflective" },
-  { label: "Exhausted", family: "Reflective" },
-  { label: "Burned Out", family: "Reflective" },
-
-  // Tender / blush — soft, vulnerable
-  { label: "Tender", family: "Tender" },
-  { label: "Wistful", family: "Tender" },
-  { label: "Homesick", family: "Tender" },
-  { label: "Down", family: "Tender" },
-  { label: "Lonely", family: "Tender" },
-  { label: "Disappointed", family: "Tender" },
-  { label: "Sad", family: "Tender" },
-  { label: "Vulnerable", family: "Tender" },
-  { label: "Hurt", family: "Tender" },
-];
-
-const MOOD_TO_FAMILY: Record<string, MoodFamily> = Object.fromEntries(
-  MOOD_OPTIONS.map((m) => [m.label, m.family])
+const MOOD_MAP: Record<string, { accent: AccentKey; intensity: 1 | 2 | 3 }> = Object.fromEntries(
+  MOODS.map((m) => [m.label, { accent: m.accent, intensity: m.intensity }])
 );
 
-export function getMoodFamily(label?: string): MoodFamily | undefined {
-  if (!label) return undefined;
-  return MOOD_TO_FAMILY[label];
-}
+// Entries saved under the old 39-mood family system (or the original 5)
+// still exist in the database — this keeps them showing a sensible color
+// instead of falling back to a default, without dragging the old picker
+// UI back in. Not shown anywhere; lookup-only.
+const LEGACY_MOOD_ACCENT: Record<string, AccentKey> = {
+  Cozy: "terracotta", Content: "terracotta", Safe: "terracotta", Affectionate: "terracotta",
+  Playful: "terracotta", Joyful: "terracotta", Fulfilled: "terracotta",
+  Calm: "sky", Bored: "sky", Drained: "sky", "At Ease": "sky", Relieved: "sky", Peaceful: "sky",
+  Grateful: "mustard", Hopeful: "mustard", Proud: "mustard", Motivated: "mustard",
+  Inspired: "mustard", Ambitious: "mustard", Fiery: "mustard", Angry: "olive",
+  Reflective: "olive", Uncertain: "olive", Pensive: "olive", Nostalgic: "olive",
+  Numb: "olive", Overstimulated: "olive", Overwhelmed: "olive", Exhausted: "olive",
+  "Burned Out": "olive",
+  Tender: "blush", Wistful: "blush", Homesick: "blush", Down: "blush", Lonely: "blush",
+  Disappointed: "blush", Sad: "blush", Vulnerable: "blush", Hurt: "blush",
+};
 
 export function getMoodAccent(label?: string): AccentKey {
-  const family = getMoodFamily(label);
-  return family ? FAMILY_ACCENT[family] : "terracotta";
+  if (!label) return "terracotta";
+  return MOOD_MAP[label]?.accent ?? LEGACY_MOOD_ACCENT[label] ?? "terracotta";
 }
 
-export function moodsInFamily(family: MoodFamily): string[] {
-  return MOOD_OPTIONS.filter((m) => m.family === family).map((m) => m.label);
-}
-
-// Where a mood sits within its family's mild-to-intense ordering (see the
-// comment above MOOD_OPTIONS) — used to hint at intensity visually (e.g.
-// steam wisps on the mood cup) without needing a distinct icon per mood.
 export function getMoodIntensity(label?: string): 1 | 2 | 3 {
-  const family = getMoodFamily(label);
-  if (!family || !label) return 1;
-  const list = moodsInFamily(family);
-  const index = list.indexOf(label);
-  if (index < 0) return 1;
-  const ratio = index / Math.max(list.length - 1, 1);
-  if (ratio < 0.34) return 1;
-  if (ratio < 0.67) return 2;
-  return 3;
+  if (!label) return 1;
+  return MOOD_MAP[label]?.intensity ?? 2;
 }
+
+// Groups moods by their shared color for charts (Heart Patterns) that need
+// a handful of meaningful buckets rather than fifteen sparse ones — a
+// display grouping only, never surfaced as something to pick from.
+export const ACCENT_GROUP_LABEL: Record<AccentKey, string> = {
+  terracotta: "Warm",
+  sky: "Calm",
+  mustard: "Energized",
+  olive: "Heavy",
+  blush: "Tender",
+};
+
+export const ACCENTS: AccentKey[] = ["terracotta", "sky", "mustard", "olive", "blush"];
 
 // Tailwind needs literal class strings to keep them in the production build —
 // building these with template interpolation would get purged.
@@ -134,6 +98,11 @@ const ACCENT_PILL_CLASSES: Record<AccentKey, string> = {
   sky: "bg-sky/10 text-sky border-sky/20",
 };
 
+// Covers both the current 15 moods and every legacy label, so a journal
+// entry logged years ago still renders with a real color, not a fallback.
 export const MOOD_PILL_CLASSES: Record<string, string> = Object.fromEntries(
-  MOOD_OPTIONS.map((m) => [m.label, ACCENT_PILL_CLASSES[FAMILY_ACCENT[m.family]]])
+  [...MOODS.map((m) => m.label), ...Object.keys(LEGACY_MOOD_ACCENT)].map((label) => [
+    label,
+    ACCENT_PILL_CLASSES[getMoodAccent(label)],
+  ])
 );

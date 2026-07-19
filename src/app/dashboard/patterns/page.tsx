@@ -6,15 +6,23 @@ import { Card } from "@/components/ui/card";
 import { useDailyLogStore } from "@/store/dailyLogStore";
 import { useJournalStore } from "@/store/journalStore";
 import { computeMoodCounts, computeMoodCorrelations, getRecentTrend } from "@/lib/patterns";
-import { MOOD_PILL_CLASSES } from "@/lib/moods";
+import { AccentKey } from "@/lib/moods";
 import { cn } from "@/lib/utils";
 
-const ACCENT_VAR: Record<string, string> = {
-  Cozy: "var(--terracotta)",
-  Calm: "var(--sky)",
-  Grateful: "var(--mustard)",
-  Reflective: "var(--olive)",
-  Tender: "var(--blush)",
+const ACCENT_VAR: Record<AccentKey, string> = {
+  terracotta: "var(--terracotta)",
+  sky: "var(--sky)",
+  mustard: "var(--mustard)",
+  olive: "var(--olive)",
+  blush: "var(--blush)",
+};
+
+const ACCENT_CARD_CLASSES: Record<AccentKey, string> = {
+  terracotta: "bg-terracotta/10 text-terracotta border-terracotta/20",
+  sky: "bg-sky/10 text-sky border-sky/20",
+  mustard: "bg-mustard/10 text-mustard border-mustard/20",
+  olive: "bg-olive/10 text-olive border-olive/20",
+  blush: "bg-blush/10 text-blush border-blush/20",
 };
 
 export default function HeartPatternsPage() {
@@ -57,14 +65,14 @@ export default function HeartPatternsPage() {
           <div className="flex flex-col gap-3">
             {moodCounts.map((m, i) => (
               <div key={m.mood} className="flex items-center gap-3">
-                <span className="text-sm text-foreground w-20 shrink-0">{m.mood}</span>
+                <span className="text-sm text-foreground w-24 shrink-0">{m.mood}</span>
                 <div className="flex-1 h-2.5 rounded-full bg-border overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${(m.count / maxMoodCount) * 100}%` }}
                     transition={{ duration: 0.6, delay: i * 0.05 }}
                     className="h-full rounded-full"
-                    style={{ backgroundColor: ACCENT_VAR[m.mood] }}
+                    style={{ backgroundColor: ACCENT_VAR[m.accent] }}
                   />
                 </div>
                 <span className="text-xs text-muted w-6 text-right shrink-0">{m.count}</span>
@@ -92,7 +100,7 @@ export default function HeartPatternsPage() {
                 key={c.mood}
                 className={cn(
                   "rounded-2xl border px-4 py-3 flex flex-col gap-1",
-                  MOOD_PILL_CLASSES[c.mood]
+                  ACCENT_CARD_CLASSES[c.accent]
                 )}
               >
                 <span className="text-sm font-semibold">{c.mood}</span>

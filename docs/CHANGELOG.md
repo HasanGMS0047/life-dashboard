@@ -236,5 +236,30 @@ the app.
 
 Still ahead: carrying this same layout language (section headings,
 capped/lighter motion) through the remaining pages — Journal's own
-composer/history layout, Timeline, Heart Patterns, Heatmap, Gallery,
-Account, and Life Replay.
+composer/history layout, Timeline, Heatmap, Gallery, Account, and Life
+Replay.
+
+## Mood system, rebuilt flat
+
+The two-step "pick a family banner, then the specific mood inside it"
+picker built earlier this session turned out to be the wrong call —
+it read as an extra, confusing step for something meant to take five
+seconds. Scrapped it for a single flat, one-tap list.
+
+- **15 moods, one tier, one click** — down from ~39 moods spread
+  across a family-then-submood flow. Each mood still carries one of
+  the five theme colors (terracotta/sky/mustard/olive/blush) so the
+  teacup art, Timeline dots, and Heart Patterns chart stay meaningful
+  — the color is just baked into the button directly now instead of
+  gated behind a "pick a family first" navigation step.
+- Old entries logged under the previous system (both the ~39-mood set
+  and the original 5) still render with a correct color via a
+  lookup-only legacy map in `src/lib/moods.ts` — no data migration,
+  nothing silently turns gray.
+- Heart Patterns' "Mood Rhythm" and "Mood & Body" cards now bucket by
+  color group ("Warm", "Calm", "Energized", "Heavy", "Tender") instead
+  of the old family names, so the five-bar chart still means something
+  without needing the retired family concept.
+- Verified: mood selection, the reload-persistence fix, journal entry
+  save/display, and Heart Patterns all still work correctly with the
+  new flat list; no horizontal overflow on mobile.
