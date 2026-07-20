@@ -13,6 +13,20 @@ export interface JournalPrompt {
 // kept short and clearly attributed (real, verifiable lines), the same
 // bar as the literary quotes below.
 export const JOURNAL_PROMPTS: JournalPrompt[] = [
+  // Basic journaling questions
+  { text: "How are you feeling right now?" },
+  { text: "What's on your mind?" },
+  { text: "What happened today?" },
+  { text: "What's one word for today?" },
+  { text: "What do you need right now?" },
+  { text: "What's something you want to let go of?" },
+  { text: "What's your intention for tomorrow?" },
+  { text: "How did you sleep last night?" },
+  { text: "What's something you're thinking about?" },
+  { text: "What was the best part of your day?" },
+  { text: "What was the hardest part of your day?" },
+  { text: "What's something simple that made today better?" },
+
   // Plain, everyday
   { text: "What's the detail of what you accomplished today?" },
   { text: "What made you feel this way today?" },
@@ -178,6 +192,36 @@ export const JOURNAL_PROMPTS: JournalPrompt[] = [
   { text: "What's the comeback story arc your day is quietly building toward?" },
   { text: "If today were a magazine cover, what's the headline?" },
 
+  // Anime & more games
+  { text: "If today were a Jujutsu Kaisen domain expansion, what would yours be called?" },
+  { text: "What was your Gojo-tier flex moment today, however small?" },
+  { text: "If today were a One Piece arc, what island did you wash up on?" },
+  { text: "What's the bounty you'd put on today's chaos?" },
+  { text: "If today leveled you up like Solo Leveling, what stat went up?" },
+  { text: "What was your 'it's over 9000' moment today — something that spiked out of nowhere?" },
+  { text: "If today were a Pokémon battle, what move did you use, and was it super effective?" },
+  { text: "What starter would today's mood evolve into?" },
+  { text: "If today were a Mass Effect dialogue wheel, which option did you pick — paragon or renegade?" },
+  { text: "What's the loyalty mission you completed for someone today?" },
+
+  // More movies — Troy & Mission Impossible
+  { text: "If today were a Mission: Impossible briefing, what was your mission, should you have chosen to accept it?" },
+  { text: "What self-destructed after five seconds today, metaphorically speaking?" },
+  { text: "If today were an epic like Troy, what would the opening narration say about you?" },
+  { text: "What's the thing you'd want people to remember about today, years from now?" },
+
+  // Niche references
+  { text: "If today needed a skill check like in Disco Elysium, what would you have rolled for and failed?" },
+  { text: "What's the boss theme that would play if today became a final battle?" },
+  { text: "If today were a social-link rank-up, what stat improved?" },
+  { text: "What's the tutorial popup you wish today came with?" },
+  { text: "If today were an anime filler episode, what non-canon detour did you take?" },
+  { text: "What's the power-up you clearly needed today but didn't get?" },
+  { text: "If today were a JRPG random encounter, what enemy did you fight?" },
+  { text: "What's the New Game Plus lesson you'd carry into tomorrow?" },
+  { text: "If today had a difficulty setting, what was it set to?" },
+  { text: "What's the cutscene you'd skip if you could replay today?" },
+
   // Famous quotes
   { text: "You can always edit a bad page. You can't edit a blank page.", attribution: "Jodi Picoult" },
   { text: "Writing is medicine. It is an appropriate antidote to injury. It is an appropriate companion for any difficult change.", attribution: "Julia Cameron" },
@@ -214,14 +258,33 @@ export const JOURNAL_PROMPTS: JournalPrompt[] = [
   { text: "Evil is evil. Lesser, greater, middling — makes no difference. The degree is arbitrary.", attribution: "Geralt of Rivia, The Witcher" },
   { text: "May the Force be with you.", attribution: "Star Wars" },
   { text: "No. I am your father.", attribution: "Darth Vader, Star Wars: The Empire Strikes Back" },
+  { text: "Do. Or do not. There is no try.", attribution: "Yoda, Star Wars: The Empire Strikes Back" },
+  { text: "I find your lack of faith disturbing.", attribution: "Darth Vader, Star Wars: A New Hope" },
+  { text: "Fear is the path to the dark side. Fear leads to anger. Anger leads to hate. Hate leads to suffering.", attribution: "Yoda, Star Wars: The Phantom Menace" },
+  { text: "Never tell me the odds.", attribution: "Han Solo, Star Wars: The Empire Strikes Back" },
+  { text: "This is the way.", attribution: "The Mandalorian" },
   { text: "One does not simply walk into Mordor.", attribution: "Boromir, The Lord of the Rings: The Fellowship of the Ring" },
   { text: "Not all those who wander are lost.", attribution: "J.R.R. Tolkien, The Lord of the Rings" },
   { text: "I solemnly swear that I am up to no good.", attribution: "Harry Potter" },
   { text: "It does not do to dwell on dreams and forget to live.", attribution: "Albus Dumbledore, Harry Potter and the Sorcerer's Stone" },
+  { text: "It is our choices, Harry, that show what we truly are, far more than our abilities.", attribution: "Albus Dumbledore, Harry Potter and the Chamber of Secrets" },
+  { text: "Happiness can be found even in the darkest of times, if one only remembers to turn on the light.", attribution: "Albus Dumbledore, Harry Potter and the Prisoner of Azkaban" },
+  { text: "We've all got both light and dark inside us.", attribution: "Sirius Black, Harry Potter and the Order of the Phoenix" },
   { text: "There is no spoon.", attribution: "The Matrix" },
   { text: "Life was like a box of chocolates. You never know what you're gonna get.", attribution: "Forrest Gump" },
   { text: "Get busy living, or get busy dying.", attribution: "Andy Dufresne, The Shawshank Redemption" },
   { text: "Hope is a good thing, maybe the best of things, and no good thing ever dies.", attribution: "Andy Dufresne, The Shawshank Redemption" },
+  { text: "Will our actions echo across the centuries? Will strangers hear our names long after we're gone, and wonder who we were?", attribution: "Achilles, Troy" },
+  { text: "If they ever tell my story, let them say I walked with giants. Men rise and fall like the winter wheat, but these names will never die.", attribution: "Achilles, Troy" },
+  { text: "Your mission, should you choose to accept it...", attribution: "Mission: Impossible" },
+  { text: "I should go.", attribution: "Commander Shepard, Mass Effect" },
+  { text: "I'm gonna be King of the Pirates!", attribution: "Monkey D. Luffy, One Piece" },
+  { text: "If you don't take risks, you can't create a future!", attribution: "Monkey D. Luffy, One Piece" },
+  { text: "Throughout Heaven and Earth, I alone am the honored one.", attribution: "Gojo Satoru, Jujutsu Kaisen" },
+  { text: "Arise.", attribution: "Sung Jinwoo, Solo Leveling" },
+  { text: "It's over 9000!", attribution: "Vegeta, Dragon Ball Z" },
+  { text: "I choose you, Pikachu!", attribution: "Ash Ketchum, Pokémon" },
+  { text: "Gotta catch 'em all!", attribution: "Pokémon" },
 
   // Words from the greats — football
   { text: "Talent without working hard is nothing.", attribution: "Cristiano Ronaldo" },
