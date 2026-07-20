@@ -214,6 +214,20 @@ related code:
     cancel it (`vercel remove <deployment-url> --yes`, since a stuck
     build won't self-cancel) and check whether it's connecting through a
     pooler again.
+17a. **A deployment can also stick at "Initializing" — before "Building"
+    even starts — for reasons unrelated to note #17's pooler cause.**
+    Hit this on a commit that touched no schema/Prisma files at all
+    (`76f7d33`, icon-purpose + journal-prompt changes), so it wasn't
+    the `db push`/pooler issue; `vercel inspect --logs` returned no
+    build output whatsoever, just the stuck status, suggesting a
+    platform-side stall rather than anything in this repo's build
+    script. Same recovery either way: `vercel remove <deployment-url>
+    --yes` (a stuck deployment doesn't serve traffic — the previous
+    `Ready` deployment stays live at the production alias while it's
+    stuck, so cancelling it is safe), then `git commit --allow-empty`
+    + push to retrigger a fresh deploy of the same code via the Git
+    integration, since there's no local `vercel --prod` step in this
+    project's workflow to fall back on.
 18. **Never pick a random value inside `useState(() => ...)` or during
     render in a "use client" component** — it still renders once on the
     server for the initial HTML. If that pick is random (`Math.random()`,
