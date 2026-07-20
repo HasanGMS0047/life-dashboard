@@ -446,6 +446,18 @@ related code:
     experience regardless of site theme (see the Life Replay note under
     "Where things live" below). Check whether a hardcoded color is
     supposed to be theme-invariant before "fixing" it.
+34. **`MoodPicker` toggles off on a second tap of the same mood — this
+    lives in the shared component, not at each call site.** `onClick`
+    is `onChange(value === m.label ? "" : m.label)`; every consumer
+    (`MoodWidget`, `JournalComposer`, `JournalEntryCard`) just passes a
+    plain setter and gets deselect-by-re-tapping for free. Don't
+    re-implement this per call site — if a future mood picker instance
+    needs different toggle behavior, that's a reason to add a prop, not
+    to duplicate the ternary. `MoodWidget` specifically needed one
+    matching change: its status line was `mood ?? "Not logged yet"`,
+    which doesn't catch a deliberately-cleared empty string (`??` only
+    falls back on `null`/`undefined`) — changed to `mood ||
+    "Not logged yet"`.
 
 ## Where things live
 
