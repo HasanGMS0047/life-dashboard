@@ -739,3 +739,31 @@ left as-is.
   clear instantly since those were never draft-then-confirm to begin
   with (Journal has always used a single explicit Save/Save Changes
   action).
+
+## The Mood widget's corner stickers now do something, and richer journal prompts
+
+- The Sun and Heart tags on the Mood widget were asked about ("what's
+  the purpose of the heart and the sun icon?") and turned out to be
+  pure decoration — no `onClick` at all. Given real purpose instead of
+  removing them, reusing meanings the icons already carry elsewhere in
+  the app so nothing new has to be learned: **Sun** is now the same
+  day/night toggle as the TopBar's (icon swaps to a Moon in night
+  mode, exactly mirroring the TopBar's own swap), and **Heart** is now
+  a shortcut to Heart Patterns — the same Heart icon already used for
+  that page in the Sidebar. Both are simple `onClick`/`<Link>`
+  additions with no new state; theme toggling reuses `themeStore`
+  directly, same store the TopBar already calls.
+- **`JOURNAL_PROMPTS`** grew from 11 entries to 30, organized (by
+  comment, not by separate arrays — `getRandomPrompt` still draws from
+  one flat pool so the mix stays genuinely random rather than biased
+  toward whichever category was picked) into four loose registers: the
+  original plain day-to-day prompts, nine more thoughtful/reflective
+  ones ("What belief do you hold today that you didn't a year ago?"),
+  nine deliberately light/silly ones ("If today were a weather
+  forecast, what would it say?"), and three additional attributed
+  quotes. The point was variety in *tone*, not just quantity — a
+  blank-page nudge shouldn't always read like a therapy prompt.
+- Verified via Playwright: the Sun icon actually flips `data-theme` on
+  `<html>` (not just its own icon), the Heart icon navigates to
+  `/dashboard/patterns`, and 15 shuffles of the journal prompt surfaced
+  14 distinct prompts spanning both new registers.
