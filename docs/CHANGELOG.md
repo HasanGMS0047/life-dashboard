@@ -794,3 +794,33 @@ left as-is.
   rather than anything retriggering can fix — see the updated
   engineering note #17a for the "when to stop retriggering and just
   wait" guidance this added.
+
+## Journal prompt pool: 30 -> 106 -> 144 -> 196
+
+- Three rounds of expanding `JOURNAL_PROMPTS`, each following the
+  same pattern established in the first pass: original creative
+  prompts referencing a theme (games, movies, football, celebrities)
+  live alongside a small number of real, short, clearly attributed
+  quotes from that same theme — never fabricated or misattributed
+  dialogue passed off as verbatim.
+- Round 1 (106): thickened the plain/thoughtful/random categories and
+  added two new registers (oddly specific/niche, pop-culture
+  flavored), plus quadrupled the literary quotes section (Anne Frank,
+  Didion, Angelou, Twain, Wilde, Marcus Aurelius, Rumi, Morrison,
+  Emerson, Thoreau, C.S. Lewis, Rilke, Brené Brown, Plath).
+- Round 2 (144): added video-game and MCU/DC-flavored original
+  prompts (Skyrim, Disco Elysium, GTA), plus real short attributed
+  lines (Captain America, Iron Man, Thanos, Batman Begins,
+  Spider-Man, the Skyrim guard's "arrow in the knee" line) and
+  Ronaldo/Messi quotes.
+- Round 3 (196): more mainstream games and non-MCU movies as original
+  prompts (Dark Souls, Zelda, Portal-style RPGs, Star Wars, LOTR, The
+  Matrix, Shawshank), real quotes from those same games/films (Portal,
+  Dark Souls, Zelda, Undertale, The Witcher, Star Wars, Tolkien, Harry
+  Potter, Forrest Gump, Shawshank), and a broader celebrity-quotes
+  section beyond football (Steve Jobs, Muhammad Ali, Michael Jordan,
+  Kobe Bryant, Serena Williams, Walt Disney, Will Smith).
+- Verified round 3 with a 250-shuffle Playwright stress test against
+  the live composer (0 empty prompt renders, attributions displayed
+  correctly) plus a script confirming zero duplicate `text` values
+  across all 196 entries, and a clean `next build`.
