@@ -12,6 +12,7 @@ import { useSocialStore } from "@/store/socialStore";
 import { useHabitStore } from "@/store/habitStore";
 import { useGoalStore } from "@/store/goalStore";
 import { useTaskStore } from "@/store/taskStore";
+import { usePrefsStore } from "@/store/prefsStore";
 
 export default function DashboardLayout({
   children,
@@ -28,6 +29,7 @@ export default function DashboardLayout({
   const fetchHabits = useHabitStore((s) => s.fetchHabits);
   const fetchGoals = useGoalStore((s) => s.fetchGoals);
   const fetchTasks = useTaskStore((s) => s.fetchTasks);
+  const fetchPrefs = usePrefsStore((s) => s.fetchPrefs);
 
   useEffect(() => {
     fetchJournalEntries();
@@ -37,6 +39,7 @@ export default function DashboardLayout({
     fetchHabits();
     fetchGoals();
     fetchTasks();
+    fetchPrefs();
   }, [
     fetchJournalEntries,
     fetchDailyLogs,
@@ -45,6 +48,7 @@ export default function DashboardLayout({
     fetchHabits,
     fetchGoals,
     fetchTasks,
+    fetchPrefs,
   ]);
 
   return (

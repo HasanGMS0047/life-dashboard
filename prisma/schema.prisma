@@ -20,6 +20,9 @@ model User {
   favoriteColor String? // one of the app's accent palette keys: terracotta/olive/mustard/blush/sky
   hobbies   String[] @default([])
   pets      String[] @default([])
+  avatar    Bytes?   // resized client-side before upload, so this stays small
+  avatarType String? // mime type of the avatar, e.g. image/webp
+  avatarUpdatedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   

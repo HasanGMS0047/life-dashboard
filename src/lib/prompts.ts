@@ -870,7 +870,12 @@ export const JOURNAL_PROMPTS: JournalPrompt[] = [
   { text: "What are you most looking forward to about your future self?" },
 ];
 
-export function getRandomPrompt(exclude?: string): JournalPrompt {
-  const pool = exclude ? JOURNAL_PROMPTS.filter((p) => p.text !== exclude) : JOURNAL_PROMPTS;
+// `extra` lets callers fold in prompts generated outside this static pool
+// (e.g. ones personalized from the user's hobbies/pets) without duplicating
+// the exclude/pick logic — defaults to nothing, so existing callers are
+// unaffected.
+export function getRandomPrompt(exclude?: string, extra: JournalPrompt[] = []): JournalPrompt {
+  const combined = extra.length ? [...JOURNAL_PROMPTS, ...extra] : JOURNAL_PROMPTS;
+  const pool = exclude ? combined.filter((p) => p.text !== exclude) : combined;
   return pool[Math.floor(Math.random() * pool.length)];
 }

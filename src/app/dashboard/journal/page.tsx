@@ -1,13 +1,23 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { useJournalStore } from "@/store/journalStore";
+import { usePrefsStore } from "@/store/prefsStore";
+import { accentTextClass } from "@/lib/accents";
+import { computeJournalStreak, computeLongestStreak } from "@/lib/streak";
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { StreakSummary } from "@/components/ui/streak-badge";
 import { JournalComposer } from "@/components/journal/JournalComposer";
 import { JournalEntryCard } from "@/components/journal/JournalEntryCard";
 
 export default function JournalPage() {
   const entries = useJournalStore((s) => s.entries);
+  const favoriteColor = usePrefsStore((s) => s.favoriteColor);
+
+  const entryDates = useMemo(() => entries.map((e) => new Date(e.createdAt)), [entries]);
+  const streak = computeJournalStreak(entryDates);
+  const best = computeLongestStreak(entryDates);
 
   return (
     <div className="max-w-2xl mx-auto py-4 sm:py-6 md:py-8 flex flex-col gap-5 sm:gap-6 md:gap-8">
@@ -15,6 +25,7 @@ export default function JournalPage() {
         title="Your Journal."
         subtitle="A little scrapbook about the day, a little memory to keep."
         className="mb-0"
+        badge={<StreakSummary current={streak} best={best} accentClass={accentTextClass(favoriteColor)} />}
       />
 
       <motion.div

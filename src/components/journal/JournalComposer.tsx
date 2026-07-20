@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Shuffle } from "lucide-react";
 import { useJournalStore } from "@/store/journalStore";
+import { usePrefsStore } from "@/store/prefsStore";
 import { MoodPicker } from "@/components/ui/mood-picker";
 import { JOURNAL_PROMPTS, getRandomPrompt } from "@/lib/prompts";
+import { buildPersonalizedPrompts } from "@/lib/personalizedPrompts";
 
 export function JournalComposer() {
   const addEntry = useJournalStore((s) => s.addEntry);
+  const hobbies = usePrefsStore((s) => s.hobbies);
+  const pets = usePrefsStore((s) => s.pets);
   const [text, setText] = useState("");
   const [mood, setMood] = useState("");
   // Starts on a fixed prompt so server- and client-rendered HTML match, then
@@ -16,8 +20,15 @@ export function JournalComposer() {
   // a hydration mismatch.
   const [prompt, setPrompt] = useState(JOURNAL_PROMPTS[0]);
 
+  // A few templated prompts woven in from the user's own hobbies/pets, on
+  // top of the static pool — occasional, not dominant (see personalizedPrompts.ts).
+  const personalizedPrompts = useMemo(() => buildPersonalizedPrompts(hobbies, pets), [hobbies, pets]);
+
   useEffect(() => {
-    setPrompt(getRandomPrompt());
+    setPrompt(getRandomPrompt(undefined, personalizedPrompts));
+    // Only re-roll on mount, not every time personalizedPrompts finishes
+    // loading — that would swap the prompt out from under someone mid-read.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSave = () => {
@@ -25,7 +36,7 @@ export function JournalComposer() {
     addEntry(text.trim(), mood);
     setText("");
     setMood("");
-    setPrompt(getRandomPrompt(prompt.text));
+    setPrompt(getRandomPrompt(prompt.text, personalizedPrompts));
   };
 
   return (
@@ -37,7 +48,7 @@ export function JournalComposer() {
         </p>
         <button
           type="button"
-          onClick={() => setPrompt(getRandomPrompt(prompt.text))}
+          onClick={() => setPrompt(getRandomPrompt(prompt.text, personalizedPrompts))}
           title="Try a different prompt"
           className="shrink-0 text-muted hover:text-terracotta transition-colors"
         >

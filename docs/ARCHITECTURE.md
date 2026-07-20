@@ -533,6 +533,77 @@ related code:
     deployed, and there's no reason this reference doc needs to be
     publicly reachable, so it stays local/untracked rather than
     getting swept into a `git add`.
+38. **Profile picture is stored as `Bytes` on `User`, served through a
+    dedicated route, and kept out of the NextAuth session.** `User`
+    gained `avatar Bytes?`, `avatarType String?` (mime type), and
+    `avatarUpdatedAt DateTime?`. No new storage service (Supabase
+    Storage, Vercel Blob) — this is a single-user account's photo,
+    Postgres already holds everything else about the account, and
+    avoiding another billed/free-tier service to configure was the
+    simpler call, in keeping with this project's general preference
+    for not adding paid or metered dependencies. The image is
+    resized client-side (canvas, via
+    the existing `resizeImageFile` helper in `src/lib/image.ts`,
+    originally written for Gallery photos) to ~320px JPEG before
+    upload, so rows stay small (tens of KB, not multi-MB camera
+    photos); the server (`/api/account/avatar`) still enforces a
+    1.5MB decoded-size cap and an image/jpeg|png|webp allowlist as a
+    backstop against a client that skips the resize. Deliberately
+    NOT added to the NextAuth JWT/session (`src/lib/auth.ts` only
+    ever carried `id`/`name`) — a base64 image would bloat the
+    session cookie NextAuth stores client-side, so the avatar is
+    fetched separately via `GET /api/account/avatar` (returns the raw
+    bytes with the stored `Content-Type`, 404 if unset) and the
+    account page cache-busts it with `?v=<avatarUpdatedAt>`.
+39. **Streaks track two numbers — current and longest-ever — computed
+    client-side from data already in memory, no new DB columns.**
+    `computeJournalStreak`/`computeLongestStreak` (`src/lib/streak.ts`)
+    and the garden equivalents `computeGardenStreak`/
+    `computeLongestGardenStreakEver` (`src/lib/garden.ts`) both walk
+    the same in-memory arrays the rest of the app already fetched
+    (`journalStore` entries, `habitStore` habits) — a "current" streak
+    stops at the first gap walking back from today (existing
+    behavior), a "longest ever" scans the full history for the best
+    run so a broken streak doesn't erase the record. Surfaced via a
+    shared `<StreakSummary>` component (`src/components/ui/
+    streak-badge.tsx`), passed into `PageHeader`'s new optional
+    `badge` slot on the Journal and Heatmap pages (both already read
+    from `journalStore`, so no extra fetch), plus a compact flame
+    badge on the Home page's Journal widget and a "best N" note next
+    to the Garden widget's existing flame badge. Deliberately did NOT
+    add a persisted "best streak" column — recomputing from full
+    history is cheap at this app's personal-use data volume, and a
+    denormalized record risks drifting from the source data.
+40. **`favoriteColor` and `hobbies`/`pets` went from write-only to
+    actually read somewhere.** Before this, Account page preferences
+    were saved and then only ever redisplayed on the Account page
+    itself — the Help modal's copy claimed they "personalize small
+    touches around the app," which wasn't true. `AccentKey`/`ACCENTS`
+    got hoisted out of the Account page into `src/lib/accents.ts` so
+    other components can tint themselves with it too (`accentTextClass`
+    picks the right literal Tailwind class — Tailwind's scanner needs
+    literal class strings, not runtime-built ones, which is why
+    `ACCENTS` writes out `text-terracotta`/`text-olive`/etc. by hand
+    rather than templating `text-${key}`). A new read-only cache,
+    `usePrefsStore` (`src/store/prefsStore.ts`), fetches `/api/account`
+    once per session — the Account page keeps its own separate
+    fetch/save code untouched (lower risk than rewiring already-tested
+    code) but pushes successful saves into this store too, so other
+    already-mounted views pick up an edit without a full reload.
+    `favoriteColor` now tints the new streak badges (Journal/Heatmap
+    page badges, Home page journal flame) — deliberately scoped to
+    *new* UI rather than retrofitted onto existing terracotta-heavy
+    widgets like the Garden's habit checkboxes, which would've looked
+    half-reskinned with only some elements recolored. `hobbies`/`pets`
+    feed `buildPersonalizedPrompts` (`src/lib/personalizedPrompts.ts`),
+    which interpolates them into a small set of original templates
+    ("What first pulled you toward {hobby}?", "How's {pet} been
+    today?") — no attribution, so the same zero-misattribution-risk
+    rule from note #36 doesn't even apply here, these are just
+    generated prompts. `getRandomPrompt` grew an optional second
+    `extra: JournalPrompt[]` parameter so `JournalComposer` can fold
+    these in without duplicating the pick/exclude logic; existing
+    callers that don't pass it are unaffected.
 
 ## Where things live
 
