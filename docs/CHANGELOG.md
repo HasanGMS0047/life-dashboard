@@ -767,3 +767,19 @@ left as-is.
   `<html>` (not just its own icon), the Heart icon navigates to
   `/dashboard/patterns`, and 15 shuffles of the journal prompt surfaced
   14 distinct prompts spanning both new registers.
+
+## A deployment got stuck; a new class of stuck-build symptom
+
+- The production deployment for the icon-purpose/prompts commit above
+  stuck at **"Initializing"** — a state before "Building" even starts
+  — with `vercel inspect --logs` returning no build output at all.
+  This is a different symptom from the previously-documented pooler
+  hang (engineering note #17), which sticks at "Building" with a
+  specific last log line, and this commit touched no schema/Prisma
+  files, ruling that cause out. Recovery: `vercel remove
+  <deployment-url> --yes` (safe — a stuck deployment isn't live
+  traffic, the prior `Ready` deployment keeps serving the production
+  alias the whole time), then `git commit --allow-empty` + push to
+  retrigger a fresh build via the Git integration. Documented as
+  engineering note #17a since this project has no local `vercel
+  --prod` fallback to reach for instead.
