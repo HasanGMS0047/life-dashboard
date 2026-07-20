@@ -100,6 +100,11 @@ export default function AccountPage() {
   const [prefsLoading, setPrefsLoading] = useState(false);
   const [prefsStatus, setPrefsStatus] = useState<{ type: "error" | "success"; message: string } | null>(null);
 
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportStatus, setExportStatus] = useState<{ type: "error" | "success"; message: string } | null>(
+    null
+  );
+  const [importLoading, setImportLoading] = useState(false);
   const [importStatus, setImportStatus] = useState<{ type: "error" | "success"; message: string } | null>(
     null
   );
@@ -279,9 +284,24 @@ export default function AccountPage() {
     }
   };
 
+  const handleExport = async () => {
+    setExportStatus(null);
+    setExportLoading(true);
+    try {
+      await exportData();
+    } catch (err) {
+      setExportStatus({
+        type: "error",
+        message: err instanceof Error ? err.message : "Couldn't export your data.",
+      });
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   const handleImportClick = () => {
     const confirmed = window.confirm(
-      "Importing a backup will overwrite your current journal, tracking, and other data on this device. Continue?"
+      "Importing a backup replaces the matching data in your account (journal, tracking, habits, etc.) with what's in the file — anything logged since that backup was made will be lost for those sections. Continue?"
     );
     if (confirmed) fileInputRef.current?.click();
   };
@@ -291,6 +311,8 @@ export default function AccountPage() {
     e.target.value = "";
     if (!file) return;
 
+    setImportStatus(null);
+    setImportLoading(true);
     try {
       await importData(file);
       setImportStatus({ type: "success", message: "Backup restored! Reloading..." });
@@ -300,6 +322,8 @@ export default function AccountPage() {
         type: "error",
         message: err instanceof Error ? err.message : "Couldn't import that file.",
       });
+    } finally {
+      setImportLoading(false);
     }
   };
 
@@ -571,19 +595,21 @@ export default function AccountPage() {
 
         <div className="flex flex-wrap gap-3">
           <button
-            onClick={exportData}
-            className="flex items-center gap-2 rounded-full border-2 border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition-colors"
+            onClick={handleExport}
+            disabled={exportLoading}
+            className="flex items-center gap-2 rounded-full border-2 border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition-colors disabled:opacity-60"
           >
             <Download className="w-4 h-4" />
-            Export My Data
+            {exportLoading ? "Exporting..." : "Export My Data"}
           </button>
 
           <button
             onClick={handleImportClick}
-            className="flex items-center gap-2 rounded-full border-2 border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition-colors"
+            disabled={importLoading}
+            className="flex items-center gap-2 rounded-full border-2 border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition-colors disabled:opacity-60"
           >
             <Upload className="w-4 h-4" />
-            Import Backup
+            {importLoading ? "Restoring..." : "Import Backup"}
           </button>
           <input
             ref={fileInputRef}
@@ -594,6 +620,16 @@ export default function AccountPage() {
           />
         </div>
 
+        {exportStatus && (
+          <p
+            className={cn(
+              "text-sm mt-3",
+              exportStatus.type === "success" ? "text-olive" : "text-terracotta"
+            )}
+          >
+            {exportStatus.message}
+          </p>
+        )}
         {importStatus && (
           <p
             className={cn(

@@ -391,25 +391,11 @@ related code:
     future dense grid (more calendar-style views, a photo grid, etc.)
     should default to an explicit height unless the design specifically
     wants cells that scale with available width.
-29. **`src/lib/backup.ts`'s Export/Import is currently non-functional.**
-    It reads/writes `localStorage` keys like `life-dashboard-journal`,
-    which was how the app persisted data *before* the migration to
-    Postgres-backed stores (see "Dual data models" in project history).
-    No store under `src/store/` uses Zustand's `persist` middleware
-    anymore — confirmed by grep, zero matches — so those
-    `localStorage` keys are never written to by the current app, which
-    means Export produces a near-empty file and Import silently does
-    nothing useful. This predates the Calendar/mobile work in this
-    session; found while checking the Account page's Reset Data flow
-    (which explicitly tells users to "export a backup first" — a
-    broken promise as things stand). Fixing this properly means
-    rewriting both directions to go through the real API routes
-    (`/api/journal`, `/api/daily-log`, `/api/learning`, `/api/social`,
-    `/api/habits`, `/api/goals`, `/api/tasks`) instead of
-    `localStorage` — not done yet, flagged for a dedicated pass since
-    Import in particular needs a real design decision (merge vs.
-    replace existing data, how to handle partial failures across 7
-    domains) rather than a quick patch.
+29. ~~`src/lib/backup.ts`'s Export/Import is currently non-functional.~~
+    **Fixed — see note #42.** (Left struck through rather than deleted:
+    the diagnosis of *why* it was broken — leftover pre-Postgres
+    `localStorage` keys nothing writes to anymore — is still useful
+    history if a similar stale-persistence bug shows up elsewhere.)
 30. **"Fits without scrolling" and "mobile-optimized" are two different
     asks — don't conflate them.** Calendar was rebuilt to fit in one
     screen because it's a bounded, single-purpose widget (a month grid
@@ -604,6 +590,58 @@ related code:
     `extra: JournalPrompt[]` parameter so `JournalComposer` can fold
     these in without duplicating the pick/exclude logic; existing
     callers that don't pass it are unaffected.
+41. **PWA installability, deliberately without caching any real data.**
+    `public/manifest.webmanifest` plus a generated icon set
+    (`public/icons/`, `src/app/icon.png`, `src/app/apple-icon.png` —
+    all rendered from a hand-drawn SVG cottage silhouette via a
+    one-off Playwright screenshot script, since no design tool was
+    available) make the app installable to a phone/desktop home
+    screen. This stays a web app (see the deployment-plan note under
+    "Where things live" — a native app would be a separate future
+    repo) — a PWA manifest is additive, not a rewrite.
+    `public/sw.js` is intentionally almost inert: every page here is
+    either auth-gated or reads live Postgres data, so a service
+    worker that cached pages or API responses would risk showing
+    stale journal/mood/habit data offline, which is worse than no
+    offline support at all. It precaches exactly one file
+    (`public/offline.html`) and only ever intercepts failed
+    *navigations*, swapping in that fallback — API calls, JS/CSS
+    chunks, and images all pass straight through untouched. That's
+    enough to satisfy Chrome's installability criteria (a service
+    worker with a fetch handler) without any data-freshness risk.
+    Registered client-side via
+    `src/components/ServiceWorkerRegister.tsx`.
+    `manifest`/`appleWebApp`/`viewport.themeColor` are wired through
+    the root layout's Next.js Metadata API rather than hand-written
+    tags, which is why the emitted meta tag is the modern
+    `mobile-web-app-capable` rather than the legacy Apple-prefixed
+    one — that's Next 16 tracking the current spec, not a bug.
+42. **Backup Export/Import now goes through Postgres via a single
+    `/api/account/backup` route (GET = export, POST = import), and
+    Import is a replace, not a merge.** GET queries all 7 domains
+    (journal, daily metrics, learning, social, habits, goals, tasks)
+    scoped to the signed-in user and returns one JSON bundle, stripping
+    `id`/`userId` from each row — import always creates fresh rows for
+    whoever is signed in, so the originals would be dead weight (or
+    misleading) in the file. POST is a `prisma.$transaction` of
+    `deleteMany` + `createMany` pairs, one pair per domain **present in
+    the uploaded file** — a domain missing from `data` is left
+    completely untouched, so an older or partial backup can't wipe out
+    sections it never covered. Chose replace over merge because: (1)
+    the Account page's own confirm dialog already promised "overwrite"
+    before this was ever wired up correctly, so replace matches the
+    UI's existing promise; (2) merge needs a duplicate-detection rule
+    (by id? by content?) that doesn't have an obvious right answer once
+    original ids are stripped on export; (3) "restore to this
+    snapshot" is a clearer mental model for a recovery flow than a
+    silent merge would be. `dailyMetrics` rows get deduplicated by
+    `date` before insert (first-seen wins) since that field has a
+    `@@unique([userId, date])` constraint — a hand-edited or corrupt
+    file with two rows for the same date would otherwise abort the
+    whole transaction. `src/lib/backup.ts` still does the file
+    download/upload plumbing client-side; it just calls this route
+    instead of reading/writing `localStorage` now (see struck-through
+    note #29).
 
 ## Where things live
 
@@ -745,12 +783,11 @@ machine with the Vercel CLI logged in.
   shell at `md`+. See `src/app/dashboard/layout.tsx`, `Sidebar.tsx`,
   `TopBar.tsx`.
 - Data backup: the Account page has an Export/Import flow
-  (`src/lib/backup.ts`) that's currently **broken, not just
-  incomplete** — see engineering note #28. Primary user data lives in
-  Postgres regardless; backup was only ever meant to be a recovery
-  convenience, not the system of record, but a broken recovery
-  convenience is worse than an absent one since it looks like it
-  worked.
+  (`src/lib/backup.ts` + `/api/account/backup`) that reads/writes
+  Postgres directly (a real recovery convenience now — see engineering
+  note #42; it was broken for a while, see the struck-through note
+  #29). Primary user data still lives in Postgres regardless — backup
+  is a convenience, not the system of record.
 - **A known, unresolved performance characteristic**: every API route on
   production takes ~350–500ms regardless of what it does, including
   routes that touch zero database calls — ruling out query cost as the
