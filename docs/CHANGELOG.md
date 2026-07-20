@@ -900,3 +900,42 @@ record survived a broken streak, a chosen favorite color visibly
 tinted the new badges, and a hobby/pet-personalized prompt reliably
 surfaced within a couple hundred shuffles once enough hobbies/pets
 were set. `tsc`, `eslint`, and a production build all stayed clean.
+
+### PWA installability
+
+The app can now be installed to a phone/desktop home screen — a web
+app manifest, a generated icon set (192/512/maskable/apple-touch, all
+rendered from a hand-drawn SVG cottage silhouette via a one-off
+Playwright screenshot script), and a deliberately minimal service
+worker that only provides an offline fallback page, nothing else. See
+engineering note #41 for why the service worker doesn't cache pages
+or API responses (this app is entirely live-data-driven, so it can't
+without risking stale journal/mood/habit data). Verified locally
+against a production build: manifest, icons, and service worker all
+serve with correct headers, the service worker registers and
+activates, and going offline mid-session shows the fallback page
+instead of a browser error.
+
+### Fixed: Export/Import backup actually does something now
+
+The Account page's Export/Import was reading and writing localStorage
+keys left over from before the Postgres migration — nothing wrote
+those keys anymore, so Export silently produced a near-empty file and
+Import did nothing. Replaced with a real `/api/account/backup` route:
+GET pulls the signed-in user's data straight from Postgres across all
+7 domains (journal, daily metrics, learning, social, habits, goals,
+tasks) into one JSON file; POST restores it. Import is a **replace**,
+not a merge — it deletes and re-inserts each domain that's present in
+the uploaded file (a domain missing from the file is left completely
+untouched, so an older or partial backup can't wipe out sections it
+never covered). See engineering note #42 for why replace over merge.
+
+Verified two ways: directly against the API (export counts matched
+seeded data across domains; importing an earlier export correctly
+discarded entries added after that snapshot; a partial file containing
+only `journal` replaced just that domain and left habits alone; a
+malformed file was rejected with a clear 400) and through the actual
+Account page UI (Export triggers a real file download with the right
+content, Import's file picker restores it, shows the success message,
+and reloads to the restored data). `tsc`, `eslint`, and a production
+build all stayed clean.

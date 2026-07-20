@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Lora } from "next/font/google";
 import { ThemeSync } from "@/components/ThemeSync";
 import { AuthProvider } from "@/components/AuthProvider";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,6 +18,18 @@ const lora = Lora({
 export const metadata: Metadata = {
   title: "Life Simulator Dashboard",
   description: "Your life is a story. Discover it.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Life Dashboard",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#B8695C",
 };
 
 export default function RootLayout({
@@ -32,6 +45,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-terracotta/20">
         <AuthProvider>
           <ThemeSync />
+          <ServiceWorkerRegister />
           {children}
         </AuthProvider>
       </body>
