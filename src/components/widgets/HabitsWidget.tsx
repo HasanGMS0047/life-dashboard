@@ -118,7 +118,7 @@ export function HabitsWidget() {
                 )}
                 <button
                   onClick={() => removeHabit(habit.id)}
-                  className="opacity-0 group-hover:opacity-100 text-muted hover:text-foreground transition-opacity shrink-0"
+                  className="p-1.5 -m-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-muted hover:text-foreground transition-opacity shrink-0"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>

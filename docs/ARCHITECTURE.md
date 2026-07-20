@@ -402,6 +402,50 @@ related code:
     in this pass added a smaller mobile/tablet value in front of the
     existing `md:`-prefixed one, never changed the `md:` value itself
     — desktop is pixel-identical to before.
+31. **`opacity-0 group-hover:opacity-100` hides an element completely on
+    touch devices, not just "until interaction."** Touch has no hover
+    state, so an element gated this way never becomes visible by any
+    means on a phone — this is an invisibility bug, not a minor
+    ergonomics nit, and it's easy to miss because it looks completely
+    correct in every desktop screenshot. Habits/Goals/Calendar-Day's remove
+    buttons had this. The fix is always `opacity-100 sm:opacity-0
+    sm:group-hover:opacity-100` (or an equivalent breakpoint split) —
+    default-visible below the breakpoint where touch is the primary
+    input, hover-gated above it. Any future "reveal on hover" affordance
+    needs this same split, not a bare `group-hover`.
+32. **`p-N -m-N` grows an icon-only button's tap target without
+    affecting surrounding layout.** Padding increases the element's own
+    box; the matching negative margin cancels that size increase from
+    the outside, so flex/grid siblings see the same footprint as
+    before. Used throughout the touch-target pass (remove/edit/close
+    buttons that were bare icons with zero hit-area padding). For
+    `position: absolute` elements (the password show/hide toggle), the
+    negative-margin trick isn't needed since there's no sibling layout
+    to protect — instead re-anchor the position value and add
+    `flex items-center justify-center` so padding grows the box
+    symmetrically around the icon rather than shifting its visual
+    center.
+33. **Hardcoded hex colors silently opt out of day/night theming — grep
+    for literal `#`-hex before assuming an icon/cell color is
+    theme-aware.** `HeatmapQuilt`'s level-1/level-2 cell colors were
+    `bg-[#e2b4bd]/40` and `bg-[#d4a373]/50` (the exact day-mode
+    `--blush`/`--mustard` hex values) instead of `bg-blush`/
+    `bg-mustard`. Literal hex in a class or inline style never
+    participates in the `:root[data-theme="night"]` CSS variable swap,
+    so those two cells were stuck in light-mode color regardless of
+    theme — a real bug, not a style preference. Always prefer the
+    theme-mapped Tailwind classes (`terracotta`/`olive`/`mustard`/
+    `blush`/`sky`, or a mood's own `--mood-*` var) over a literal hex,
+    even if the hex happens to currently match — it silently
+    desyncs the moment either palette changes. Not every hardcoded hex
+    in the codebase is a bug, though: the day/night background
+    images/overlays in `login`/`register`/root/`dashboard/layout` are
+    intentionally branched per an explicit `isNight` check (they *are*
+    the theme switch), and `ReplayShell`/`TitleScene`'s hardcoded
+    accents are deliberate — Life Replay is a fixed cinematic
+    experience regardless of site theme (see the Life Replay note under
+    "Where things live" below). Check whether a hardcoded color is
+    supposed to be theme-invariant before "fixing" it.
 
 ## Where things live
 

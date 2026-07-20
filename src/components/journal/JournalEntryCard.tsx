@@ -86,21 +86,23 @@ export function JournalEntryCard({ entry }: { entry: JournalEntry }) {
           {format(new Date(entry.createdAt), "MMMM d, yyyy")}
         </span>
         <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              "text-xs font-medium px-2.5 py-1 rounded-full border",
-              MOOD_PILL_CLASSES[entry.mood] ?? "border-border text-muted"
-            )}
-          >
-            {entry.mood}
-          </span>
+          {entry.mood && (
+            <span
+              className={cn(
+                "text-xs font-medium px-2.5 py-1 rounded-full border",
+                MOOD_PILL_CLASSES[entry.mood] ?? "border-border text-muted"
+              )}
+            >
+              {entry.mood}
+            </span>
+          )}
           {editable ? (
             <>
               <button
                 type="button"
                 onClick={startEdit}
                 title="Edit entry"
-                className="text-muted hover:text-terracotta transition-colors"
+                className="p-1.5 -m-1.5 text-muted hover:text-terracotta transition-colors"
               >
                 <Pencil className="w-3.5 h-3.5" />
               </button>
@@ -108,7 +110,7 @@ export function JournalEntryCard({ entry }: { entry: JournalEntry }) {
                 type="button"
                 onClick={handleDelete}
                 title="Delete entry"
-                className="text-muted hover:text-terracotta transition-colors"
+                className="p-1.5 -m-1.5 text-muted hover:text-terracotta transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>

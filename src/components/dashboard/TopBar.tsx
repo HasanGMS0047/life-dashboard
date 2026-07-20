@@ -41,7 +41,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onMenuClick}
-          className="md:hidden text-muted hover:text-foreground transition-colors shrink-0"
+          className="md:hidden p-2 -m-2 text-muted hover:text-foreground transition-colors shrink-0"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -58,14 +58,14 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
         <button
           onClick={() => setHelpOpen(true)}
           title="What does what?"
-          className="hover:text-foreground transition-colors"
+          className="p-2 -m-2 hover:text-foreground transition-colors"
         >
           <HelpCircle className="w-5 h-5" />
         </button>
         <button
           onClick={() => setTheme(theme === "day" ? "night" : "day")}
           title={theme === "day" ? "Switch to night" : "Switch to day"}
-          className="hover:text-foreground transition-colors"
+          className="p-2 -m-2 hover:text-foreground transition-colors"
         >
           {theme === "day" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>

@@ -25,7 +25,7 @@ export function WeekRollup({
       <div className="flex items-center justify-between">
         <button
           onClick={() => onChangeDate(subWeeks(date, 1))}
-          className="w-7 h-7 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
+          className="w-9 h-9 sm:w-7 sm:h-7 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
         >
           <ChevronLeft className="w-3.5 h-3.5" />
         </button>
@@ -42,7 +42,7 @@ export function WeekRollup({
         </div>
         <button
           onClick={() => onChangeDate(addWeeks(date, 1))}
-          className="w-7 h-7 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
+          className="w-9 h-9 sm:w-7 sm:h-7 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
         >
           <ChevronRight className="w-3.5 h-3.5" />
         </button>

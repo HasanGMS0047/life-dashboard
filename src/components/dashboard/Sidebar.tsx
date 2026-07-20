@@ -96,7 +96,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                 <span className="font-serif text-lg font-semibold text-foreground">Menu</span>
                 <button
                   onClick={onMobileClose}
-                  className="text-muted hover:text-foreground transition-colors"
+                  className="p-2 -m-2 text-muted hover:text-foreground transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>

@@ -171,7 +171,7 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
                 </div>
                 <button
                   onClick={onClose}
-                  className="text-muted hover:text-foreground transition-colors"
+                  className="p-2 -m-2 text-muted hover:text-foreground transition-colors"
                   aria-label="Close guide"
                 >
                   <X className="w-5 h-5" />

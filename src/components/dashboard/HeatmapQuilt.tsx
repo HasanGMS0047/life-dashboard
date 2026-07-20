@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { subDays, isSameDay, startOfDay, format } from "date-fns";
 import { useJournalStore, JournalEntry } from "@/store/journalStore";
 
@@ -29,11 +29,7 @@ function buildQuiltData(entries: JournalEntry[]): QuiltDay[] {
 
 export function HeatmapQuilt() {
   const entries = useJournalStore((s) => s.entries);
-  const [data, setData] = useState<QuiltDay[]>([]);
-
-  useEffect(() => {
-    setData(buildQuiltData(entries));
-  }, [entries]);
+  const data = useMemo(() => buildQuiltData(entries), [entries]);
 
   // Map levels to different fabric patterns (using Tailwind background classes)
   const getFabricPattern = (level: number) => {
@@ -41,9 +37,9 @@ export function HeatmapQuilt() {
       case 0:
         return "bg-background border-dashed border-border/50"; // Empty patch
       case 1:
-        return "bg-[#e2b4bd]/40 border-solid border-[#e2b4bd]/60"; // Soft blush
+        return "bg-blush/40 border-solid border-blush/60"; // Soft blush
       case 2:
-        return "bg-[#d4a373]/50 border-solid border-[#d4a373] shadow-inner"; // Mustard solid
+        return "bg-mustard/50 border-solid border-mustard shadow-inner"; // Mustard solid
       case 3:
         // Plaid pattern using repeating linear gradients
         return "bg-olive/60 border-solid border-olive/80 shadow-sm"; 
