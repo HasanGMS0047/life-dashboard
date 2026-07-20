@@ -24,12 +24,12 @@ export function MoodWidget() {
       <div className="text-center">
         <h3 className="font-serif text-lg font-semibold text-foreground">Today&apos;s Mood:</h3>
         <p className={cn("text-sm font-medium", pending ? "text-mustard" : "text-terracotta")}>
-          {mood ?? "Not logged yet"}
+          {mood || "Not logged yet"}
           {pending && " · tap Confirm below"}
         </p>
       </div>
 
-      <MoodPicker value={mood ?? ""} onChange={(m) => setDraftMood(m)} />
+      <MoodPicker value={mood ?? ""} onChange={setDraftMood} />
 
       {/* Little decorative tags */}
       <div className="absolute right-4 top-6 flex flex-col gap-2">

@@ -710,3 +710,32 @@ left as-is.
   seed historical journal data through the public API). No horizontal
   overflow at either size; both charts' internal horizontal scroll
   (by design, GitHub-contribution-graph style) works as intended.
+
+## Moods can be unselected, not just selected
+
+- Follow-up to the "no default mood" fix above: a screenshot from the
+  live app showed "Fulfilled" highlighted on the Home page's mood
+  widget — that turned out to be correct behavior (an already-confirmed
+  mood for today, shown in its normal confirmed color, not the pending
+  one), but it surfaced the real gap: once any mood is picked, there
+  was no way back to "no mood" short of deleting logged data outright.
+  Only *selecting* a mood was ever wired up; *un*selecting one wasn't.
+- Fixed once, centrally, in `MoodPicker` itself rather than at each of
+  its three call sites: tapping the mood that's already selected now
+  clears it (`onChange("")`) instead of re-selecting the same value.
+  `MoodWidget`, `JournalComposer`, and `JournalEntryCard`'s edit mode
+  all get this for free since they all render through the shared
+  component — no per-caller changes needed beyond `MoodWidget`'s status
+  text, which used `mood ?? "Not logged yet"` and needed to become
+  `mood || "Not logged yet"` so a deliberately-cleared empty string
+  (not just an absent value) also reads as "not logged."
+- On the Home widget this still goes through the existing
+  draft-then-confirm flow — tapping an already-confirmed mood again
+  stages a clear (shown as "Not logged yet · tap Confirm below" in
+  mustard) rather than clearing instantly, consistent with every other
+  check-in field. Verified the full round trip: pick → confirm → shows
+  as confirmed on reload → tap again → stages a clear → confirm →
+  shows "Not logged yet" on reload. Journal composer and entry editing
+  clear instantly since those were never draft-then-confirm to begin
+  with (Journal has always used a single explicit Save/Save Changes
+  action).
