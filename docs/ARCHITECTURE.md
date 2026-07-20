@@ -492,6 +492,21 @@ related code:
     that a shared component would need a style-variant prop for
     marginal benefit — worth revisiting only if a third call site shows
     up.
+36. **`JOURNAL_PROMPTS` (`src/lib/prompts.ts`) mixes original prompts
+    with real quotes, and only real quotes get an `attribution`.**
+    When adding themed prompts (games, movies, celebrities, etc.),
+    the pattern is: write new, original prompt text inspired by the
+    theme (safe, no misattribution risk) and only add a `{ text,
+    attribution }` quote entry when the exact wording is one you're
+    actually confident is accurate — never invent a quote and
+    attribute it to a real person or work. This kept quote entries
+    short (fair-use-appropriate for a personal journaling prompt, not
+    reproducing lengthy dialogue) and avoided the two failure modes
+    that matter here: fabricated quotes presented as real, and
+    reproducing copyrighted material at length. `getRandomPrompt`
+    doesn't care about the distinction — it draws from one flat pool
+    — so this discipline lives entirely in how entries get added, not
+    in any runtime check.
 
 ## Where things live
 
