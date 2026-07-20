@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { Coffee, Sun, Heart } from "lucide-react";
+import { Coffee, Sun, Moon, Heart } from "lucide-react";
 import { useDailyLogStore, getTodayKey } from "@/store/dailyLogStore";
+import { useThemeStore } from "@/store/themeStore";
 import { getMoodTextClass } from "@/lib/moods";
 import { MoodPicker } from "@/components/ui/mood-picker";
 import { cn } from "@/lib/utils";
@@ -12,6 +14,8 @@ export function MoodWidget() {
   const savedMood = useDailyLogStore((s) => s.logs[today]?.mood);
   const draftMood = useDailyLogStore((s) => s.draft.mood);
   const setDraftMood = useDailyLogStore((s) => s.setDraftMood);
+  const theme = useThemeStore((s) => s.theme);
+  const setTheme = useThemeStore((s) => s.setTheme);
   const pending = draftMood !== undefined;
   const mood = draftMood ?? savedMood;
 
@@ -31,14 +35,22 @@ export function MoodWidget() {
 
       <MoodPicker value={mood ?? ""} onChange={setDraftMood} />
 
-      {/* Little decorative tags */}
+      {/* Little corner tags, doing double duty as quick actions */}
       <div className="absolute right-4 top-6 flex flex-col gap-2">
-        <div className="w-8 h-8 rounded-full bg-surface shadow-sm border border-border flex items-center justify-center text-mustard rotate-12">
-          <Sun className="w-4 h-4" />
-        </div>
-        <div className="w-8 h-8 rounded-full bg-surface shadow-sm border border-border flex items-center justify-center text-terracotta -rotate-6">
+        <button
+          onClick={() => setTheme(theme === "day" ? "night" : "day")}
+          title={theme === "day" ? "Switch to night" : "Switch to day"}
+          className="w-8 h-8 rounded-full bg-surface shadow-sm border border-border flex items-center justify-center text-mustard rotate-12 hover:scale-110 hover:rotate-0 transition-transform"
+        >
+          {theme === "day" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+        <Link
+          href="/dashboard/patterns"
+          title="See your Heart Patterns"
+          className="w-8 h-8 rounded-full bg-surface shadow-sm border border-border flex items-center justify-center text-terracotta -rotate-6 hover:scale-110 hover:rotate-0 transition-transform"
+        >
           <Heart className="w-4 h-4" />
-        </div>
+        </Link>
       </div>
     </Card>
   );

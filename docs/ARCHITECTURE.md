@@ -458,6 +458,16 @@ related code:
     which doesn't catch a deliberately-cleared empty string (`??` only
     falls back on `null`/`undefined`) — changed to `mood ||
     "Not logged yet"`.
+35. **`MoodWidget`'s Sun corner tag duplicates the TopBar's day/night
+    toggle** (`useThemeStore((s) => s.setTheme)`, same icon-swap
+    logic) rather than sharing a component — two call sites now need
+    to stay in sync if the toggle behavior ever changes (e.g. a third
+    theme, different icon). Deliberately not extracted into a shared
+    `ThemeToggleButton` yet since the two renderings look different
+    enough (bare icon in a header vs. a rotated sticker-style badge)
+    that a shared component would need a style-variant prop for
+    marginal benefit — worth revisiting only if a third call site shows
+    up.
 
 ## Where things live
 
