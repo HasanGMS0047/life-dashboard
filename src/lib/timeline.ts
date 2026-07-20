@@ -50,7 +50,7 @@ export function buildTimelineEvents(
       id: `journal-${entry.id}`,
       date: new Date(entry.createdAt),
       title: entry.text,
-      subtitle: `Mood: ${entry.mood}`,
+      subtitle: entry.mood ? `Mood: ${entry.mood}` : "Journal entry",
       accent: moodAccent(entry.mood),
       Icon: BookOpen,
     });

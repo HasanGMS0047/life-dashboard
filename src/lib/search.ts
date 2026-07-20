@@ -52,7 +52,7 @@ export function buildSearchIndex(
     results.push({
       id: `journal-${entry.id}`,
       title: entry.text,
-      subtitle: `Journal · Mood: ${entry.mood}`,
+      subtitle: entry.mood ? `Journal · Mood: ${entry.mood}` : "Journal",
       href: "/dashboard/journal",
       accent: moodAccent(entry.mood),
       Icon: BookOpen,

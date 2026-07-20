@@ -9,7 +9,7 @@ import { JOURNAL_PROMPTS, getRandomPrompt } from "@/lib/prompts";
 export function JournalComposer() {
   const addEntry = useJournalStore((s) => s.addEntry);
   const [text, setText] = useState("");
-  const [mood, setMood] = useState("Cozy");
+  const [mood, setMood] = useState("");
   // Starts on a fixed prompt so server- and client-rendered HTML match, then
   // swaps to a random one after mount — picking randomly during the initial
   // render would give the server and client different results and trigger
@@ -24,6 +24,7 @@ export function JournalComposer() {
     if (!text.trim()) return;
     addEntry(text.trim(), mood);
     setText("");
+    setMood("");
     setPrompt(getRandomPrompt(prompt.text));
   };
 

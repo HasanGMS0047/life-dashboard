@@ -639,3 +639,74 @@ left as-is.
   height. Confirmed at 1400×900 desktop that nothing changed there —
   screenshots before/after are visually identical above the `md`
   breakpoint.
+
+## Journal mood no longer pre-selected; touch targets; a real theme-color bug
+
+- **Journal mood defaulted to "Cozy" on every fresh entry** — the
+  composer's `useState("Cozy")` meant the first pill was always
+  pre-highlighted, so saving without deliberately touching the mood
+  picker silently logged "Cozy" rather than nothing. Changed the
+  default to `""` (nothing selected) and reset it back to `""` after
+  each save, so a mood is only ever applied by actually tapping one.
+  Saving with no mood picked is now a supported, normal action — the
+  mood pill on that entry (Journal list, Timeline, Search, the Replay
+  monthly recap) is simply omitted rather than rendered empty; three
+  spots (`JournalEntryCard`, `timeline.ts`, `search.ts`) that
+  unconditionally interpolated `Mood: ${entry.mood}` were guarded to
+  drop the mood clause entirely when there isn't one. `patterns.ts`
+  already guarded on `if (entry.mood)` and needed no change.
+- **Touch targets — found a real invisibility bug, not just a sizing
+  one.** The remove (×) buttons on Habits, Goals, and Calendar Day
+  tasks used `opacity-0 group-hover:opacity-100` — meaning on a touch
+  device, which has no hover state, they never become visible at all.
+  Not "hard to tap," actually unreachable. Fixed with
+  `opacity-100 sm:opacity-0 sm:group-hover:opacity-100`: always
+  visible below the `sm` breakpoint (touch-first sizes), hover-reveal
+  preserved on desktop. Paired with a `p-1.5 -m-1.5` (or `p-2 -m-2`
+  for larger icons) padding trick throughout — adds real invisible hit
+  area around a small icon without shifting surrounding layout, since
+  the negative margin cancels the box-size increase. Applied to: the
+  three opacity-bugged remove buttons above, Journal entry's edit/
+  delete icons (always visible already, just had zero padding), the
+  TopBar's hamburger/help/theme-toggle buttons, the Sidebar drawer's
+  and HelpModal's close buttons, and the password show/hide toggle
+  (re-centered via `flex items-center justify-center` so growing the
+  tap target didn't shift the icon's visual position). Calendar's nav
+  arrows (prev/next day/week/month/year) grew to `w-9 h-9` on mobile,
+  `sm:w-7 sm:h-7` on desktop — reverified Calendar still fits without
+  scrolling after this (it does, unchanged at 611px on mobile).
+- **A real day/night theme bug**: `HeatmapQuilt`'s level-1 and level-2
+  cell colors were hardcoded to `#e2b4bd`/`#d4a373` — the exact hex
+  values of day-mode `--blush`/`--mustard` — instead of the
+  `bg-blush`/`bg-mustard` Tailwind classes already used everywhere
+  else in the app. Literal hex doesn't participate in the
+  `data-theme="night"` CSS variable swap, so those two activity levels
+  stayed stuck in their light-mode colors regardless of theme. Fixed
+  by switching to the theme-aware classes; verified via computed
+  `background-color` and screenshots that the legend and cells now
+  correctly shift between day and night palettes.
+- Swept the rest of the codebase for the same class of bug (hardcoded
+  hex instead of the theme-var-backed Tailwind classes) — found
+  nothing else wrong. The day/night background images and overlays in
+  `login`/`register`/root/`dashboard/layout` are hardcoded per an
+  explicit `isNight` branch on purpose (they're the theme switch
+  itself, not something that should also respond to a CSS variable).
+  `ReplayShell`/`TitleScene`'s hardcoded accent hex values are also
+  intentional — Life Replay is a deliberately fixed "cinematic"
+  experience regardless of site theme, documented earlier in this file
+  ("Life Replay's actual full-screen slideshow... was deliberately
+  left untouched"). `KindDeedsWidget`'s gold medal badge and
+  `PlantVisual`'s soil color were checked in both themes and read
+  fine as fixed colors (a medal is gold in any lighting) — left alone.
+- While in `HeatmapQuilt.tsx`, also converted its `useEffect`+
+  `setState` derived-state pattern to `useMemo`, matching the same fix
+  already applied to `TeacupChart` earlier this session — same
+  pre-existing `react-hooks/set-state-in-effect` lint error, same fix.
+- Verified Heatmap and `TeacupChart` render correctly on mobile/tablet
+  with realistic data: seeded ~45 journal entries backdated across the
+  past year via direct SQL (the journal API always stamps `createdAt`
+  to now, by design, so this needed the same DB-level backdating
+  approach used for Habit streak testing earlier — there's no way to
+  seed historical journal data through the public API). No horizontal
+  overflow at either size; both charts' internal horizontal scroll
+  (by design, GitHub-contribution-graph style) works as intended.

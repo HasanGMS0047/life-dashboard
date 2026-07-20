@@ -102,7 +102,7 @@ export default function MonthlyReplayPage() {
             latestEntry?.text ??
             "You didn't write anything down this month — but you lived one anyway."
           }
-          tag={latestEntry ? `Mood: ${latestEntry.mood}` : undefined}
+          tag={latestEntry?.mood ? `Mood: ${latestEntry.mood}` : undefined}
         />
       ),
     },

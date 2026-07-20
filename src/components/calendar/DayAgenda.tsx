@@ -35,7 +35,7 @@ export function DayAgenda({
       <div className="flex items-center justify-between">
         <button
           onClick={() => onChangeDate(subDays(date, 1))}
-          className="w-7 h-7 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
+          className="w-9 h-9 sm:w-7 sm:h-7 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
         >
           <ChevronLeft className="w-3.5 h-3.5" />
         </button>
@@ -54,7 +54,7 @@ export function DayAgenda({
         </div>
         <button
           onClick={() => onChangeDate(addDays(date, 1))}
-          className="w-7 h-7 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
+          className="w-9 h-9 sm:w-7 sm:h-7 rounded-full border border-border text-muted flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
         >
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
@@ -87,7 +87,7 @@ export function DayAgenda({
               </span>
               <button
                 onClick={() => removeTask(task.id)}
-                className="opacity-0 group-hover:opacity-100 text-muted hover:text-foreground transition-opacity shrink-0"
+                className="p-1.5 -m-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-muted hover:text-foreground transition-opacity shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
