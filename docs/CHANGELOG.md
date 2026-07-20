@@ -795,7 +795,7 @@ left as-is.
   engineering note #17a for the "when to stop retriggering and just
   wait" guidance this added.
 
-## Journal prompt pool: 30 -> 106 -> 144 -> 196 -> 251
+## Journal prompt pool: 30 -> 106 -> 144 -> 196 -> 251 -> 716
 
 - Three rounds of expanding `JOURNAL_PROMPTS`, each following the
   same pattern established in the first pass: original creative
@@ -835,3 +835,24 @@ left as-is.
   verify exact wording, so it stayed a referential prompt only rather
   than risk a misattributed quote. Re-verified with the same
   250-shuffle stress test, zero-duplicate check, and clean build.
+- Round 5 (716): the user supplied a curated reference document
+  (`public/quotes_and_journal_prompts_full.md`, 496 entries) covering
+  celebrities, sportspeople, football, movies, Harry Potter, Star
+  Wars, general video games, GTA, Disco Elysium, Mass Effect,
+  Assassin's Creed, nine anime franchises, Game of Thrones, The Boys,
+  Stranger Things, BTS, MCU, Persona, Elden Ring, Red Dead Redemption
+  2, more K-pop groups, basketball, and tennis, plus 150 journal
+  questions across 21 themes. Parsed it programmatically (a Node
+  script, not hand-transcription — retyping ~500 entries by hand
+  would've been slow and error-prone) and merged it against the
+  existing pool, removing 30 entries that duplicated ones already
+  added in earlier rounds (same quote, near-identical punctuation) in
+  favor of the reference list's canonical version. This is a
+  different provenance than earlier rounds' self-written quotes: the
+  user did the sourcing and explicitly directed everything be
+  included, including entries the source itself marks "paraphrased"
+  (kept that marker in the attribution rather than presenting them as
+  confirmed word-for-word dialogue — see engineering note #36). The
+  reference `.md` file lives in `public/` but was deliberately left
+  uncommitted/unpushed, since committing it would make it a publicly
+  served static asset at a real URL on the live site.
