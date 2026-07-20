@@ -783,3 +783,14 @@ left as-is.
   retrigger a fresh build via the Git integration. Documented as
   engineering note #17a since this project has no local `vercel
   --prod` fallback to reach for instead.
+- The retrigger got stuck too — and so did the retrigger after that.
+  Three consecutive deployments in a row (the original commit, an
+  empty-commit retrigger, and the docs-commit push that followed)
+  all hung at "Initializing" for 5-7 minutes each with zero build
+  output, despite unrelated builds finishing normally in ~35-40s
+  immediately before and after this window. Same recovery applied
+  each time (`vercel remove` + push to retrigger), but three straight
+  identical failures point to a transient Vercel platform-side issue
+  rather than anything retriggering can fix — see the updated
+  engineering note #17a for the "when to stop retriggering and just
+  wait" guidance this added.

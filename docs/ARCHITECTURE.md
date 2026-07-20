@@ -227,7 +227,17 @@ related code:
     stuck, so cancelling it is safe), then `git commit --allow-empty`
     + push to retrigger a fresh deploy of the same code via the Git
     integration, since there's no local `vercel --prod` step in this
-    project's workflow to fall back on.
+    project's workflow to fall back on. **This can repeat several times
+    in a row** — the retrigger for `76f7d33` stuck too, and so did the
+    next retrigger after that (three consecutive deployments, each
+    hung 5-7 minutes with zero build output, while unrelated builds
+    immediately before/after took ~35-40s). At that point stop
+    retriggering blindly: it's not fixing anything the 4th time that
+    it didn't fix the first three, and each attempt costs a deployment
+    slot. Confirm production is unaffected (`vercel ls` — the last
+    `Ready` deployment keeps serving the alias throughout), clean up
+    the stuck deployment, and just wait — it's a transient Vercel
+    platform issue, not a repo-side bug to chase.
 18. **Never pick a random value inside `useState(() => ...)` or during
     render in a "use client" component** — it still renders once on the
     server for the initial HTML. If that pick is random (`Math.random()`,
