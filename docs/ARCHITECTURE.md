@@ -506,7 +506,12 @@ related code:
     reproducing copyrighted material at length. `getRandomPrompt`
     doesn't care about the distinction — it draws from one flat pool
     — so this discipline lives entirely in how entries get added, not
-    in any runtime check.
+    in any runtime check. Concrete example: Disco Elysium got a
+    referential prompt ("If today needed a skill check like in Disco
+    Elysium...") but no verbatim quote, because its dialogue is dense
+    and translation/version-specific enough that exact wording
+    couldn't be confidently recalled — the game still got represented,
+    just without an attributed line that might be wrong.
 
 ## Where things live
 

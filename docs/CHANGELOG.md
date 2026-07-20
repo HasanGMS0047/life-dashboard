@@ -795,7 +795,7 @@ left as-is.
   engineering note #17a for the "when to stop retriggering and just
   wait" guidance this added.
 
-## Journal prompt pool: 30 -> 106 -> 144 -> 196
+## Journal prompt pool: 30 -> 106 -> 144 -> 196 -> 251
 
 - Three rounds of expanding `JOURNAL_PROMPTS`, each following the
   same pattern established in the first pass: original creative
@@ -824,3 +824,14 @@ left as-is.
   the live composer (0 empty prompt renders, attributions displayed
   correctly) plus a script confirming zero duplicate `text` values
   across all 196 entries, and a clean `next build`.
+- Round 4 (251): added a "basic journaling questions" register (plain,
+  unthemed check-ins like "How are you feeling right now?" and "What's
+  on your mind?"), more niche gaming/anime referential prompts, and
+  real quotes from Star Wars (expanded — Yoda, Vader, Han Solo, The
+  Mandalorian), Troy, Mission: Impossible, Harry Potter (expanded —
+  more Dumbledore, Sirius Black), Mass Effect, One Piece, Jujutsu
+  Kaisen, Solo Leveling, Dragon Ball Z, and Pokémon. Deliberately
+  skipped verbatim Disco Elysium dialogue — couldn't confidently
+  verify exact wording, so it stayed a referential prompt only rather
+  than risk a misattributed quote. Re-verified with the same
+  250-shuffle stress test, zero-duplicate check, and clean build.
