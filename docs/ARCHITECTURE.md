@@ -511,7 +511,28 @@ related code:
     Elysium...") but no verbatim quote, because its dialogue is dense
     and translation/version-specific enough that exact wording
     couldn't be confidently recalled — the game still got represented,
-    just without an attributed line that might be wrong.
+    just without an attributed line that might be wrong. This
+    changed with a later merge: the user supplied their own curated
+    quote list (`public/quotes_and_journal_prompts_full.md`, not
+    committed — see below) including Disco Elysium lines, and
+    explicitly directed all of it be added. Different provenance than
+    self-sourced quotes — the user did the vetting and owns the
+    accuracy call — so entries from that file were merged in as-is,
+    including ones the source itself marks "paraphrased" (that marker
+    stays in the attribution string rather than being stripped, so
+    the app is exactly as honest about accuracy as its source was).
+    The merge itself was scripted (`node` parsing the markdown into
+    `{ text, attribution }` objects, normalizing and diffing against
+    the existing pool) rather than hand-transcribed, since retyping
+    ~500 entries invites transcription errors at that volume.
+37. **`public/quotes_and_journal_prompts_full.md` is a source
+    document, deliberately not committed.** It's the reference list
+    note #36 describes merging from — everything in it that survived
+    dedup now lives in `JOURNAL_PROMPTS`. Anything in `public/` is a
+    static asset Next.js serves at a real URL once committed and
+    deployed, and there's no reason this reference doc needs to be
+    publicly reachable, so it stays local/untracked rather than
+    getting swept into a `git add`.
 
 ## Where things live
 
