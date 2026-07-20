@@ -7,8 +7,11 @@ export interface JournalPrompt {
 // at a blank page — shown one at a time above the composer, shuffle-able.
 // Deliberately varied in register (plain daily check-in, more reflective/
 // intellectual, random/silly, oddly specific, pop-culture flavored, and
-// famous real quotes) rather than one tone throughout — a blank-page
-// nudge should sometimes be light, not always a therapy question.
+// famous real quotes — literary, screen/game, and football) rather than
+// one tone throughout — a blank-page nudge should sometimes be light,
+// not always a therapy question. The screen/game/football quotes are
+// kept short and clearly attributed (real, verifiable lines), the same
+// bar as the literary quotes below.
 export const JOURNAL_PROMPTS: JournalPrompt[] = [
   // Plain, everyday
   { text: "What's the detail of what you accomplished today?" },
@@ -107,6 +110,39 @@ export const JOURNAL_PROMPTS: JournalPrompt[] = [
   { text: "If today were a reality TV confessional, what would you say to the camera?" },
   { text: "Which fictional sidekick would've had the most commentary on your day?" },
 
+  // Video games & interactive worlds
+  { text: "If today were a Skyrim quest, what would the objective marker say?" },
+  { text: "What today would count as taking an arrow in the knee?" },
+  { text: "If today were a Disco Elysium skill check, which skill would've failed you?" },
+  { text: "What internal voice argued with you the loudest today?" },
+  { text: "If today were a GTA wanted level, how many stars would you be at right now?" },
+  { text: "What's the side quest you got distracted by instead of today's main story?" },
+  { text: "If today had a loading-screen tip, what would it say?" },
+  { text: "What would your character sheet's 'notable trait' be after today?" },
+  { text: "If today were a save file, what would you name the checkpoint?" },
+  { text: "What's a debuff you were clearly under today?" },
+
+  // Movies — MCU, DC & beyond
+  { text: "If today were an MCU post-credits scene, what's the twist?" },
+  { text: "Which superhero's day off did today resemble most?" },
+  { text: "If today were a Batman origin-story beat, what happened in the alley?" },
+  { text: "What was your 'I am inevitable' moment today — the thing you couldn't stop?" },
+  { text: "Which villain monologue best explains your mood today?" },
+  { text: "If today needed a post-credits scene, what would it tease?" },
+  { text: "What's the training-montage moment from today?" },
+  { text: "If today were a movie trailer, what's the one line that would sell it?" },
+  { text: "What's the plot hole in today that nobody's going to question?" },
+
+  // From the pitch — football flavored
+  { text: "If today were a match, what's the final scoreline?" },
+  { text: "What was your Messi moment today — small, quiet, but decisive?" },
+  { text: "What was your Ronaldo moment today — loud, unmissable, celebrated?" },
+  { text: "If today went to penalties, who would you trust to take the kick?" },
+  { text: "What's the stoppage-time goal of your day — the thing that saved it at the last second?" },
+  { text: "If today were a post-match interview, what's the one line you'd give reporters?" },
+  { text: "What red card would you show today, if you could?" },
+  { text: "If your day were a highlight reel, what's the one clip everyone would replay?" },
+
   // Famous quotes
   { text: "You can always edit a bad page. You can't edit a blank page.", attribution: "Jodi Picoult" },
   { text: "Writing is medicine. It is an appropriate antidote to injury. It is an appropriate companion for any difficult change.", attribution: "Julia Cameron" },
@@ -127,6 +163,21 @@ export const JOURNAL_PROMPTS: JournalPrompt[] = [
   { text: "The only journey is the one within.", attribution: "Rainer Maria Rilke" },
   { text: "Owning our story and loving ourselves through that process is the bravest thing we'll ever do.", attribution: "Brené Brown" },
   { text: "I took a deep breath and listened to the old brag of my heart: I am, I am, I am.", attribution: "Sylvia Plath" },
+
+  // Screen & game quotes
+  { text: "I can do this all day.", attribution: "Steve Rogers, Captain America: Civil War" },
+  { text: "I am Iron Man.", attribution: "Tony Stark, Iron Man" },
+  { text: "I am inevitable.", attribution: "Thanos, Avengers: Endgame" },
+  { text: "Why do we fall, sir? So that we can learn to pick ourselves up.", attribution: "Alfred Pennyworth, Batman Begins" },
+  { text: "It's not who you are underneath, it's what you do that defines you.", attribution: "Rachel Dawes, Batman Begins" },
+  { text: "With great power comes great responsibility.", attribution: "Uncle Ben, Spider-Man" },
+  { text: "I used to be an adventurer like you, until I took an arrow in the knee.", attribution: "Guard dialogue, The Elder Scrolls V: Skyrim" },
+
+  // Words from the greats — football
+  { text: "Talent without working hard is nothing.", attribution: "Cristiano Ronaldo" },
+  { text: "Your love makes me strong, your hate makes me unstoppable.", attribution: "Cristiano Ronaldo" },
+  { text: "You have to fight to reach your dream. You have to sacrifice and work hard for it.", attribution: "Lionel Messi" },
+  { text: "The day you think there's no improvement to be made is a sad one for any player.", attribution: "Lionel Messi" },
 ];
 
 export function getRandomPrompt(exclude?: string): JournalPrompt {
