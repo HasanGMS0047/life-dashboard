@@ -24,6 +24,7 @@ const PAGE_HELP: { href: string; help: PageHelp }[] = [
       title: "Journal",
       items: [
         { label: "Writing an entry", description: "A short entry about your day, tagged with a mood from the same 15-mood picker used on the Home page." },
+        { label: "Streak", description: "How many days in a row you've journaled, with your all-time best once you've broken a streak." },
         { label: "Editing & deleting", description: "Only available the same day you wrote the entry — after that, entries lock (shown with a small lock icon) so your history stays honest." },
         { label: "Reflect with AI", description: "An optional short reflection on what you wrote, generated locally — only appears if the app can reach a local Ollama instance on your machine." },
       ],
@@ -77,6 +78,7 @@ const PAGE_HELP: { href: string; help: PageHelp }[] = [
       items: [
         { label: "Activity grid", description: "A year-at-a-glance grid — darker squares mean more logged that day." },
         { label: "Monthly chart", description: "A bar chart of journal entries per month for the selected year." },
+        { label: "Streak", description: "Your current and best-ever journaling streaks, same numbers as the Journal page." },
       ],
     },
   },
@@ -86,7 +88,7 @@ const PAGE_HELP: { href: string; help: PageHelp }[] = [
       title: "Account",
       items: [
         { label: "Profile", description: "Update your name and password, and sign out." },
-        { label: "Preferences", description: "Favorite accent color, hobbies, and pets as tag chips — used to personalize small touches around the app." },
+        { label: "Preferences", description: "Favorite accent color, hobbies, and pets as tag chips. Your color tints streak badges around the app, and your hobbies/pets occasionally shape a journal prompt into something more specific to you." },
         { label: "Appearance", description: "Switch between day and night themes." },
         { label: "Your Data", description: "Export a backup of everything you've logged, or import one back in." },
         { label: "Reset Data", description: "Permanently deletes your journal, daily logs, learning, memories, habits, goals, and tasks. Type RESET to confirm — this can't be undone. Your account itself (email, password, name) is untouched." },
@@ -116,7 +118,7 @@ const PAGE_HELP: { href: string; help: PageHelp }[] = [
         { label: "Kind Deeds", description: "Small acts of kindness you did today — check them off as you go." },
         { label: "Learning", description: "Track books or articles you've finished and hours spent studying." },
         { label: "People & Places", description: "Log memories, trips, and friendships — attach a photo if you like." },
-        { label: "Your Garden", description: "Habits you're building, with a little plant that grows as you keep them. Water it by checking off every habit each day — miss one and it wilts, but it never dies, so a slip is never the end." },
+        { label: "Your Garden", description: "Habits you're building, with a little plant that grows as you keep them. Water it by checking off every habit each day — miss one and it wilts, but it never dies, so a slip is never the end. Your best-ever streak stays visible even after a wilt." },
         { label: "Goals", description: "Longer-term goals tracked with a 0–100% progress bar, split into This Month and a Six-Month Vision." },
       ],
     },

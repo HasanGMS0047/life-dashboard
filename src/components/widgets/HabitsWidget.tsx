@@ -9,7 +9,13 @@ import {
   computeHabitStreak,
 } from "@/store/habitStore";
 import { cn } from "@/lib/utils";
-import { computeGardenStreak, computeGrowthStage, hasEverWatered, STAGE_LABELS } from "@/lib/garden";
+import {
+  computeGardenStreak,
+  computeGrowthStage,
+  computeLongestGardenStreakEver,
+  hasEverWatered,
+  STAGE_LABELS,
+} from "@/lib/garden";
 import { PlantVisual } from "@/components/widgets/PlantVisual";
 import { WaterCelebration } from "@/components/widgets/WaterCelebration";
 
@@ -42,6 +48,7 @@ export function HabitsWidget() {
   };
 
   const gardenStreak = computeGardenStreak(habits);
+  const gardenBest = computeLongestGardenStreakEver(habits);
   const everWatered = hasEverWatered(habits);
   const wilted = gardenStreak === 0 && everWatered;
   const stage = computeGrowthStage(gardenStreak);
@@ -60,10 +67,15 @@ export function HabitsWidget() {
     <Card className="flex flex-col gap-4 p-6 bg-background border-2 hover:border-terracotta/30 transition-colors">
       <div className="flex items-center justify-between">
         <h3 className="font-serif text-lg font-semibold text-foreground">Your Garden</h3>
-        {gardenStreak > 0 && (
-          <span className="text-xs font-medium text-terracotta flex items-center gap-0.5">
-            <Flame className="w-3.5 h-3.5" />
-            {gardenStreak}
+        {(gardenStreak > 0 || gardenBest > 0) && (
+          <span className="flex items-center gap-1.5">
+            <span className="text-xs font-medium text-terracotta flex items-center gap-0.5">
+              <Flame className="w-3.5 h-3.5" />
+              {gardenStreak}
+            </span>
+            {gardenBest > gardenStreak && (
+              <span className="text-[11px] text-muted">best {gardenBest}</span>
+            )}
           </span>
         )}
       </div>

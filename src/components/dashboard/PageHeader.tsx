@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -10,10 +11,12 @@ export function PageHeader({
   title,
   subtitle,
   className,
+  badge,
 }: {
   title: string;
   subtitle: string;
   className?: string;
+  badge?: ReactNode;
 }) {
   return (
     <motion.div
@@ -26,6 +29,7 @@ export function PageHeader({
         {title}
       </h1>
       <p className="text-muted text-sm sm:text-base md:text-lg mt-1 sm:mt-2 font-medium">{subtitle}</p>
+      {badge}
     </motion.div>
   );
 }

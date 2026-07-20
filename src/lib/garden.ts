@@ -1,4 +1,4 @@
-import { isSameDay, subDays } from "date-fns";
+import { addDays, isSameDay, startOfDay, subDays } from "date-fns";
 import type { Habit } from "@/store/habitStore";
 
 export type GrowthStage = 0 | 1 | 2 | 3 | 4;
@@ -24,6 +24,32 @@ export function computeGardenStreak(habits: Habit[]): number {
     cursor = subDays(cursor, 1);
   }
   return streak;
+}
+
+// The longest run of fully-watered days ever, walking the whole history
+// instead of stopping at the first gap — a record that survives a wilt,
+// same idea as computeLongestStreak for journaling.
+export function computeLongestGardenStreakEver(habits: Habit[]): number {
+  if (habits.length === 0) return 0;
+
+  const earliest = habits.reduce(
+    (min, h) => (startOfDay(new Date(h.createdAt)) < min ? startOfDay(new Date(h.createdAt)) : min),
+    startOfDay(new Date())
+  );
+  const today = startOfDay(new Date());
+
+  let longest = 0;
+  let current = 0;
+  for (let day = earliest; day <= today; day = addDays(day, 1)) {
+    const activeHabits = habits.filter((h) => startOfDay(new Date(h.createdAt)) <= day);
+    const allWatered =
+      activeHabits.length > 0 &&
+      activeHabits.every((h) => h.completions.some((d) => isSameDay(new Date(d), day)));
+
+    current = allWatered ? current + 1 : 0;
+    longest = Math.max(longest, current);
+  }
+  return longest;
 }
 
 // True once the garden has ever been watered at all — used to tell a fresh,

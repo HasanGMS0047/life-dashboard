@@ -856,3 +856,47 @@ left as-is.
   reference `.md` file lives in `public/` but was deliberately left
   uncommitted/unpushed, since committing it would make it a publicly
   served static asset at a real URL on the live site.
+
+### Profile pictures
+
+Added avatar upload/change/remove on the Account page. Client-side
+resize (canvas, ~320px JPEG) keeps uploads small before they're
+POSTed to `/api/account/avatar`, which stores the bytes + mime type
+directly on `User` (Postgres `Bytes` column, no third-party storage
+service — see engineering note #38) and serves them back through a
+dedicated GET route rather than stuffing them into the NextAuth
+session/cookie. Verified: fresh account starts with no photo (icon
+placeholder), upload renders immediately and survives a reload,
+remove falls back to the placeholder and that also survives a
+reload, `tsc`/`eslint`/production build all clean. A pre-existing
+"Failed to fetch" console noise on `/dashboard/*` pages (dev-mode
+double-invoked widget fetches racing navigation) was confirmed to
+already happen on a bare page load with zero avatar interaction —
+unrelated to this change, left as-is.
+
+### Streaks + preferences that actually do something
+
+Added a "longest ever" streak alongside the existing "current" one for
+journaling and the habit garden, so breaking a streak doesn't erase
+the record — surfaced on the Journal and Heatmap pages (new badge
+under the page title) and the Home page (a flame next to "Daily
+Journal", a "best N" note on the Garden widget). See engineering note
+#39.
+
+Also gave `favoriteColor`/`hobbies`/`pets` real jobs instead of just
+being redisplayed on the Account page: favorite color now tints the
+new streak badges, and hobbies/pets occasionally shape a journal
+prompt into something specific ("What first pulled you toward
+{hobby}?", "How's {pet} been today?"). See engineering note #40.
+
+Verified with a seeded local account (journal entries and habit
+completions backdated through Prisma directly, not raw SQL — a raw
+`pg` insert against Prisma's timezone-naive `DateTime` columns
+introduced a 6-hour/1-day skew that very nearly got mistaken for a
+real streak-math bug before tracing it back to the seeding method):
+current + best streak numbers matched hand-computed expectations on
+both the Journal and Heatmap pages, the Garden widget's best-ever
+record survived a broken streak, a chosen favorite color visibly
+tinted the new badges, and a hobby/pet-personalized prompt reliably
+surfaced within a couple hundred shuffles once enough hobbies/pets
+were set. `tsc`, `eslint`, and a production build all stayed clean.

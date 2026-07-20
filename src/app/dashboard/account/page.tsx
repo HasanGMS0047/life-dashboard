@@ -9,17 +9,10 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { useThemeStore } from "@/store/themeStore";
 import { exportData, importData } from "@/lib/backup";
+import { resizeImageFile } from "@/lib/image";
+import { ACCENTS, type AccentKey } from "@/lib/accents";
+import { usePrefsStore } from "@/store/prefsStore";
 import { cn } from "@/lib/utils";
-
-type AccentKey = "terracotta" | "olive" | "mustard" | "blush" | "sky";
-
-const ACCENTS: { key: AccentKey; label: string; swatch: string; border: string; text: string }[] = [
-  { key: "terracotta", label: "Terracotta", swatch: "bg-terracotta", border: "border-terracotta", text: "text-terracotta" },
-  { key: "olive", label: "Olive", swatch: "bg-olive", border: "border-olive", text: "text-olive" },
-  { key: "mustard", label: "Mustard", swatch: "bg-mustard", border: "border-mustard", text: "text-mustard" },
-  { key: "blush", label: "Blush", swatch: "bg-blush", border: "border-blush", text: "text-blush" },
-  { key: "sky", label: "Sky", swatch: "bg-sky", border: "border-sky", text: "text-sky" },
-];
 
 function TagInput({
   items,
@@ -94,6 +87,13 @@ export default function AccountPage() {
     null
   );
 
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarStatus, setAvatarStatus] = useState<{ type: "error" | "success"; message: string } | null>(
+    null
+  );
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
   const [favoriteColor, setFavoriteColor] = useState<AccentKey | null>(null);
   const [hobbies, setHobbies] = useState<string[]>([]);
   const [pets, setPets] = useState<string[]>([]);
@@ -127,6 +127,9 @@ export default function AccountPage() {
         setFavoriteColor((data.favoriteColor as AccentKey) ?? null);
         setHobbies(Array.isArray(data.hobbies) ? data.hobbies : []);
         setPets(Array.isArray(data.pets) ? data.pets : []);
+        if (data.avatarUpdatedAt) {
+          setAvatarSrc(`/api/account/avatar?v=${encodeURIComponent(data.avatarUpdatedAt)}`);
+        }
       } catch (err) {
         console.error("Couldn't load preferences", err);
       }
@@ -215,11 +218,64 @@ export default function AccountPage() {
         return;
       }
       setPrefsStatus({ type: "success", message: "Preferences saved." });
+      // Keep the shared prefs cache (streak badges, journal prompts) in sync
+      // with this edit rather than leaving it stale until next full reload.
+      usePrefsStore.setState((state) => ({
+        favoriteColor: next.favoriteColor !== undefined ? next.favoriteColor : state.favoriteColor,
+        hobbies: next.hobbies ?? state.hobbies,
+        pets: next.pets ?? state.pets,
+      }));
     } catch (err) {
       console.error("Preferences update failed", err);
       setPrefsStatus({ type: "error", message: "Couldn't save your preferences. Please try again." });
     } finally {
       setPrefsLoading(false);
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setAvatarStatus(null);
+    setAvatarUploading(true);
+    try {
+      const dataUrl = await resizeImageFile(file, 320, 0.85);
+      const res = await fetch("/api/account/avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dataUrl }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setAvatarStatus({ type: "error", message: data?.error || "Couldn't save that photo." });
+        return;
+      }
+      setAvatarSrc(dataUrl);
+    } catch (err) {
+      console.error("Avatar upload failed", err);
+      setAvatarStatus({ type: "error", message: "Couldn't save that photo. Please try again." });
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setAvatarStatus(null);
+    setAvatarUploading(true);
+    try {
+      const res = await fetch("/api/account/avatar", { method: "DELETE" });
+      if (!res.ok) {
+        setAvatarStatus({ type: "error", message: "Couldn't remove that photo." });
+        return;
+      }
+      setAvatarSrc(null);
+    } catch (err) {
+      console.error("Avatar removal failed", err);
+      setAvatarStatus({ type: "error", message: "Couldn't remove that photo. Please try again." });
+    } finally {
+      setAvatarUploading(false);
     }
   };
 
@@ -274,19 +330,53 @@ export default function AccountPage() {
 
       <Card className="p-4 sm:p-5 md:p-6 bg-background border-2 flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4 min-w-0">
-          <div
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            title={avatarSrc ? "Change photo" : "Add a photo"}
             className={cn(
-              "w-14 h-14 rounded-full flex items-center justify-center shrink-0 border-2",
+              "w-14 h-14 rounded-full flex items-center justify-center shrink-0 border-2 overflow-hidden transition-opacity hover:opacity-80",
               accent ? accent.border : "border-border"
             )}
           >
-            <UserIcon className={cn("w-6 h-6", accent ? accent.text : "text-muted")} />
-          </div>
+            {avatarSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarSrc} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <UserIcon className={cn("w-6 h-6", accent ? accent.text : "text-muted")} />
+            )}
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="hidden"
+          />
           <div className="min-w-0">
             <p className="font-serif text-lg font-semibold text-foreground truncate">
               {session?.user?.name || "Your Account"}
             </p>
             <p className="text-sm text-muted truncate">{session?.user?.email}</p>
+            <div className="flex gap-3 mt-1">
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={avatarUploading}
+                className="text-xs font-medium text-terracotta hover:underline disabled:opacity-60"
+              >
+                {avatarUploading ? "Uploading..." : avatarSrc ? "Change photo" : "Add photo"}
+              </button>
+              {avatarSrc && !avatarUploading && (
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  className="text-xs font-medium text-muted hover:text-terracotta hover:underline"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
           </div>
         </div>
         <Button
@@ -299,6 +389,11 @@ export default function AccountPage() {
           Sign Out
         </Button>
       </Card>
+      {avatarStatus && (
+        <p className={cn("text-sm mt-2 px-1", avatarStatus.type === "success" ? "text-olive" : "text-terracotta")}>
+          {avatarStatus.message}
+        </p>
+      )}
 
       <Card className="p-4 sm:p-5 md:p-6 bg-background border-2 mt-4 sm:mt-5 md:mt-6">
         <h3 className="font-serif text-lg font-semibold text-foreground mb-1">Account</h3>
