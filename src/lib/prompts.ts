@@ -143,6 +143,41 @@ export const JOURNAL_PROMPTS: JournalPrompt[] = [
   { text: "What red card would you show today, if you could?" },
   { text: "If your day were a highlight reel, what's the one clip everyone would replay?" },
 
+  // More mainstream games
+  { text: "If today were a Dark Souls boss fight, how many tries did it take?" },
+  { text: "What was today's 'Praise the Sun' moment — a small win worth celebrating?" },
+  { text: "If today were a Zelda dungeon, what was the boss key you needed?" },
+  { text: "What's the crafting recipe for today — what ingredients made it what it was?" },
+  { text: "If today were a Portal test chamber, what was the trick you didn't see coming?" },
+  { text: "What quest marker popped up out of nowhere today?" },
+  { text: "If today were an RPG dialogue tree, which option did you almost pick but didn't?" },
+  { text: "What's the respawn point you'd set today, if you could redo the rest?" },
+  { text: "If today were a battle royale, what round did you get eliminated in?" },
+  { text: "What's the easter egg from today — something small only you noticed?" },
+  { text: "If today were an open-world map, what was still fogged over by the end?" },
+  { text: "What NPC-brained moment did you have today — repeating the same line on a loop?" },
+
+  // More movies
+  { text: "If today were a Star Wars scene, were you closer to the light side or the dark side?" },
+  { text: "What was your 'carrying the ring' moment today — the thing you couldn't put down?" },
+  { text: "If today were a heist movie, what was the plan that almost went wrong?" },
+  { text: "What's the twist ending if today were a thriller?" },
+  { text: "If today were narrated like a nature documentary, what would the narrator say about you?" },
+  { text: "What's the one scene from today you'd cut in the edit?" },
+  { text: "If today were a Pixar movie, what's the emotional gut-punch moment?" },
+  { text: "What's the soundtrack-swell moment from today — when it would've felt cinematic?" },
+  { text: "If today were a courtroom drama, what would you plead guilty to?" },
+  { text: "What's the sequel hook from today — something left unresolved?" },
+  { text: "If today got a director's cut, what deleted scene would you add back in?" },
+
+  // Celebrity-flavored
+  { text: "Whose work ethic did today's grind remind you of?" },
+  { text: "If a camera crew followed you today for a documentary, what would the trailer tease?" },
+  { text: "What's the red-carpet-ready moment from today, if any?" },
+  { text: "If you had to give an acceptance speech for today, who would you thank first?" },
+  { text: "What's the comeback story arc your day is quietly building toward?" },
+  { text: "If today were a magazine cover, what's the headline?" },
+
   // Famous quotes
   { text: "You can always edit a bad page. You can't edit a blank page.", attribution: "Jodi Picoult" },
   { text: "Writing is medicine. It is an appropriate antidote to injury. It is an appropriate companion for any difficult change.", attribution: "Julia Cameron" },
@@ -172,12 +207,37 @@ export const JOURNAL_PROMPTS: JournalPrompt[] = [
   { text: "It's not who you are underneath, it's what you do that defines you.", attribution: "Rachel Dawes, Batman Begins" },
   { text: "With great power comes great responsibility.", attribution: "Uncle Ben, Spider-Man" },
   { text: "I used to be an adventurer like you, until I took an arrow in the knee.", attribution: "Guard dialogue, The Elder Scrolls V: Skyrim" },
+  { text: "The cake is a lie.", attribution: "GLaDOS, Portal" },
+  { text: "Praise the Sun!", attribution: "Solaire of Astora, Dark Souls" },
+  { text: "It's dangerous to go alone! Take this.", attribution: "The Legend of Zelda" },
+  { text: "Despite everything, it's still you.", attribution: "Undertale" },
+  { text: "Evil is evil. Lesser, greater, middling — makes no difference. The degree is arbitrary.", attribution: "Geralt of Rivia, The Witcher" },
+  { text: "May the Force be with you.", attribution: "Star Wars" },
+  { text: "No. I am your father.", attribution: "Darth Vader, Star Wars: The Empire Strikes Back" },
+  { text: "One does not simply walk into Mordor.", attribution: "Boromir, The Lord of the Rings: The Fellowship of the Ring" },
+  { text: "Not all those who wander are lost.", attribution: "J.R.R. Tolkien, The Lord of the Rings" },
+  { text: "I solemnly swear that I am up to no good.", attribution: "Harry Potter" },
+  { text: "It does not do to dwell on dreams and forget to live.", attribution: "Albus Dumbledore, Harry Potter and the Sorcerer's Stone" },
+  { text: "There is no spoon.", attribution: "The Matrix" },
+  { text: "Life was like a box of chocolates. You never know what you're gonna get.", attribution: "Forrest Gump" },
+  { text: "Get busy living, or get busy dying.", attribution: "Andy Dufresne, The Shawshank Redemption" },
+  { text: "Hope is a good thing, maybe the best of things, and no good thing ever dies.", attribution: "Andy Dufresne, The Shawshank Redemption" },
 
   // Words from the greats — football
   { text: "Talent without working hard is nothing.", attribution: "Cristiano Ronaldo" },
   { text: "Your love makes me strong, your hate makes me unstoppable.", attribution: "Cristiano Ronaldo" },
   { text: "You have to fight to reach your dream. You have to sacrifice and work hard for it.", attribution: "Lionel Messi" },
   { text: "The day you think there's no improvement to be made is a sad one for any player.", attribution: "Lionel Messi" },
+
+  // Words from the greats — beyond the pitch
+  { text: "Your time is limited, so don't waste it living someone else's life.", attribution: "Steve Jobs" },
+  { text: "I hated every minute of training, but I said, don't quit. Suffer now and live the rest of your life as a champion.", attribution: "Muhammad Ali" },
+  { text: "Float like a butterfly, sting like a bee.", attribution: "Muhammad Ali" },
+  { text: "I've failed over and over and over again in my life and that is why I succeed.", attribution: "Michael Jordan" },
+  { text: "The most important thing is to try and inspire people so that they can be great in whatever they want to do.", attribution: "Kobe Bryant" },
+  { text: "I really think a champion is defined not by their wins but by how they can recover when they fall.", attribution: "Serena Williams" },
+  { text: "The way to get started is to quit talking and begin doing.", attribution: "Walt Disney" },
+  { text: "Being realistic is the most commonly traveled road to mediocrity.", attribution: "Will Smith" },
 ];
 
 export function getRandomPrompt(exclude?: string): JournalPrompt {
