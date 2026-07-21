@@ -6,11 +6,14 @@ export type GrowthStage = 0 | 1 | 2 | 3 | 4;
 // A day only counts as "watered" if every habit that existed by that day was
 // checked off — missing even one keeps the garden from growing, same as a
 // real plant needs consistent care, not just occasional attention.
-export function computeGardenStreak(habits: Habit[]): number {
+// `referenceDate` defaults to today but can be shifted back (e.g. to
+// yesterday) to answer "what was the streak as of then" — see
+// src/lib/streakReminder.ts.
+export function computeGardenStreak(habits: Habit[], referenceDate: Date = new Date()): number {
   if (habits.length === 0) return 0;
 
   let streak = 0;
-  let cursor = new Date();
+  let cursor = referenceDate;
   for (;;) {
     const activeHabits = habits.filter((h) => new Date(h.createdAt) <= cursor);
     if (activeHabits.length === 0) break;

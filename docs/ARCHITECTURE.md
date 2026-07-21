@@ -642,6 +642,35 @@ related code:
     download/upload plumbing client-side; it just calls this route
     instead of reading/writing `localStorage` now (see struck-through
     note #29).
+43. **The streak reminder banner is a same-session nudge, not a push
+    notification — deliberately, as a lighter first step.** The
+    original ask was "remind me before my streak breaks," and true
+    background push (Web Push + VAPID keys + a stored subscription per
+    device + a `push` handler in the service worker) is the complete
+    version of that, but it's more moving parts than a first pass
+    warranted. `src/lib/streakReminder.ts` answers a narrower question
+    that's cheap to compute from data already in memory: "was there a
+    streak going into yesterday, and has today's entry/watering not
+    happened yet?" It reuses `computeJournalStreak`/`computeGardenStreak`
+    rather than writing parallel logic — both gained an optional
+    `referenceDate` parameter (defaults to `new Date()`, so every
+    existing caller is unaffected) specifically so this module could
+    ask "what was the streak as of yesterday" without duplicating the
+    walk-backward algorithm. `StreakReminderBanner`
+    (`src/components/dashboard/StreakReminderBanner.tsx`) renders on
+    the Home page only, reading `journalStore`/`habitStore` that
+    `DashboardLayout` already warms — no extra fetch. Dismissal is
+    `localStorage`, keyed by today's date (`streak-reminder-dismissed-
+    YYYY-MM-DD`), so closing it quiets it for the rest of the day
+    without suppressing tomorrow's — this is ephemeral UI state, not
+    user data, so `localStorage` is fine here even though it's wrong
+    for anything that needs to be the system of record (see note #29's
+    original mistake). The `dismissed: boolean | null` state starts
+    `null` specifically so the component renders nothing until the
+    `useEffect` reads `localStorage` — `false`/`true` would either
+    flash the banner before hiding it or never show it at all,
+    depending on which default was picked, since `localStorage` isn't
+    available during server render.
 
 ## Where things live
 

@@ -13,6 +13,7 @@ import { LearningWidget } from "@/components/widgets/LearningWidget";
 import { SocialWidget } from "@/components/widgets/SocialWidget";
 import { HabitsWidget } from "@/components/widgets/HabitsWidget";
 import { GoalsWidget } from "@/components/widgets/GoalsWidget";
+import { StreakReminderBanner } from "@/components/dashboard/StreakReminderBanner";
 import { motion } from "framer-motion";
 
 function DashboardWelcome() {
@@ -65,6 +66,7 @@ export default function DashboardHome() {
         <Suspense fallback={null}>
           <DashboardWelcome />
         </Suspense>
+        <StreakReminderBanner />
       </motion.div>
 
       <motion.section {...fadeIn} className="mb-6 sm:mb-8 md:mb-10">
