@@ -939,3 +939,26 @@ Account page UI (Export triggers a real file download with the right
 content, Import's file picker restores it, shows the success message,
 and reloads to the restored data). `tsc`, `eslint`, and a production
 build all stayed clean.
+
+### Streak reminder banner
+
+A same-session nudge on the Home page: if there was a journal or
+garden streak going into yesterday and today's entry/watering hasn't
+happened yet, a dismissible banner shows the streak length and a link
+to keep it going. Deliberately the lighter of two options discussed —
+real background push notifications (works even with the app fully
+closed) would need Web Push + VAPID keys + a stored subscription per
+device + a service worker push handler; this needs none of that,
+since it only ever shows while the app is already open. Dismissing it
+quiets it for the rest of the day (`localStorage`, keyed by date) but
+it comes back fresh the next day if still at risk. See engineering
+note #43.
+
+Verified against a seeded account (a journal entry and habit watering
+both dated to yesterday only): the banner showed both at-risk
+messages, survived a reload, disappeared immediately on dismiss and
+stayed hidden across a reload that same day, and — independent of the
+dismiss flag entirely — the journal message cleared on its own the
+moment today's entry was actually written, while the still-unwatered
+garden message kept showing. `tsc`, `eslint`, and a production build
+all stayed clean.
