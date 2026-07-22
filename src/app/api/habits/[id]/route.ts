@@ -26,15 +26,31 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/habits/[id
 
   const { id } = await ctx.params;
   const payload = await request.json();
-  const { completions } = payload ?? {};
+  const { completions, targetPerWeek } = payload ?? {};
 
-  if (!Array.isArray(completions)) {
-    return NextResponse.json({ error: "Completions must be an array." }, { status: 400 });
+  const data: { completions?: string[]; targetPerWeek?: number } = {};
+
+  if (completions !== undefined) {
+    if (!Array.isArray(completions)) {
+      return NextResponse.json({ error: "Completions must be an array." }, { status: 400 });
+    }
+    data.completions = completions;
+  }
+
+  if (targetPerWeek !== undefined) {
+    if (!Number.isInteger(targetPerWeek) || targetPerWeek < 1 || targetPerWeek > 7) {
+      return NextResponse.json({ error: "targetPerWeek must be an integer from 1 to 7." }, { status: 400 });
+    }
+    data.targetPerWeek = targetPerWeek;
+  }
+
+  if (Object.keys(data).length === 0) {
+    return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
   }
 
   const habit = await prisma.habit.updateMany({
     where: { id, userId: session.user.id },
-    data: { completions },
+    data,
   });
 
   return NextResponse.json({ ok: true, updated: habit.count });

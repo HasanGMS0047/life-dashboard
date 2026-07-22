@@ -1,21 +1,26 @@
 import { addDays, isSameDay, startOfDay, subDays } from "date-fns";
-import type { Habit } from "@/store/habitStore";
+import { isDailyHabit, type Habit } from "@/store/habitStore";
 
 export type GrowthStage = 0 | 1 | 2 | 3 | 4;
 
-// A day only counts as "watered" if every habit that existed by that day was
-// checked off — missing even one keeps the garden from growing, same as a
-// real plant needs consistent care, not just occasional attention.
+// A day only counts as "watered" if every DAILY habit that existed by that
+// day was checked off — missing even one keeps the garden from growing,
+// same as a real plant needs consistent care, not just occasional
+// attention. Habits with a custom weekly frequency (e.g. "3x/week") don't
+// participate in this collective, every-day requirement — they keep their
+// own weekly streak instead (see computeHabitStreak) since judging them by
+// "watered today" would make the garden un-growable for anyone who has one.
 // `referenceDate` defaults to today but can be shifted back (e.g. to
 // yesterday) to answer "what was the streak as of then" — see
 // src/lib/streakReminder.ts.
 export function computeGardenStreak(habits: Habit[], referenceDate: Date = new Date()): number {
-  if (habits.length === 0) return 0;
+  const dailyHabits = habits.filter(isDailyHabit);
+  if (dailyHabits.length === 0) return 0;
 
   let streak = 0;
   let cursor = referenceDate;
   for (;;) {
-    const activeHabits = habits.filter((h) => new Date(h.createdAt) <= cursor);
+    const activeHabits = dailyHabits.filter((h) => new Date(h.createdAt) <= cursor);
     if (activeHabits.length === 0) break;
 
     const allWatered = activeHabits.every((h) =>
@@ -33,9 +38,10 @@ export function computeGardenStreak(habits: Habit[], referenceDate: Date = new D
 // instead of stopping at the first gap — a record that survives a wilt,
 // same idea as computeLongestStreak for journaling.
 export function computeLongestGardenStreakEver(habits: Habit[]): number {
-  if (habits.length === 0) return 0;
+  const dailyHabits = habits.filter(isDailyHabit);
+  if (dailyHabits.length === 0) return 0;
 
-  const earliest = habits.reduce(
+  const earliest = dailyHabits.reduce(
     (min, h) => (startOfDay(new Date(h.createdAt)) < min ? startOfDay(new Date(h.createdAt)) : min),
     startOfDay(new Date())
   );
@@ -44,7 +50,7 @@ export function computeLongestGardenStreakEver(habits: Habit[]): number {
   let longest = 0;
   let current = 0;
   for (let day = earliest; day <= today; day = addDays(day, 1)) {
-    const activeHabits = habits.filter((h) => startOfDay(new Date(h.createdAt)) <= day);
+    const activeHabits = dailyHabits.filter((h) => startOfDay(new Date(h.createdAt)) <= day);
     const allWatered =
       activeHabits.length > 0 &&
       activeHabits.every((h) => h.completions.some((d) => isSameDay(new Date(d), day)));
@@ -58,7 +64,7 @@ export function computeLongestGardenStreakEver(habits: Habit[]): number {
 // True once the garden has ever been watered at all — used to tell a fresh,
 // never-started garden apart from one that grew and then lost its streak.
 export function hasEverWatered(habits: Habit[]): boolean {
-  return habits.some((h) => h.completions.length > 0);
+  return habits.filter(isDailyHabit).some((h) => h.completions.length > 0);
 }
 
 const STAGE_THRESHOLDS: [minStreak: number, stage: GrowthStage][] = [

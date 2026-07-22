@@ -4,11 +4,9 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Sprout, Target } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/dashboard/PageHeader";
-import { StreakSummary } from "@/components/ui/streak-badge";
 import { useTaskStore } from "@/store/taskStore";
 import { useHabitStore } from "@/store/habitStore";
 import { useGoalStore } from "@/store/goalStore";
-import { longestHabitStreak } from "@/store/habitStore";
 import { computeTaskTrend, computeHabitConsistency, computeGoalsSummary } from "@/lib/progress";
 
 export default function ProgressPage() {
@@ -19,8 +17,6 @@ export default function ProgressPage() {
   const taskTrend = computeTaskTrend(tasks, 14);
   const habitConsistency = computeHabitConsistency(habits, 30);
   const goalsSummary = computeGoalsSummary(goals);
-  const bestHabitStreak = longestHabitStreak(habits);
-  const currentBestHabitStreak = habitConsistency.length > 0 ? Math.max(...habitConsistency.map((h) => h.streak)) : 0;
 
   return (
     <div className="max-w-3xl mx-auto py-4 sm:py-6 md:py-8 flex flex-col gap-4 sm:gap-5 md:gap-6">
@@ -87,8 +83,8 @@ export default function ProgressPage() {
                     className="h-full rounded-full bg-olive"
                   />
                 </div>
-                <span className="text-xs text-muted w-20 text-right shrink-0">
-                  {h.percent}% · {h.streak}d
+                <span className="text-xs text-muted w-24 text-right shrink-0">
+                  {h.percent}% · {h.streak}{h.isDaily ? "d" : "w"}
                 </span>
               </div>
             ))}
@@ -127,10 +123,6 @@ export default function ProgressPage() {
           </div>
         )}
       </Card>
-
-      {(bestHabitStreak > 0 || currentBestHabitStreak > 0) && (
-        <StreakSummary current={currentBestHabitStreak} best={bestHabitStreak} accentClass="text-olive" />
-      )}
     </div>
   );
 }

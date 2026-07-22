@@ -762,6 +762,61 @@ related code:
     and goal summary tiles (`computeGoalsSummary`, built on the
     existing `countGoalsCompletedInPeriod` rather than re-deriving the
     same date filtering). Lives in `src/lib/progress.ts`.
+50. **Two real regressions found by actually resizing the browser
+    instead of trusting the default window: the desktop sidebar rail
+    overflowed on short windows, and the Heatmap page wasn't usable on
+    mobile at all.** The sidebar (`Sidebar.tsx`) gained a 10th icon
+    this session (Progress) without anyone checking whether the rail
+    still fits a non-maximized window — at anything under roughly
+    700px tall, the bottom 1-2 icons were simply unreachable (no
+    overflow handling existed at all). Fixed by making the icon `<nav>`
+    itself `overflow-y-auto` with `min-h-0` (a flex child needs
+    `min-h-0` to be allowed to shrink below its content size and
+    actually scroll instead of overflowing the rail). Separately,
+    `HeatmapQuilt` (the 365-day activity grid) and `TeacupChart` (the
+    12-month bar chart) are both always wider than a phone screen by
+    design — that's fine, they're meant to scroll horizontally — but
+    neither had any visible affordance that they *were* scrollable, so
+    on mobile they just looked cut off mid-cell/mid-label. Fixed with
+    three changes, none of which touch the underlying data: (1) both
+    now auto-scroll on mount to the most relevant position — the
+    quilt to today (a new user's oldest days are the least likely to
+    have anything logged, so starting there showed nothing but empty
+    cells) and the teacup chart to the current month; (2) cell/icon
+    sizes and gaps shrink slightly under the `sm` breakpoint so more
+    fits without scrolling at all; (3) the quilt gained a left-edge
+    fade-to-background gradient (mobile-only) hinting there's more to
+    scroll to, since a hidden/overlay mobile scrollbar gives no cue on
+    its own.
+51. **Habits can now have a custom weekly frequency (e.g. "3x/week")
+    instead of only ever being daily — `Habit.targetPerWeek` (1-7,
+    default 7 for full backward compatibility with every habit that
+    existed before this).** The interesting problem this creates: the
+    Home Garden's collective streak (`computeGardenStreak` in
+    `garden.ts`) requires *every* habit to be checked off on the same
+    day, which is fundamentally incompatible with a habit that's only
+    supposed to happen 3 days a week — under the old logic the garden
+    could never grow past day 1 for anyone who added one. Resolved by
+    scoping the garden's daily "watered" concept to daily habits only
+    (`isDailyHabit`, `targetPerWeek >= 7`) — a custom-frequency habit
+    keeps its own independent streak instead of gating the shared
+    garden, shown as its own flame badge on its row. That streak is
+    counted in *weeks* hit, not days (`computeWeeklyHabitStreak` in
+    `habitStore.ts`), since judging a "3x/week" habit day-by-day would
+    call a Tuesday-Thursday gap a broken streak when it's actually
+    right on schedule — mirrors the daily streak's existing "today not
+    done yet doesn't break it" leniency, just at week granularity. The
+    Progress page's consistency percentage (`computeHabitConsistency`)
+    is scaled the same way: a 3x/week habit is judged against
+    `3/7 * days`, not against every day, so a habit that's perfectly on
+    pace for its own cadence shows close to 100% instead of looking
+    permanently behind a daily one. One bug this surfaced along the
+    way: `longestHabitStreak` (used by Replay's "Best Habit Streak,"
+    hardcoded to a "d" suffix) took the max streak across *all* habits
+    regardless of unit — a "3-week streak" and a "5-day streak" aren't
+    comparable as raw numbers, so mixing them into one max would
+    sometimes show a weekly streak mislabeled as days. Fixed by scoping
+    that function to daily habits too, same as the garden.
 
 ## Where things live
 

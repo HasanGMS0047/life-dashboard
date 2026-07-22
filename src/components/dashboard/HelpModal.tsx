@@ -77,7 +77,7 @@ const PAGE_HELP: { href: string; help: PageHelp }[] = [
       title: "Progress",
       items: [
         { label: "Task Completion", description: "A 14-day bar chart of how much of each day's task list you finished." },
-        { label: "Habit Consistency", description: "For each habit, the share of the last 30 days it was completed on, plus its current streak." },
+        { label: "Habit Consistency", description: "For each habit, how on-pace it is against its own frequency over the last 30 days (a 3x/week habit is judged against 3x/week, not every day), plus its current streak — in days for a daily habit, in weeks for a custom-frequency one." },
         { label: "Goals", description: "How many goals are active, how many you've completed this month and this year, and your average progress across them." },
       ],
     },
@@ -129,7 +129,7 @@ const PAGE_HELP: { href: string; help: PageHelp }[] = [
         { label: "Kind Deeds", description: "Small acts of kindness you did today — check them off as you go." },
         { label: "Learning", description: "Track books or articles you've finished and hours spent studying." },
         { label: "People & Places", description: "Log memories, trips, and friendships — attach a photo if you like." },
-        { label: "Your Garden", description: "Habits you're building, with a little plant that grows as you keep them. Water it by checking off every habit each day — miss one and it wilts, but it never dies, so a slip is never the end. Your best-ever streak stays visible even after a wilt." },
+        { label: "Your Garden", description: "Habits you're building, with a little plant that grows as you keep them. Each habit can be Daily or a custom weekly target (like 3x/week) — tap a habit's frequency badge to change it. The garden itself is watered by your daily habits: check off every one each day, miss one and it wilts (but never dies, so a slip is never the end). Weekly-target habits keep their own streak instead, counted in weeks hit rather than days." },
         { label: "Goals", description: "Longer-term goals tracked with a 0–100% progress bar, split into This Month and a Six-Month Vision." },
       ],
     },

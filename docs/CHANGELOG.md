@@ -1031,3 +1031,40 @@ with two completions, and a goal at 40% progress, then confirms the
 page renders the right numbers and bar heights in both day and night
 theme, and that the sidebar link is present.
 `tsc`, `eslint`, and the production build all stayed clean.
+
+## Mobile/scaling fixes, and habits can now be weekly instead of only daily
+
+- **Sidebar overflow fixed**: the desktop icon rail could overflow and
+  hide its bottom icons (Heatmap, Account) on a shorter browser
+  window — a regression from adding the Progress icon. It now scrolls
+  internally instead. See engineering note #50.
+- **Heatmap page made mobile-friendly**: the year-activity grid and
+  the monthly bar chart now auto-scroll to today/the current month on
+  load instead of starting at the least-relevant end, shrink slightly
+  on small screens, and the grid shows a scroll hint so it doesn't
+  read as cut off. See engineering note #50.
+- **Habits can be set to a custom weekly frequency** (Daily down to
+  1x/week) instead of only ever daily — tap a habit's frequency badge
+  to cycle it, or pick one when adding a habit. A habit set to, say,
+  3x/week tracks its own streak counted in weeks hit, and keeps its
+  own consistency percentage scaled to its own target rather than
+  being judged as if it were daily.
+- **The Home Garden now only requires daily habits to be watered.** A
+  weekly-target habit doesn't gate the shared garden's growth the way
+  a daily one does — it keeps its own separate streak instead, shown
+  on its own row. See engineering note #51.
+- Fixed a unit-mismatch bug this surfaced: Replay's "Best Habit
+  Streak" and a redundant stat on the new Progress page could both
+  take the max streak across habits with different units (days vs.
+  weeks) and mislabel a weekly streak as days. Removed the redundant
+  Progress-page stat and scoped the Replay one to daily habits.
+
+Verified against a production build: `tsc`, `eslint`, and the build
+stayed clean throughout. Confirmed via Playwright that a 3x/week habit
+added through the UI persists its frequency, shows a week-streak
+tooltip instead of a day one, doesn't block the Garden from growing
+off a separate daily habit, and shows correctly on the Progress page
+with a "w" suffix instead of "d". Confirmed the sidebar's icon list is
+actually scrollable (not just visually truncated) at a constrained
+window height, and re-captured the Heatmap page on mobile to confirm
+the grid and chart no longer look cut off.

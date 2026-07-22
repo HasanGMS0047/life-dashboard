@@ -88,11 +88,12 @@ model SocialEntry {
 }
 
 model Habit {
-  id           String   @id @default(cuid())
-  userId       String
-  title        String
-  completions  String[]
-  createdAt    DateTime @default(now())
+  id            String   @id @default(cuid())
+  userId        String
+  title         String
+  completions   String[]
+  targetPerWeek Int      @default(7)
+  createdAt     DateTime @default(now())
 
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

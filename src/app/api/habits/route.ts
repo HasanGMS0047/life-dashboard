@@ -19,6 +19,7 @@ export async function GET() {
     title: habit.title,
     createdAt: habit.createdAt.toISOString(),
     completions: habit.completions,
+    targetPerWeek: habit.targetPerWeek,
   })));
 }
 
@@ -29,17 +30,23 @@ export async function POST(request: Request) {
   }
 
   const payload = await request.json();
-  const { title } = payload ?? {};
+  const { title, targetPerWeek } = payload ?? {};
 
   if (typeof title !== "string" || !title.trim()) {
     return NextResponse.json({ error: "Title is required." }, { status: 400 });
   }
+
+  const target =
+    typeof targetPerWeek === "number" && Number.isInteger(targetPerWeek) && targetPerWeek >= 1 && targetPerWeek <= 7
+      ? targetPerWeek
+      : 7;
 
   const habit = await prisma.habit.create({
     data: {
       userId: session.user.id,
       title: title.trim(),
       completions: [],
+      targetPerWeek: target,
     },
   });
 
@@ -48,5 +55,6 @@ export async function POST(request: Request) {
     title: habit.title,
     createdAt: habit.createdAt.toISOString(),
     completions: habit.completions,
+    targetPerWeek: habit.targetPerWeek,
   });
 }
