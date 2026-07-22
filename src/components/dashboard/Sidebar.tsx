@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Home, BookOpen, Heart, Grid, User, Clapperboard, Clock, Images, X, CalendarDays } from "lucide-react";
+import { Home, BookOpen, Heart, Grid, User, Clapperboard, Clock, Images, X, CalendarDays, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -15,6 +15,7 @@ const navItems = [
   { icon: BookOpen, label: "Journal", href: "/dashboard/journal" },
   { icon: Images, label: "Gallery", href: "/dashboard/gallery" },
   { icon: Heart, label: "Heart Patterns", href: "/dashboard/patterns" },
+  { icon: TrendingUp, label: "Progress", href: "/dashboard/progress" },
   { icon: Grid, label: "Heatmap", href: "/dashboard/heatmap" },
   { icon: User, label: "Account", href: "/dashboard/account" },
 ];

@@ -1007,4 +1007,27 @@ reload, that exactly the expected two remove buttons appear on a
 timeline with one journal and one learning entry (and none on a goal
 achievement), and — via screenshot — that the timeline line, dots, and
 month heading all line up correctly including for a multi-line entry.
+
+## New Progress page: Task/Habit/Goal trends in one place
+
+- Added `/dashboard/progress`, a new sidebar entry between Heart
+  Patterns and Heatmap, covering the one gap those two didn't: how
+  Tasks, Habits, and Goals are actually trending over time (Heart
+  Patterns owns mood/sleep/energy, Replay owns the narrative recap).
+- **Task Completion**: a 14-day bar chart of the share of each day's
+  task list finished.
+- **Habit Consistency**: for each habit, the percent of the last 30
+  days it was completed on plus its current streak — a single streak
+  number can't tell a mostly-consistent habit that recently broke a
+  chain from a dead one.
+- **Goals**: active count, completed this month, completed this year,
+  and average progress across all goals.
+- Pure aggregation over data the dashboard layout already fetches —
+  no new API routes, no schema changes. See engineering note #49.
+
+Verified with a production build and a Playwright pass that seeds
+tasks (partially completed today, fully completed yesterday), a habit
+with two completions, and a goal at 40% progress, then confirms the
+page renders the right numbers and bar heights in both day and night
+theme, and that the sidebar link is present.
 `tsc`, `eslint`, and the production build all stayed clean.
