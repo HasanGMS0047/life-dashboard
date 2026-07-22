@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { subDays, isSameDay, startOfDay, format } from "date-fns";
 import { useJournalStore, JournalEntry } from "@/store/journalStore";
 
@@ -30,6 +30,16 @@ function buildQuiltData(entries: JournalEntry[]): QuiltDay[] {
 export function HeatmapQuilt() {
   const entries = useJournalStore((s) => s.entries);
   const data = useMemo(() => buildQuiltData(entries), [entries]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // The grid is wider than most screens (365 days of cells), so on mobile
+  // it's mostly reached by scrolling — start scrolled all the way to today
+  // rather than a year ago, since the oldest days are the least likely to
+  // have anything logged and otherwise a new user's first view is empty.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [data]);
 
   // Map levels to different fabric patterns (using Tailwind background classes)
   const getFabricPattern = (level: number) => {
@@ -52,9 +62,9 @@ export function HeatmapQuilt() {
 
   return (
     <div className="w-full flex flex-col gap-4">
-      <div className="flex gap-2 p-4 bg-surface rounded-3xl border-2 border-border/80 shadow-inner overflow-hidden">
+      <div className="relative flex gap-2 p-4 bg-surface rounded-3xl border-2 border-border/80 shadow-inner overflow-hidden">
         {/* The quilt container */}
-        <div className="grid grid-flow-col grid-rows-7 gap-1.5 overflow-x-auto scrollbar-hide py-2 px-1">
+        <div ref={scrollRef} className="grid grid-flow-col grid-rows-7 gap-1 sm:gap-1.5 overflow-x-auto min-w-0 py-2 px-1">
           {data.map((day, i) => {
             const isTopRow = i % 7 < 2;
             return (
@@ -62,7 +72,7 @@ export function HeatmapQuilt() {
                 key={day.id}
                 whileHover={{ scale: 1.5, zIndex: 10, rotate: (i % 2 === 0 ? 2 : -2) }}
                 className={cn(
-                  "w-4 h-4 rounded-sm border cursor-pointer relative group transition-all duration-200",
+                  "w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-sm border cursor-pointer relative group transition-all duration-200",
                   getFabricPattern(day.level)
                 )}
               >
@@ -81,8 +91,13 @@ export function HeatmapQuilt() {
             );
           })}
         </div>
+
+        {/* Hints that there's more to scroll to the left (older days) — the
+            grid is always wider than the screen, and on mobile there's no
+            visible scrollbar to suggest that on its own. */}
+        <div className="pointer-events-none absolute left-4 top-4 bottom-4 w-6 bg-gradient-to-r from-surface to-transparent sm:hidden" />
       </div>
-      
+
       {/* Legend */}
       <div className="flex items-center justify-end gap-3 text-xs font-medium text-muted px-2">
         <span>Less</span>

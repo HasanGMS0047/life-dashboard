@@ -37,12 +37,12 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   return (
     <>
       {/* Desktop rail */}
-      <aside className="hidden md:flex w-16 h-full border-r border-border flex-col items-center py-4 bg-surface/50">
+      <aside className="hidden md:flex w-16 h-full border-r border-border flex-col items-center py-4 bg-surface/50 min-h-0">
         <Link
           href="/dashboard/replay"
           title="Life Replay"
           className={cn(
-            "mb-8 w-10 h-10 rounded-2xl flex items-center justify-center transition-all",
+            "mb-4 shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center transition-all",
             pathname.startsWith("/dashboard/replay")
               ? "bg-terracotta/10 text-terracotta shadow-sm border border-terracotta/20"
               : "text-muted hover:bg-black/5 hover:text-foreground"
@@ -51,7 +51,10 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
           <Clapperboard className="w-5 h-5" />
         </Link>
 
-        <nav className="flex-1 flex flex-col gap-4 w-full px-2">
+        {/* min-h-0 lets this scroll instead of overflowing the rail — with
+            10 nav items it no longer reliably fits a short browser window
+            without it. */}
+        <nav className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-3 w-full px-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (

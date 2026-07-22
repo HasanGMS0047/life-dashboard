@@ -1,6 +1,6 @@
 import { format, subDays } from "date-fns";
 import { Task } from "@/store/taskStore";
-import { Habit, computeHabitStreak } from "@/store/habitStore";
+import { Habit, computeHabitStreak, isDailyHabit } from "@/store/habitStore";
 import { Goal, countGoalsCompletedInPeriod } from "@/store/goalStore";
 
 export interface TaskDayPoint {
@@ -34,21 +34,28 @@ export interface HabitConsistency {
   title: string;
   percent: number;
   streak: number;
+  isDaily: boolean;
 }
 
-// Percentage of the last `days` days each habit was completed on, plus its
-// current streak — a single streak number hides a habit that's done most
-// days but recently broke a chain, so this rounds that out.
+// Percentage of the last `days` days each habit was completed on relative
+// to what its own frequency expects, plus its current streak — a single
+// streak number hides a habit that's done most days (or most weeks, for a
+// non-daily one) but recently broke a chain, so this rounds that out. A
+// "3x/week" habit is compared against 3/7 of the window, not against every
+// day, so a habit that's perfectly on pace for its own cadence shows 100%
+// instead of looking permanently behind.
 export function computeHabitConsistency(habits: Habit[], days = 30): HabitConsistency[] {
   const cutoff = subDays(new Date(), days - 1);
   return habits
     .map((habit) => {
       const inWindow = habit.completions.filter((d) => new Date(d) >= cutoff).length;
+      const expected = (habit.targetPerWeek / 7) * days;
       return {
         id: habit.id,
         title: habit.title,
-        percent: Math.round((Math.min(inWindow, days) / days) * 100),
+        percent: Math.round(Math.min(inWindow / expected, 1) * 100),
         streak: computeHabitStreak(habit),
+        isDaily: isDailyHabit(habit),
       };
     })
     .sort((a, b) => b.percent - a.percent);
