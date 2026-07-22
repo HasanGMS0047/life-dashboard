@@ -671,6 +671,82 @@ related code:
     flash the banner before hiding it or never show it at all,
     depending on which default was picked, since `localStorage` isn't
     available during server render.
+44. **Theme flash on refresh, fixed with the standard pre-paint-script
+    pattern (the one `next-themes` and Tailwind's own dark-mode docs
+    use) — not a bigger SSR-the-theme rewrite.** The symptom: theme
+    lived only in Postgres, fetched client-side by `ThemeSync` after
+    mount, so every hard refresh briefly rendered the "day" default
+    before the fetch resolved and flipped to "night" — most visible on
+    the Login page, whose full-bleed background image also depended on
+    that same async state. Considered reading the theme server-side in
+    `RootLayout` (session + Prisma lookup, setting `data-theme` in the
+    initial HTML) but that only solves it for authenticated pages and
+    adds a DB read to every page's server render; the actual fix is
+    cheaper and covers logged-out pages too: a tiny inline
+    `<script>` in `RootLayout`'s `<head>` (`THEME_INIT_SCRIPT`) that
+    reads `localStorage` and sets `data-theme` on `<html>` before
+    anything paints — no network round-trip, so returning visitors
+    never see a wrong-theme frame at all. `useThemeStore`'s initial
+    state also reads the same `localStorage` key (`readStoredTheme`,
+    guarded for the SSR pass where `document` doesn't exist) so the
+    client store agrees with what the script already set, instead of
+    reverting to "day" and flipping again. The Login/Register/Home
+    pages' background images moved from a JS-computed inline `style`
+    keyed on Zustand state to plain CSS (`.auth-scenery`,
+    `[data-theme="night"] .auth-scenery` in `globals.css`) — the
+    `data-theme` attribute changing doesn't go through React at all,
+    so there's no hydration-mismatch risk the way there would be if
+    Zustand's corrected client-side state disagreed with what got
+    server-rendered.
+45. **Root `/` and `/login`/`/register` now redirect signed-in visitors
+    to `/dashboard` consistently.** `/login`/`/register` already had
+    this in `proxy.ts`; `/` (the marketing/landing page) didn't, so an
+    authenticated user opening the bare domain always landed on the
+    pre-auth marketing page instead of their dashboard — easy to
+    mistake for "the site always shows me the login page" since that
+    page's top bar is dominated by Log in/Start Setup CTAs. Added `/`
+    to the same token-check branch and to the proxy's `matcher`.
+46. **Delete was missing for Social ("memories") and Learning
+    entries — the only two domains that only ever showed aggregate
+    counts, never a list to delete from.** Journal/Habits/Goals/Tasks
+    already had delete because their widgets or pages show an actual
+    list of entries with something to click; Social and Learning only
+    showed totals ("3 Memories", "2 Books this year") with no per-row
+    UI at all, in either their Home widget or (for Social) the Gallery
+    page. Added `DELETE /api/social/[id]` and `DELETE
+    /api/learning/[id]` (same ownership-scoped `deleteMany({ id,
+    userId })` pattern as the existing `/api/goals/[id]` and
+    `/api/journal/[id]`) plus `removeEntry` on both stores. Surfaced
+    two places: a hover-reveal remove button on each Gallery card (the
+    most direct "browse your memories" page), and a shared remove
+    button on the Timeline page's event cards for any `journal`/
+    `learning`/`social`-sourced event. Timeline events gained explicit
+    `source`/`sourceId` fields (`src/lib/timeline.ts`) instead of
+    requiring the delete handler to parse the `${source}-${id}`
+    composite `id` string. Deliberately did NOT add a remove button
+    for `goal`-sourced timeline events (goal achievements) — deleting
+    from a timeline card reads as "remove this timeline entry," but
+    the underlying action would be deleting the whole goal, which
+    already has its own explicit delete in `GoalsWidget`; conflating
+    the two felt like the wrong affordance in that one spot.
+47. **Timeline alignment: the connecting line had gaps at every month
+    boundary, and dots sat near the top of multi-line cards instead of
+    centered.** The vertical line + left padding (`pl-6 border-l-2`)
+    were on the events wrapper only, not the month heading above it —
+    moving both up to wrap the heading too makes the line run
+    continuously through the whole month section and lines up the
+    heading text with the entry cards instead of sitting flush left of
+    them. Dots switched from a fixed `top-2` to `top-1/2
+    -translate-y-1/2`, which centers on whatever the actual card
+    height ends up being rather than assuming every card is the same
+    (single-line) height.
+48. **Scrollbars now follow the day/night palette** (`--border` for
+    the thumb, `--muted` on hover) via `scrollbar-color`/
+    `scrollbar-width` (Firefox) and `::-webkit-scrollbar*` (Chromium/
+    Safari) in `globals.css`, applied globally (`*`) rather than
+    per-component — since both properties read the same CSS custom
+    properties everything else themes off of, this needed zero JS and
+    automatically flips with `[data-theme]` like everything else.
 
 ## Where things live
 

@@ -15,6 +15,7 @@ interface LearningState {
   fetchEntries: () => Promise<void>;
   addBook: (title: string, wordCount?: number) => Promise<void>;
   addStudySession: (title: string, hours: number) => Promise<void>;
+  removeEntry: (id: string) => Promise<void>;
 }
 
 export const useLearningStore = create<LearningState>((set, get) => ({
@@ -65,6 +66,17 @@ export const useLearningStore = create<LearningState>((set, get) => ({
       set((state) => ({ entries: [entry, ...state.entries] }));
     } catch (err) {
       console.error("Failed to add study session", err);
+    }
+  },
+  removeEntry: async (id) => {
+    const previousEntries = get().entries;
+    set((state) => ({ entries: state.entries.filter((entry) => entry.id !== id) }));
+    try {
+      const res = await fetch(`/api/learning/${id}`, { method: "DELETE" });
+      if (!res.ok) set({ entries: previousEntries });
+    } catch (err) {
+      console.error("Failed to remove learning entry", err);
+      set({ entries: previousEntries });
     }
   },
 }));

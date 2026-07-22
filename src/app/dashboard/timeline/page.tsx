@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { X } from "lucide-react";
 import { useJournalStore } from "@/store/journalStore";
 import { useLearningStore } from "@/store/learningStore";
 import { useSocialStore } from "@/store/socialStore";
@@ -55,12 +56,28 @@ function groupByMonth(events: TimelineEvent[]): EventGroup[] {
 
 export default function TimelinePage() {
   const journalEntries = useJournalStore((s) => s.entries);
+  const removeJournalEntry = useJournalStore((s) => s.removeEntry);
   const learningEntries = useLearningStore((s) => s.entries);
+  const removeLearningEntry = useLearningStore((s) => s.removeEntry);
   const socialEntries = useSocialStore((s) => s.entries);
+  const removeSocialEntry = useSocialStore((s) => s.removeEntry);
   const goals = useGoalStore((s) => s.goals);
 
   const events = buildTimelineEvents(journalEntries, learningEntries, socialEntries, goals);
   const groups = groupByMonth(events);
+
+  const handleDelete = async (event: TimelineEvent) => {
+    if (!window.confirm("Remove this from your timeline? This can't be undone.")) return;
+
+    if (event.source === "journal") {
+      const result = await removeJournalEntry(event.sourceId);
+      if (!result.ok) window.alert(result.error);
+    } else if (event.source === "learning") {
+      await removeLearningEntry(event.sourceId);
+    } else if (event.source === "social") {
+      await removeSocialEntry(event.sourceId);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto py-4 sm:py-6 md:py-8">
@@ -73,11 +90,15 @@ export default function TimelinePage() {
       ) : (
         <div className="flex flex-col gap-10">
           {groups.map((group) => (
-            <div key={group.label}>
+            // The line + left padding wrap the heading too (not just the
+            // events below it), so it runs continuously behind both and the
+            // month label lines up with the entry cards instead of sitting
+            // flush left of them.
+            <div key={group.label} className="relative pl-6 border-l-2 border-border">
               <h2 className="font-serif text-xl font-semibold text-foreground mb-4 sticky top-0 bg-background/90 backdrop-blur-sm py-1 z-10">
                 {group.label}
               </h2>
-              <div className="relative pl-6 border-l-2 border-border flex flex-col gap-4">
+              <div className="flex flex-col gap-4">
                 {group.events.map((event, i) => (
                   <motion.div
                     key={event.id}
@@ -88,13 +109,13 @@ export default function TimelinePage() {
                   >
                     <span
                       className={cn(
-                        "absolute -left-[27px] top-2 w-3 h-3 rounded-full border-2 border-surface",
+                        "absolute -left-[27px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-surface",
                         ACCENT_DOT[event.accent]
                       )}
                     />
                     <div
                       className={cn(
-                        "bg-surface rounded-2xl border p-4 flex items-start gap-3",
+                        "group relative bg-surface rounded-2xl border p-4 flex items-start gap-3",
                         ACCENT_BORDER[event.accent]
                       )}
                     >
@@ -107,7 +128,7 @@ export default function TimelinePage() {
                         <event.Icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-foreground leading-snug">{event.title}</p>
+                        <p className="text-sm text-foreground leading-snug pr-6">{event.title}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs text-muted">{format(event.date, "MMM d")}</span>
                           {event.subtitle && (
@@ -117,6 +138,16 @@ export default function TimelinePage() {
                           )}
                         </div>
                       </div>
+                      {event.source !== "goal" && (
+                        <button
+                          onClick={() => handleDelete(event)}
+                          title="Remove"
+                          aria-label="Remove from timeline"
+                          className="absolute top-3 right-3 text-muted hover:text-terracotta opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 ))}

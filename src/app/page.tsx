@@ -4,32 +4,12 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useThemeStore } from "@/store/themeStore";
 
 export default function Home() {
-  const isNight = useThemeStore((s) => s.theme === "night");
-
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4 sm:p-8 relative"
-      style={{
-        backgroundImage: isNight
-          ? "url(/moonlit_scenery_bg.png), url(/stars_pattern.svg), radial-gradient(ellipse at top, #2a3159 0%, #12142a 75%)"
-          : "url(/calm_scenery_bg.png)",
-        backgroundSize: isNight ? "cover, 240px 240px, cover" : "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: isNight ? "no-repeat, repeat, no-repeat" : "no-repeat",
-        backgroundAttachment: "fixed",
-      }}
-    >
+    <div className="auth-scenery min-h-screen flex items-center justify-center p-4 sm:p-8 relative">
       {/* Soft overlay to ensure the scenery is calm and doesn't overwhelm the UI */}
-      <div
-        className={
-          isNight
-            ? "absolute inset-0 bg-[#171b30]/55 backdrop-blur-[2px]"
-            : "absolute inset-0 bg-[#f3e9d8]/60 backdrop-blur-[2px]"
-        }
-      />
+      <div className="auth-overlay absolute inset-0" />
 
       {/* Main Container Card resembling the app window */}
       <div className="w-full max-w-5xl bg-surface rounded-3xl border border-border shadow-2xl shadow-terracotta/10 overflow-hidden flex flex-col relative z-10">

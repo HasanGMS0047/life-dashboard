@@ -15,6 +15,7 @@ interface SocialState {
   loaded: boolean;
   fetchEntries: () => Promise<void>;
   addEntry: (type: SocialType, title: string, photo?: string) => Promise<void>;
+  removeEntry: (id: string) => Promise<void>;
 }
 
 export const useSocialStore = create<SocialState>((set, get) => ({
@@ -50,6 +51,17 @@ export const useSocialStore = create<SocialState>((set, get) => ({
       set((state) => ({ entries: [entry, ...state.entries] }));
     } catch (err) {
       console.error("Failed to add social entry", err);
+    }
+  },
+  removeEntry: async (id) => {
+    const previousEntries = get().entries;
+    set((state) => ({ entries: state.entries.filter((entry) => entry.id !== id) }));
+    try {
+      const res = await fetch(`/api/social/${id}`, { method: "DELETE" });
+      if (!res.ok) set({ entries: previousEntries });
+    } catch (err) {
+      console.error("Failed to remove social entry", err);
+      set({ entries: previousEntries });
     }
   },
 }));
