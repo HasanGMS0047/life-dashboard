@@ -6,6 +6,8 @@ import { SocialEntry } from "@/store/socialStore";
 import { Goal } from "@/store/goalStore";
 import { getMoodAccent } from "@/lib/moods";
 
+export type TimelineSource = "journal" | "learning" | "social" | "goal";
+
 export interface TimelineEvent {
   id: string;
   date: Date;
@@ -13,6 +15,10 @@ export interface TimelineEvent {
   subtitle?: string;
   accent: ReplayAccent;
   Icon: LucideIcon;
+  // Which domain this came from and its own id there — lets the Timeline
+  // page route a delete action to the right store without parsing `id`.
+  source: TimelineSource;
+  sourceId: string;
 }
 
 function moodAccent(mood?: string): ReplayAccent {
@@ -53,6 +59,8 @@ export function buildTimelineEvents(
       subtitle: entry.mood ? `Mood: ${entry.mood}` : "Journal entry",
       accent: moodAccent(entry.mood),
       Icon: BookOpen,
+      source: "journal",
+      sourceId: entry.id,
     });
   }
 
@@ -64,6 +72,8 @@ export function buildTimelineEvents(
         title: `Finished reading "${entry.title}"`,
         accent: "olive",
         Icon: BookOpen,
+        source: "learning",
+        sourceId: entry.id,
       });
     } else {
       events.push({
@@ -73,6 +83,8 @@ export function buildTimelineEvents(
         subtitle: entry.hours ? `${entry.hours}h` : undefined,
         accent: "olive",
         Icon: Zap,
+        source: "learning",
+        sourceId: entry.id,
       });
     }
   }
@@ -85,6 +97,8 @@ export function buildTimelineEvents(
       subtitle: SOCIAL_LABEL[entry.type],
       accent: SOCIAL_ACCENT[entry.type],
       Icon: SOCIAL_ICON[entry.type],
+      source: "social",
+      sourceId: entry.id,
     });
   }
 
@@ -96,6 +110,8 @@ export function buildTimelineEvents(
       title: `Achieved goal: "${goal.title}"`,
       accent: "mustard",
       Icon: Target,
+      source: "goal",
+      sourceId: goal.id,
     });
   }
 

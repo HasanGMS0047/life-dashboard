@@ -32,6 +32,22 @@ export const viewport: Viewport = {
   themeColor: "#B8695C",
 };
 
+// Runs before first paint (see <head> below) to set data-theme from
+// localStorage synchronously — without this, the theme only becomes known
+// after ThemeSync's effect resolves an async /api/theme fetch, which is
+// what caused the visible day->night flash on refresh. Kept tiny and
+// dependency-free since it has to be inlined.
+const THEME_INIT_SCRIPT = `
+(function() {
+  try {
+    var theme = localStorage.getItem("theme");
+    if (theme === "night" || theme === "day") {
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,8 +56,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} ${lora.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-terracotta/20">
         <AuthProvider>
           <ThemeSync />

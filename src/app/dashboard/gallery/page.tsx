@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { format } from "date-fns";
-import { Users, MapPin, Heart, LucideIcon } from "lucide-react";
+import { Users, MapPin, Heart, LucideIcon, X } from "lucide-react";
 import { useSocialStore, SocialType } from "@/store/socialStore";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,13 @@ const ROTATIONS = ["-rotate-2", "rotate-1", "-rotate-1", "rotate-2", "rotate-0"]
 
 export default function GalleryPage() {
   const entries = useSocialStore((s) => s.entries);
+  const removeEntry = useSocialStore((s) => s.removeEntry);
+
+  const handleRemove = (id: string, title: string) => {
+    if (window.confirm(`Remove "${title}"? This can't be undone.`)) {
+      removeEntry(id);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto py-4 sm:py-6 md:py-8">
@@ -56,10 +63,18 @@ export default function GalleryPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: Math.min(i, 10) * 0.05 }}
                 className={cn(
-                  "break-inside-avoid mb-5 bg-surface rounded-xl border border-border p-3 pb-4 shadow-sm hover:shadow-md hover:rotate-0 transition-all",
+                  "group relative break-inside-avoid mb-5 bg-surface rounded-xl border border-border p-3 pb-4 shadow-sm hover:shadow-md hover:rotate-0 transition-all",
                   rotate
                 )}
               >
+                <button
+                  onClick={() => handleRemove(entry.id, entry.title)}
+                  title="Remove"
+                  aria-label={`Remove ${entry.title}`}
+                  className="absolute top-1.5 right-1.5 z-10 w-6 h-6 rounded-full bg-black/50 text-white flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
                 {entry.photo ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img

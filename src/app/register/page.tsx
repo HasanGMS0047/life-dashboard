@@ -7,11 +7,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
-import { useThemeStore } from "@/store/themeStore";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const isNight = useThemeStore((s) => s.theme === "night");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -66,25 +64,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div
-      className="h-screen overflow-y-auto flex items-center justify-center p-4 sm:p-8 relative"
-      style={{
-        backgroundImage: isNight
-          ? "url(/moonlit_scenery_bg.png), url(/stars_pattern.svg), radial-gradient(ellipse at top, #2a3159 0%, #12142a 75%)"
-          : "url(/calm_scenery_bg.png)",
-        backgroundSize: isNight ? "cover, 240px 240px, cover" : "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: isNight ? "no-repeat, repeat, no-repeat" : "no-repeat",
-        backgroundAttachment: "fixed",
-      }}
-    >
-      <div
-        className={
-          isNight
-            ? "absolute inset-0 bg-[#171b30]/55 backdrop-blur-[2px]"
-            : "absolute inset-0 bg-[#f3e9d8]/60 backdrop-blur-[2px]"
-        }
-      />
+    <div className="auth-scenery h-screen overflow-y-auto flex items-center justify-center p-4 sm:p-8 relative">
+      <div className="auth-overlay absolute inset-0" />
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}

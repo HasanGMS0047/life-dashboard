@@ -962,3 +962,49 @@ dismiss flag entirely — the journal message cleared on its own the
 moment today's entry was actually written, while the still-unwatered
 garden message kept showing. `tsc`, `eslint`, and a production build
 all stayed clean.
+
+### Bug fixes: theme flicker, stuck-on-login, and missing delete; Timeline polish
+
+- **Theme flash on refresh, fixed.** A pre-paint inline script now sets
+  `data-theme` from `localStorage` before anything renders, instead of
+  waiting on an async `/api/theme` fetch after mount — most noticeable
+  before on the Login page, whose background image also switched from
+  a JS-computed style to plain CSS for the same reason. See
+  engineering note #44.
+- **Signed-in visitors landing on the login/marketing page instead of
+  the dashboard, fixed.** `/login` and `/register` already redirected
+  authenticated visitors to `/dashboard`; `/` (the marketing page)
+  didn't, which is very likely what read as "the site always shows me
+  the login page." See engineering note #45.
+- **Memories (and Learning entries) can now be deleted.** Both only
+  ever showed aggregate counts with no per-entry list anywhere, so
+  there was nothing to attach a delete button to. Added a remove
+  button on each Gallery card and on Timeline event cards (journal,
+  learning, and social entries — not goal-achievement events, which
+  already have their own delete in the Goals widget). See engineering
+  note #46.
+- **Timeline alignment fixed**: the connecting line now runs
+  continuously behind the month headings instead of gapping at every
+  month boundary, headings line up with the entry cards, and the dots
+  center vertically on each card instead of sitting near the top of
+  taller (multi-line) ones. See engineering note #47.
+- **Scrollbars now follow the day/night theme** instead of the
+  browser default, via `scrollbar-color` and `::-webkit-scrollbar`
+  rules reading the same palette variables as everything else. See
+  engineering note #48.
+
+Verified against a production build (`next start`, not dev — this
+batch was mostly SSR/hydration-timing and middleware-redirect fixes,
+where dev mode's extra warnings/double-invokes could mask the real
+behavior): confirmed `data-theme` is already correct at the moment the
+HTML is received (before hydration), that an authenticated visit to
+both `/` and `/login` redirects to `/dashboard` while a logged-out
+visit to `/` still shows the marketing page, that a logged-out visit
+to `/login` still picks up a previously-cached theme with the right
+background with no session needed, that deleting a memory/learning
+entry/journal entry from the Gallery and Timeline persists across a
+reload, that exactly the expected two remove buttons appear on a
+timeline with one journal and one learning entry (and none on a goal
+achievement), and — via screenshot — that the timeline line, dots, and
+month heading all line up correctly including for a multi-line entry.
+`tsc`, `eslint`, and the production build all stayed clean.
