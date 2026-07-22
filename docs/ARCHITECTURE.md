@@ -747,6 +747,21 @@ related code:
     per-component — since both properties read the same CSS custom
     properties everything else themes off of, this needed zero JS and
     automatically flips with `[data-theme]` like everything else.
+49. **New Progress page (`/dashboard/progress`), scoped to Tasks/
+    Habits/Goals specifically because Heart Patterns already owns
+    mood/sleep/energy and Replay already owns the narrative
+    month/year recap.** Three cards, each pure aggregation over data
+    already fetched by `dashboard/layout.tsx` — no new API routes or
+    DB fields: a 14-day task-completion bar chart
+    (`computeTaskTrend`, mirrors `getRecentTrend`'s day-walking shape
+    from `src/lib/patterns.ts` so the two charts read the same way),
+    a per-habit consistency list (`computeHabitConsistency` — percent
+    of the last 30 days completed, not just the current streak, since
+    a habit that's mostly-consistent but recently broke a chain looks
+    identical to a dead habit if you only show the streak number),
+    and goal summary tiles (`computeGoalsSummary`, built on the
+    existing `countGoalsCompletedInPeriod` rather than re-deriving the
+    same date filtering). Lives in `src/lib/progress.ts`.
 
 ## Where things live
 

@@ -72,6 +72,17 @@ const PAGE_HELP: { href: string; help: PageHelp }[] = [
     },
   },
   {
+    href: "/dashboard/progress",
+    help: {
+      title: "Progress",
+      items: [
+        { label: "Task Completion", description: "A 14-day bar chart of how much of each day's task list you finished." },
+        { label: "Habit Consistency", description: "For each habit, the share of the last 30 days it was completed on, plus its current streak." },
+        { label: "Goals", description: "How many goals are active, how many you've completed this month and this year, and your average progress across them." },
+      ],
+    },
+  },
+  {
     href: "/dashboard/heatmap",
     help: {
       title: "Heatmap",
